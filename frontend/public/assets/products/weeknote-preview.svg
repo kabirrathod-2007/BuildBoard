@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="wn-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#f4ede2"/>
+    </linearGradient>
+    <linearGradient id="wn-card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#faf8f5"/>
+    </linearGradient>
+    <filter id="wn-shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#161c16" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="800" height="500" rx="16" fill="url(#wn-bg)"/>
+  
+  <!-- Window Header Bar -->
+  <rect x="0" y="0" width="800" height="48" rx="16" fill="#18221b"/>
+  <circle cx="28" cy="24" r="5" fill="#e07a5f"/>
+  <circle cx="44" cy="24" r="5" fill="#eab308"/>
+  <circle cx="60" cy="24" r="5" fill="#22c55e"/>
+  <text x="90" y="28" fill="#d1dcd3" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="500">weeknote.app / workspace / sprint-42</text>
+  <rect x="680" y="14" width="96" height="20" rx="10" fill="#29392e"/>
+  <text x="728" y="28" fill="#b0c4b6" font-family="Arial, sans-serif" font-size="10" font-weight="600" text-anchor="middle">WEEK 14</text>
+
+  <!-- Sub Navigation Bar -->
+  <rect x="0" y="48" width="800" height="44" fill="#ffffff" stroke="#e7e2d6" stroke-width="1"/>
+  <text x="32" y="75" fill="#18221b" font-family="Arial, sans-serif" font-size="16" font-weight="600">April 7 – April 13 Planning</text>
+  
+  <rect x="520" y="58" width="110" height="24" rx="6" fill="#f4ede2"/>
+  <text x="575" y="74" fill="#677368" font-family="'JetBrains Mono', monospace" font-size="10" text-anchor="middle">5 of 9 Done (55%)</text>
+  
+  <rect x="642" y="58" width="126" height="24" rx="6" fill="#d96b43"/>
+  <text x="705" y="74" fill="#ffffff" font-family="Arial, sans-serif" font-size="10" font-weight="600" text-anchor="middle">+ Add Planned Task</text>
+
+  <!-- 3 Column Layout (Mon-Tue, Wed-Thu, Friday / Reflections) -->
+  
+  <!-- Column 1: Mon / Tue -->
+  <g transform="translate(24, 108)">
+    <rect width="236" height="364" rx="12" fill="#f8f6f0" stroke="#e6e1d5" stroke-width="1"/>
+    <text x="16" y="28" fill="#677368" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600">MON · TUE</text>
+    <rect x="180" y="16" width="40" height="18" rx="9" fill="#e7e2d6"/>
+    <text x="200" y="29" fill="#18221b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" text-anchor="middle">3</text>
+
+    <!-- Card 1 -->
+    <g transform="translate(12, 44)" filter="url(#wn-shadow)">
+      <rect width="212" height="84" rx="8" fill="url(#wn-card)" stroke="#e4ded1" stroke-width="1"/>
+      <circle cx="20" cy="22" r="6" fill="#22c55e"/>
+      <text x="34" y="25" fill="#18221b" font-family="Arial, sans-serif" font-size="12" font-weight="600">Draft SQLite query tree</text>
+      <text x="34" y="44" fill="#677368" font-family="Arial, sans-serif" font-size="10">Mapped scan vs index cost breakdown</text>
+      <rect x="34" y="56" width="60" height="16" rx="4" fill="#e8f5e9"/>
+      <text x="64" y="68" fill="#2e7d32" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">DONE</text>
+    </g>
+
+    <!-- Card 2 -->
+    <g transform="translate(12, 138)" filter="url(#wn-shadow)">
+      <rect width="212" height="92" rx="8" fill="url(#wn-card)" stroke="#e4ded1" stroke-width="1"/>
+      <circle cx="20" cy="22" r="6" fill="#22c55e"/>
+      <text x="34" y="25" fill="#18221b" font-family="Arial, sans-serif" font-size="12" font-weight="600">Export Tailwind v4 tokens</text>
+      <text x="34" y="44" fill="#677368" font-family="Arial, sans-serif" font-size="10">Figma variables to @theme token block</text>
+      <rect x="34" y="64" width="60" height="16" rx="4" fill="#e8f5e9"/>
+      <text x="64" y="76" fill="#2e7d32" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">DONE</text>
+    </g>
+
+    <!-- Card 3 -->
+    <g transform="translate(12, 240)" filter="url(#wn-shadow)">
+      <rect width="212" height="84" rx="8" fill="url(#wn-card)" stroke="#e4ded1" stroke-width="1"/>
+      <circle cx="20" cy="22" r="6" fill="#d96b43"/>
+      <text x="34" y="25" fill="#18221b" font-family="Arial, sans-serif" font-size="12" font-weight="600">Sync dark mode palette</text>
+      <text x="34" y="44" fill="#677368" font-family="Arial, sans-serif" font-size="10">Deep forest ink contrast audit</text>
+      <rect x="34" y="56" width="80" height="16" rx="4" fill="#fff3e0"/>
+      <text x="74" y="68" fill="#d96b43" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">IN PROGRESS</text>
+    </g>
+  </g>
+
+  <!-- Column 2: Wed / Thu -->
+  <g transform="translate(282, 108)">
+    <rect width="236" height="364" rx="12" fill="#f8f6f0" stroke="#e6e1d5" stroke-width="1"/>
+    <text x="16" y="28" fill="#677368" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600">WED · THU</text>
+    <rect x="180" y="16" width="40" height="18" rx="9" fill="#e7e2d6"/>
+    <text x="200" y="29" fill="#18221b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" text-anchor="middle">2</text>
+
+    <!-- Card 1 -->
+    <g transform="translate(12, 44)" filter="url(#wn-shadow)">
+      <rect width="212" height="96" rx="8" fill="url(#wn-card)" stroke="#e4ded1" stroke-width="1"/>
+      <circle cx="20" cy="22" r="6" fill="#eab308"/>
+      <text x="34" y="25" fill="#18221b" font-family="Arial, sans-serif" font-size="12" font-weight="600">User testing interviews</text>
+      <text x="34" y="44" fill="#677368" font-family="Arial, sans-serif" font-size="10">3 sessions with early enrolled builders</text>
+      <rect x="34" y="66" width="70" height="16" rx="4" fill="#fef9c3"/>
+      <text x="69" y="78" fill="#a16207" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">SCHEDULED</text>
+    </g>
+
+    <!-- Card 2 -->
+    <g transform="translate(12, 150)" filter="url(#wn-shadow)">
+      <rect width="212" height="92" rx="8" fill="url(#wn-card)" stroke="#e4ded1" stroke-width="1"/>
+      <circle cx="20" cy="22" r="6" fill="#677368"/>
+      <text x="34" y="25" fill="#18221b" font-family="Arial, sans-serif" font-size="12" font-weight="600">Feedback categorization</text>
+      <text x="34" y="44" fill="#677368" font-family="Arial, sans-serif" font-size="10">Sort bugs vs usability frictions</text>
+      <rect x="34" y="64" width="56" height="16" rx="4" fill="#f1f3f5"/>
+      <text x="62" y="76" fill="#677368" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle">QUEUED</text>
+    </g>
+  </g>
+
+  <!-- Column 3: Fri / Reflection -->
+  <g transform="translate(540, 108)">
+    <rect width="236" height="364" rx="12" fill="#f8f6f0" stroke="#e6e1d5" stroke-width="1"/>
+    <text x="16" y="28" fill="#677368" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600">FRI · REFLECTIONS</text>
+    <rect x="180" y="16" width="40" height="18" rx="9" fill="#e7e2d6"/>
+    <text x="200" y="29" fill="#18221b" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" text-anchor="middle">1</text>
+
+    <!-- Reflection Notebook Card -->
+    <g transform="translate(12, 44)" filter="url(#wn-shadow)">
+      <rect width="212" height="180" rx="8" fill="#ffffff" stroke="#d96b43" stroke-width="1.5"/>
+      <text x="16" y="26" fill="#d96b43" font-family="Arial, sans-serif" font-size="13" font-weight="600">End-of-week Notes</text>
+      <line x1="16" y1="36" x2="196" y2="36" stroke="#f0e9df" stroke-width="1"/>
+      <text x="16" y="56" fill="#18221b" font-family="Arial, sans-serif" font-size="11" font-weight="500">What went well:</text>
+      <text x="16" y="74" fill="#677368" font-family="Arial, sans-serif" font-size="10">· 5 early testers enrolled in hours</text>
+      <text x="16" y="90" fill="#677368" font-family="Arial, sans-serif" font-size="10">· Usability feedback was candid</text>
+      <line x1="16" y1="104" x2="196" y2="104" stroke="#f0e9df" stroke-width="1"/>
+      <text x="16" y="122" fill="#18221b" font-family="Arial, sans-serif" font-size="11" font-weight="500">Friction point:</text>
+      <text x="16" y="140" fill="#677368" font-family="Arial, sans-serif" font-size="10">· Unfinished tasks need 1-click</text>
+      <text x="16" y="154" fill="#677368" font-family="Arial, sans-serif" font-size="10">  rescheduling to next Monday</text>
+    </g>
+  </g>
+</svg>

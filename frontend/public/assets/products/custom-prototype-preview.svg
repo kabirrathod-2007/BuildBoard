@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cp-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbfaf7"/>
+      <stop offset="100%" stop-color="#f0ece2"/>
+    </linearGradient>
+    <pattern id="cp-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e6e1d5" stroke-width="0.75"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="500" rx="16" fill="url(#cp-bg)"/>
+  <rect width="800" height="500" rx="16" fill="url(#cp-grid)"/>
+
+  <!-- Window Header Bar -->
+  <rect x="0" y="0" width="800" height="48" rx="16" fill="#161c16"/>
+  <circle cx="28" cy="24" r="5" fill="#e07a5f"/>
+  <circle cx="44" cy="24" r="5" fill="#eab308"/>
+  <circle cx="60" cy="24" r="5" fill="#22c55e"/>
+  <text x="90" y="28" fill="#d1dcd3" font-family="'JetBrains Mono', monospace" font-size="12">prototype.local / active-deployment / preview</text>
+  <rect x="660" y="14" width="116" height="20" rx="10" fill="#29392e"/>
+  <text x="718" y="28" fill="#86efac" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600" text-anchor="middle">LIVE PREVIEW</text>
+
+  <!-- Prototype Workspace Window -->
+  <g transform="translate(60, 84)">
+    <rect width="680" height="360" rx="12" fill="#ffffff" stroke="#ded8ca" stroke-width="1.5"/>
+    
+    <!-- Workspace top bar -->
+    <rect x="0" y="0" width="680" height="44" rx="12" fill="#f8f6f0" stroke="#ede7dc" stroke-width="1"/>
+    <rect x="20" y="14" width="80" height="16" rx="4" fill="#e6e1d5"/>
+    <rect x="110" y="14" width="60" height="16" rx="4" fill="#f0ece2"/>
+    <rect x="180" y="14" width="90" height="16" rx="4" fill="#f0ece2"/>
+
+    <!-- Central Prototype Canvas -->
+    <g transform="translate(40, 70)">
+      <rect width="600" height="220" rx="10" fill="#fbfaf7" stroke="#e8e2d5" stroke-width="1" stroke-dasharray="4 4"/>
+      
+      <!-- Maker Icon / Emblem -->
+      <circle cx="300" cy="80" r="32" fill="#d96b43" fill-opacity="0.12"/>
+      <path d="M 292 68 L 308 68 M 300 68 L 300 92 M 290 84 L 310 84" stroke="#d96b43" stroke-width="2.5" stroke-linecap="round"/>
+
+      <text x="300" y="135" fill="#161c16" font-family="Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle">Working Prototype Preview</text>
+      <text x="300" y="158" fill="#677368" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Deployed web application ready for community tester enrollment</text>
+
+      <rect x="230" y="176" width="140" height="24" rx="12" fill="#161c16"/>
+      <text x="300" y="192" fill="#ffffff" font-family="Arial, sans-serif" font-size="10" font-weight="600" text-anchor="middle">Interactive Session Ready</text>
+    </g>
+  </g>
+</svg>

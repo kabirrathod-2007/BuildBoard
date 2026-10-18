@@ -1,0 +1,393 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --font-display: 'DM Sans', Arial, sans-serif;
+  --font-sans: 'DM Sans', Arial, Helvetica, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  /* BuildBoard Warm Paper/Ivory Light Studio Palette */
+  --bg-page: #fbfaf7;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f4f1ea;
+  --bg-card: #ffffff;
+  
+  /* Deep Ink & Forest-Green Text */
+  --text-main: #141a15;
+  --text-muted: #434f45;
+  --text-subtle: #68766a;
+  
+  /* Tactile Warm Craft Borders */
+  --border-main: #e2ded4;
+  --border-subtle: #ebe8e0;
+  --border-strong: #cfc9bd;
+
+  /* Controlled Artisanal Terracotta Accent */
+  --accent-coral: #d96b43;
+  --accent-coral-hover: #e57b54;
+  --accent-coral-badge: rgba(217, 107, 67, 0.08);
+  --accent-amber: #c26e00;
+  --accent-lime: #2e7d32;
+  --shadow-main: rgba(20, 26, 21, 0.06);
+
+  /* Deep Forest Surface (for high-impact editorial blocks) */
+  --surface-forest: #141b16;
+  --text-forest-ivory: #f4ede2;
+  --text-forest-muted: #a4b2a6;
+
+  /* Warm Elevation Shadows (Light Mode) */
+  --shadow-warm-sm: 0 1px 3px rgba(20, 26, 21, 0.04), 0 1px 2px rgba(20, 26, 21, 0.02);
+  --shadow-warm-md: 0 4px 12px rgba(20, 26, 21, 0.06), 0 2px 4px rgba(20, 26, 21, 0.02);
+  --shadow-warm-lg: 0 10px 24px rgba(20, 26, 21, 0.08), 0 4px 8px rgba(20, 26, 21, 0.02);
+  --shadow-warm-xl: 0 20px 36px rgba(20, 26, 21, 0.09), 0 8px 16px rgba(20, 26, 21, 0.03);
+
+  color-scheme: light;
+}
+
+.dark {
+  /* BuildBoard Deep Obsidian & Forest-Ink Dark Palette */
+  --bg-page: #0b100c;
+  --bg-surface: #131914;
+  --bg-surface-subtle: #19221b;
+  --bg-card: #131914;
+
+  /* Warm Linen & Celadon/Muted Green Text */
+  --text-main: #f3f4f0;
+  --text-muted: #b0baa9;
+  --text-subtle: #828e7d;
+
+  /* Deep Tactile Borders */
+  --border-main: #242f26;
+  --border-subtle: #1b241d;
+  --border-strong: #324235;
+
+  /* Dark Mode Terracotta Accents */
+  --accent-coral: #e07a5f;
+  --accent-coral-hover: #eb8b72;
+  --accent-coral-badge: rgba(224, 122, 95, 0.15);
+  --accent-amber: #e07a5f;
+  --accent-lime: #4ade80;
+  --shadow-main: rgba(0, 0, 0, 0.55);
+
+  /* Deep Forest Surface (unified in dark mode) */
+  --surface-forest: #0e140f;
+  --text-forest-ivory: #f3f4f0;
+  --text-forest-muted: #b0baa9;
+
+  /* Warm Elevation Shadows (Dark Mode) */
+  --shadow-warm-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-warm-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --shadow-warm-lg: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 20px rgba(224, 122, 95, 0.06);
+  --shadow-warm-xl: 0 24px 48px rgba(0, 0, 0, 0.7), 0 0 32px rgba(224, 122, 95, 0.1);
+
+  color-scheme: dark;
+}
+
+@theme {
+  --font-display: 'DM Sans', Arial, sans-serif;
+  --font-sans: 'DM Sans', Arial, Helvetica, sans-serif;
+  --font-mono: 'JetBrains Mono', Courier, monospace;
+
+  --color-theme-page: var(--bg-page);
+  --color-theme-surface: var(--bg-surface);
+  --color-theme-subtle: var(--bg-surface-subtle);
+  --color-theme-card: var(--bg-card);
+  --color-theme-text: var(--text-main);
+  --color-theme-muted: var(--text-muted);
+  --color-theme-subtle-text: var(--text-subtle);
+  --color-theme-border: var(--border-main);
+  --color-theme-border-subtle: var(--border-subtle);
+  --color-theme-border-strong: var(--border-strong);
+  --color-theme-coral: var(--accent-coral);
+  --color-theme-coral-hover: var(--accent-coral-hover);
+  --color-theme-coral-badge: var(--accent-coral-badge);
+  --color-theme-amber: var(--accent-amber);
+  --color-theme-lime: var(--accent-lime);
+  
+  --color-terracotta: var(--accent-coral);
+  --color-terracotta-hover: var(--accent-coral-hover);
+  --color-terracotta-dark: #b85028;
+  --color-terracotta-light: #fbeee8;
+
+  --color-forest-surface: var(--surface-forest);
+  --color-forest-text: var(--text-forest-ivory);
+  --color-forest-muted: var(--text-forest-muted);
+
+  /* Theme Shadow Tokens */
+  --shadow-warm-sm: var(--shadow-warm-sm);
+  --shadow-warm-md: var(--shadow-warm-md);
+  --shadow-warm-lg: var(--shadow-warm-lg);
+  --shadow-warm-xl: var(--shadow-warm-xl);
+}
+
+html {
+  font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+}
+
+button, input, select, textarea {
+  font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+  font-size: inherit;
+}
+
+/* Continuous Fast-Paced Marquee Animation for ShowcaseCarousel */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes spotlight-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.spotlight-progress {
+  animation: spotlight-progress 3.5s linear forwards;
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 30s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover,
+.animate-marquee:focus-within,
+.marquee-paused {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+    transform: none;
+  }
+
+  .spotlight-progress {
+    animation: none;
+    width: 100%;
+  }
+}
+
+/* Browser Autofill Dark Mode & Consistency Fixes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #131914 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.light input:-webkit-autofill,
+.light input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+.light input:-webkit-autofill:active,
+:root:not(.dark) input:-webkit-autofill,
+:root:not(.dark) input:-webkit-autofill:hover, 
+:root:not(.dark) input:-webkit-autofill:focus, 
+:root:not(.dark) input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #141a15 !important;
+  caret-color: #141a15;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ── Transitions.dev Crafted Motion System ── */
+:root {
+  --tdev-ease-natural: cubic-bezier(0.22, 1, 0.36, 1);
+  --tdev-ease-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --tdev-ease-spring-soft: cubic-bezier(0.34, 1.35, 0.64, 1);
+  --tdev-ease-exit: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* P2: Origin-Aware Dropdown / Popover */
+@keyframes tdev-dropdown-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+}
+
+.tdev-dropdown {
+  transform-origin: top right;
+  animation: tdev-dropdown-in 250ms var(--tdev-ease-natural) forwards;
+  will-change: transform, opacity;
+}
+
+/* P7: Modal Dialog Opening */
+@keyframes tdev-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+}
+
+.tdev-modal {
+  animation: tdev-modal-in 250ms var(--tdev-ease-natural) forwards;
+  will-change: transform, opacity;
+}
+
+/* P12: Input Error Shake (4-phase tactile rejection) */
+@keyframes tdev-shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+.tdev-shake {
+  animation: tdev-shake 280ms var(--tdev-ease-natural);
+}
+
+/* P9: Spring Pop-In for numbers, badges, and counters */
+@keyframes tdev-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.88);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.tdev-pop-in {
+  display: inline-block;
+  animation: tdev-pop-in 450ms var(--tdev-ease-spring) forwards;
+  will-change: transform, opacity, filter;
+}
+
+/* P5: Icon Swap with Blur & Scale */
+@keyframes tdev-icon-swap {
+  from {
+    opacity: 0;
+    transform: scale(0.35);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.tdev-icon-swap {
+  display: inline-block;
+  animation: tdev-icon-swap 200ms var(--tdev-ease-natural) forwards;
+  will-change: transform, opacity, filter;
+}
+
+/* P6: In-Place Text State Swap */
+@keyframes tdev-text-swap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.tdev-text-swap {
+  display: inline-block;
+  animation: tdev-text-swap 180ms var(--tdev-ease-natural) forwards;
+  will-change: transform, opacity, filter;
+}
+
+/* P10: Success Checkmark (Disc Bounce & SVG Path Draw) */
+@keyframes tdev-check-disc {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(60deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.tdev-check-disc {
+  animation: tdev-check-disc 380ms var(--tdev-ease-spring-soft) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes tdev-draw-check {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.tdev-draw-check {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: tdev-draw-check 320ms var(--tdev-ease-natural) 80ms forwards;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .tdev-dropdown,
+  .tdev-modal,
+  .tdev-shake,
+  .tdev-pop-in,
+  .tdev-icon-swap,
+  .tdev-text-swap,
+  .tdev-check-disc {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  .tdev-draw-check {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+}
