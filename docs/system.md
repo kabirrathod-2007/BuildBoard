@@ -35,9 +35,11 @@ BuildBoard follows a **Modular Three-Tier Client Architecture**:
 +---------------------------------------------------------------------------------------+
 |                                    PRESENTATION LAYER                                 |
 |                                                                                       |
-|   React 19 (JSX)  •  React Router 8  •  Tailwind CSS v4 Engine  •  Motion Physics    |
-|   - 14 Route Pages (/explore, /products/:id, /builder/dashboard, /problems, etc.)     |
-|   - 12 Reusable Components (InteractiveBento, ShowcaseCarousel, ProductCard, etc.)    |
+|   React 19 (JSX)  •  React Router ^8.4.0  •  Tailwind CSS v4 Engine  •  Framer Motion |
+|   - 15 Route Pages (/explore, /products/:id, /builder/dashboard, /problems, etc.)     |
+|   - Per-page layout rendering (<Navbar /> and <Footer /> composed per page view)      |
+|   - 12 Components in src/components/ (including standalone ProductCard,               |
+|     ShowcaseCarousel, ThemeToggle)                                                    |
 +---------------------------------------------------------------------------------------+
                                            │
                                            ▼
@@ -45,13 +47,16 @@ BuildBoard follows a **Modular Three-Tier Client Architecture**:
 |                                  BUSINESS LOGIC LAYER                                 |
 |                                                                                       |
 |   Pure Utility Engines:                                                               |
-|   - src/utils/recommendations.js (Deterministic Profile-to-Product Matching)         |
-|   - src/utils/feedbackReminder.js (Time-Tiered Elapsed Reminder Engine)               |
+|   - src/utils/recommendations.js (getRecommendedProducts: +1 unweighted per match)   |
+|   - src/utils/feedbackReminder.js (getFeedbackReminderInfo: recent/early/followup)    |
+|   - src/utils/indexedDB.js (IndexedDB binary blob storage for media uploads)          |
 |                                                                                       |
-|   Scoped React Context Stores:                                                        |
-|   - AuthContext: Identity, session lifecycle, role management                        |
-|   - DemoDataContext: Products, enrollments, feedback, problem validations, views     |
-|   - ThemeContext: Dark/light mode root class & CSS variable orchestration            |
+|   Hierarchical Provider Context Tree (src/main.jsx):                                  |
+|   <BrowserRouter>                                                                     |
+|     └─► <ThemeProvider> (Dark/light mode root class & CSS variables)                  |
+|           └─► <AuthProvider> (Demo identity & session management)                     |
+|                 └─► <DemoDataProvider> (Products, enrollments, feedback, problems)   |
+|                       └─► <App />                                                     |
 +---------------------------------------------------------------------------------------+
                                            │
                                            ▼
@@ -59,8 +64,18 @@ BuildBoard follows a **Modular Three-Tier Client Architecture**:
 |                                  PERSISTENCE LAYER                                    |
 |                                                                                       |
 |   Browser Storage (Zero-Latency Local Sandbox):                                       |
-|   - 8 LocalStorage Namespaces (buildboard_demo_*)                                     |
-|   - In-memory seed fallback (src/data/products.js, src/data/problems.js)              |
+|   - 9 LocalStorage Namespaces:                                                        |
+|       1. buildboard_demo_custom_products                                              |
+|       2. buildboard_demo_enrollments                                                  |
+|       3. buildboard_demo_feedback                                                     |
+|       4. buildboard_demo_views                                                        |
+|       5. buildboard_demo_profiles                                                     |
+|       6. buildboard_demo_reminder_dismissals                                          |
+|       7. buildboard_demo_problems                                                     |
+|       8. buildboard_demo_user                                                         |
+|       9. buildboard-theme                                                             |
+|   - IndexedDB database (buildboard_media_db) for local screenshots & media uploads    |
+|   - In-memory seed fallbacks (src/data/products.js, src/data/problems.js)             |
 |   - Error-tolerant serialization with quota overflow boundaries                       |
 +---------------------------------------------------------------------------------------+
 ```
@@ -75,7 +90,7 @@ BuildBoard follows a **Modular Three-Tier Client Architecture**:
 erDiagram
     USER ||--|| PROFILE : "defines"
     USER ||--o{ PRODUCT : "creates (as Builder)"
-    USER ||--o{ ENROLLMENT : "enters (as Tester)"
+    USER ||--o{ ENROLLMENT : "enters (as Tester, keyed email:productId)"
     USER ||--o{ FEEDBACK : "submits"
     USER ||--o{ PROBLEM : "posts"
     USER ||--o{ PROBLEM_VALIDATION : "validates"
@@ -85,7 +100,7 @@ erDiagram
     PRODUCT ||--o{ PRODUCT_VIEW : "tracks"
     PRODUCT }o--o{ PROBLEM : "solves (linked via attachedSolutionIds)"
 
-    FEEDBACK ||--o{ BUILDER_REPLY : "contains"
+    FEEDBACK ||--o| BUILDER_REPLY : "contains single editable reply"
 ```
 
 ---
@@ -114,7 +129,7 @@ interface UserProfile {
 Stored under localStorage key: `buildboard_demo_custom_products` and merged with `src/data/products.js`.
 ```typescript
 interface Product {
-  id: string;                     // Unique identifier (e.g. "prod_1729123456789")
+  id: string;                     // Human-readable slug (e.g. "zenith-focus", with suffix on collision: "zenith-focus-4819")
   name: string;                   // Product name
   tagline: string;                // Short 1-sentence value proposition
   description: string;            // Extended markdown product description
@@ -128,24 +143,26 @@ interface Product {
   targetExperience?: string;      // Optional experience requirement
   feedbackRequest: string;        // Explicit question the builder wants answered
   whatToTry: string[];            // Ordered steps/tasks for tester to execute
-  productUrl: string;             // External prototype URL (GATED)
+  productUrl: string;             // External prototype URL (GATED behind enrollment)
   githubUrl?: string;             // Optional source repository URL
   enrollmentPaused: boolean;      // Gate control (true = blocks new testers)
   createdAt: string;              // ISO 8601 Timestamp
   updatedAt: string;              // Note: Pausing must NOT alter updatedAt
-  gallery?: string[];             // URLs of product preview screenshots
+  gallery?: string[];             // URLs / IndexedDB keys of product preview screenshots
 }
 ```
 
-#### 3. Enrollment Entity (`Enrollment`)
-Stored under localStorage key: `buildboard_demo_enrollments`.
+#### 3. Enrollment Entity (`EnrollmentDictionary`)
+Stored under localStorage key: `buildboard_demo_enrollments` as a key-value dictionary.
 ```typescript
-interface Enrollment {
-  id: string;                     // e.g. "enr_1729123456789"
-  productId: string;              // Foreign key -> Product.id
-  testerEmail: string;            // Foreign key -> UserProfile.email
-  enrolledAt: string;             // ISO 8601 Timestamp (drives reminder engine)
-}
+// Key format: `${testerEmail.toLowerCase()}:${productId}`
+// Value: ISO 8601 enrollment timestamp string
+type EnrollmentDictionary = Record<string, string>;
+
+// Example:
+// {
+//   "tester@buildboard.dev:zenith-focus": "2026-10-18T10:00:00.000Z"
+// }
 ```
 
 #### 4. Feedback Entity (`Feedback`)
@@ -154,40 +171,55 @@ Stored under localStorage key: `buildboard_demo_feedback`.
 interface Feedback {
   id: string;                     // e.g. "fb_1729123456789"
   productId: string;              // Foreign key -> Product.id
-  testerEmail: string;            // Foreign key -> UserProfile.email
-  testerName: string;             // Display name at time of submission
-  category: 'Bug' | 'UX / Usability' | 'Feature Request' | 'Performance' | 'General';
+  userEmail: string;              // Foreign key -> UserProfile.email
+  userName: string;               // Display name at time of submission
+  category: 'What worked well' | 'Bug or issue' | 'Usability' | 'UI' | 'Feature idea' | 'Other';
   workflow: string;               // Context: "What were you trying to do?"
   outcome: string;                // Critique: "What happened vs expected?"
+  experience?: string;            // Qualitative rating / overall experience
+  likes?: number | string[];      // Helpful upvote count or voters
   isHelpful: boolean;             // Builder toggle (drives Recognition score)
   createdAt: string;              // ISO 8601 Timestamp
-  replies: BuilderReply[];        // Threaded replies
+  reply?: BuilderReply;           // Single editable builder reply
 }
 
 interface BuilderReply {
-  id: string;
-  authorEmail: string;
-  authorName: string;
-  text: string;                   // 3 - 1,000 characters
-  createdAt: string;
+  text: string;                   // Reply body text
+  repliedBy: string;              // Builder email
+  repliedAt: string;              // ISO 8601 creation timestamp
+  updatedAt?: string;             // ISO 8601 edit timestamp
 }
 ```
 
 #### 5. Problem Validation Entity (`Problem`)
-Stored under localStorage key: `buildboard_demo_problems` and merged with `src/data/problems.js`.
+Stored under localStorage key: `buildboard_demo_problems` and merged with `src/data/problems.js`. Fully shipped with Reddit-style nested discussion comments.
 ```typescript
 interface Problem {
-  id: string;
+  id: string;                     // e.g. "prob-1" or slug
   title: string;
+  statement?: string;             // Core problem statement
   description: string;
   category: string;
+  workarounds?: string;           // How users currently cope
   targetRoles: string[];
   targetIndustries: string[];
   authorEmail: string;
   authorName: string;
-  validations: string[];          // Array of voter emails (like/upvote equivalent)
+  validatedBy: string[];          // Array of voter emails who validated the problem
+  testerSignups?: string[];       // Testers volunteering to test solutions
   attachedSolutionIds: string[];  // Array of Product.id solving this problem
+  comments?: ProblemComment[];    // Nested comment hierarchy
   createdAt: string;
+}
+
+interface ProblemComment {
+  id: string;
+  authorName: string;
+  authorEmail: string;
+  text: string;
+  createdAt: string;
+  helpfulCount?: number;
+  replies?: ProblemComment[];     // Nested replies with collapsible toggle
 }
 ```
 
@@ -195,56 +227,67 @@ interface Problem {
 
 ## 4. Component Hierarchy & UI Topology
 
+BuildBoard renders `<Navbar />` and `<Footer />` inside each individual page component for modular styling and per-view control, rather than once globally in `App.jsx`.
+
 ```
-<App>
- │
- ├── <SkipToContent />             # Screen-reader & keyboard skip navigation
- ├── <OpeningIntro />              # 400ms entrance branding animation
- ├── <Navbar>                      # Persistent top-level navigation
- │    ├── <Logo />
- │    ├── <ThemeToggle />          # Light/Dark switch
- │    └── <SettingsMenu />         # User profile menu & quick demo switchers
- │
- ├── <Suspense fallback={<PageFallback />}>
- │    └── <Routes>
- │         ├── <LandingPage>
- │         │    ├── HeroSection (Kinetic headline + 3D Tilt Preview)
- │         │    ├── <InteractiveBentoShowcase /> (4-card live interactive preview)
- │         │    ├── <ShowcaseCarousel /> (Spotlight rotating cards)
- │         │    └── HowItWorksSection (Connecting line animation)
- │         │
- │         ├── <ExplorePage>
- │         │    ├── SearchBar & CategoryFilters
- │         │    ├── RecommendationsRail (High-match products)
- │         │    └── ProductGrid -> <ProductCard />[]
- │         │
- │         ├── <ProductDetailsPage>
- │         │    ├── ProductHero & Tagline
- │         │    ├── EnrollmentGate (Unlocks URL & Test Checklist)
- │         │    ├── WhatToTryList
- │         │    ├── FeedbackSubmissionForm
- │         │    └── FeedbackThreadFeed -> <FeedbackItem />[]
- │         │
- │         ├── <SubmitProductPage> (Multi-step listing builder)
- │         ├── <BuilderDashboardPage> (Metrics: Views, Enrolled, Feedback)
- │         ├── <TesterActivityPage> (Active enrollments, Reminders, Recognition)
- │         ├── <ProfileSetupPage> (Role, Industry, Tech tag selectors)
- │         ├── <ProblemsPage> / <SubmitProblemPage> / <ProblemDetailsPage>
- │         └── <SignInPage> / <SignUpPage> / <NotFoundPage>
- │
- └── <Footer />
+<BrowserRouter>
+ └─► <ThemeProvider>
+       └─► <AuthProvider>
+             └─► <DemoDataProvider>
+                   └─► <App>
+                        │
+                        ├── <SkipToContent />             # Screen-reader skip navigation
+                        ├── <OpeningIntro />              # 400ms entrance animation check
+                        │
+                        └── <Suspense fallback={<PageFallback />}>
+                             └── <Routes>
+                                  ├── <LandingPage>
+                                  │    ├── <Navbar />
+                                  │    ├── HeroSection & ProductSpotlight (inline spotlight)
+                                  │    ├── <InteractiveBentoShowcase />
+                                  │    ├── HowItWorksSection
+                                  │    └── <Footer />
+                                  │
+                                  ├── <ExplorePage>
+                                  │    ├── <Navbar />
+                                  │    ├── SearchBar & CategoryFilters
+                                  │    ├── RecommendationsRail
+                                  │    ├── ProductGrid
+                                  │    └── <Footer />
+                                  │
+                                  ├── <ProductDetailsPage>
+                                  │    ├── <Navbar />
+                                  │    ├── FeedbackReminderBanner (getFeedbackReminderInfo)
+                                  │    ├── ProductHero, Gallery & Tagline
+                                  │    ├── EnrollmentGate (Unlocks URL & Test Checklist)
+                                  │    ├── WhatToTryList
+                                  │    ├── FeedbackSubmissionForm (6 categories + experience)
+                                  │    ├── FeedbackThreadFeed (Single editable reply per note)
+                                  │    └── <Footer />
+                                  │
+                                  ├── <SubmitProductPage> (Multi-step listing builder with IndexedDB media)
+                                  ├── <BuilderDashboardPage> (Metrics: Views, Enrolled, Feedback)
+                                  ├── <TesterActivityPage> (Active enrollments, Recognition)
+                                  ├── <ProfileSetupPage> (Role, Industry, Tech tag selectors)
+                                  ├── <ProblemsPage> / <SubmitProblemPage> / <ProblemDetailsPage>
+                                  ├── <VerifyEmailPage> (Simulated email verification)
+                                  ├── <SignInPage> / <SignUpPage> / <NotFoundPage>
+                                  └── <AboutPage>
 ```
+
+> [!NOTE]
+> **Component Library Status**: There are 12 component files in `src/components/`. `ProductCard.jsx`, `ShowcaseCarousel.jsx`, and `ThemeToggle.jsx` are standalone modular building blocks in `src/components/` that are currently unimported in the active routes (the landing page uses an inline `ProductSpotlight` rather than `ShowcaseCarousel`, and individual pages manage themes and cards directly).
 
 ---
 
 ## 5. Recommendation & Matching Algorithm Specification
 
-Implemented in `src/utils/recommendations.js`.
+Implemented in `src/utils/recommendations.js` via `getRecommendedProducts(products, profile, limit = 4)`.
 
 ### Mathematical Scoring Function
-For a given product $P$ and user profile $U$:
+Every matching criterion adds exactly **+1 point** to the total match score. The total score is equal to the total count of matched reasons:
 
-$$\text{Score}(P, U) = 3 \cdot |P_{\text{categories}} \cap U_{\text{interests}}| + 3 \cdot |P_{\text{roles}} \cap U_{\text{roles}}| + 2 \cdot |P_{\text{tech}} \cap U_{\text{tech}}| + 2 \cdot |P_{\text{industries}} \cap U_{\text{industries}}| + E(P, U)$$
+$$\text{Score}(P, U) = |P_{\text{categories}} \cap U_{\text{interests}}| + |P_{\text{roles}} \cap U_{\text{roles}}| + |P_{\text{tech}} \cap U_{\text{tech}}| + |P_{\text{industries}} \cap U_{\text{industries}}| + E(P, U)$$
 
 Where experience match $E(P, U)$:
 $$E(P, U) = \begin{cases} 
@@ -252,10 +295,11 @@ $$E(P, U) = \begin{cases}
 0 & \text{otherwise}
 \end{cases}$$
 
-### Match Quality Classification
-- **High Match**: $\text{Score} \ge 6$ (rendered with terracotta badge and detailed reasons).
-- **Moderate Match**: $3 \le \text{Score} < 6$.
-- **Low / Unmatched**: $\text{Score} < 3$.
+### Match Reasons & Ranking
+- **Score Calculation**: $\text{Score} = \text{reasons.length}$.
+- **Transparent Explanations**: Each matching attribute generates a human-readable explanation string (e.g. `"Matches your role: Frontend Developer"`, `"Uses React"`, `"Matches your interest in DevTools"`).
+- **Ranking**: Products are sorted in descending order of `matchScore`. Only products with $\text{Score} > 0$ are included in recommendations.
+- **No Category Labels**: Unlike earlier draft proposals, the code does not classify products into "High / Moderate / Low" match badges. Products display the exact match count and reason bullet list directly.
 
 ---
 
@@ -263,8 +307,9 @@ $$E(P, U) = \begin{cases}
 
 ### Current Client-Side Prototype Constraints
 1. **Client-Visible Secrets**: In the demo prototype, external prototype URLs exist inside client-side JS memory even before enrollment.
-2. **Client-Side Auth**: The demo user identity is stored in `localStorage` and can be edited via DevTools.
+2. **Client-Side Auth**: The demo user identity is stored in `localStorage` and can be edited via DevTools. Simulated email verification exists at `/verify-email`.
 3. **Derived Recognition**: Tamperable in local storage, but deterministic across reloads.
+4. **Automated Tests**: No automated tests currently exist in the repository; quality assurance relies on linting, TypeScript/Vite build validation, and manual verification flows.
 
 ### Production Security Model (Mandatory for Cloud Launch)
 ```

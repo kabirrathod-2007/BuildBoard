@@ -17,13 +17,15 @@ This document traces the exact step-by-step code execution flow between files, c
 10. [End-to-End Sequence Diagram](#10-end-to-end-sequence-diagram)
 
 ---
-
 ## 1. Application Boot & Initialization Flow
 
 ```
 index.html
   │
   └─► src/main.jsx (Entrypoint)
+        │
+        ├─► <BrowserRouter> (react-router ^8.4.0)
+        │     └─► Initializes HTML5 History routing context
         │
         ├─► <ThemeProvider> (src/context/ThemeContext.jsx)
         │     └─► Reads 'buildboard-theme' from localStorage
@@ -34,27 +36,27 @@ index.html
         │     └─► Initializes demo user state ({ name, email, role })
         │
         ├─► <DemoDataProvider> (src/context/DemoDataContext.jsx)
-        │     └─► Reads 8 localStorage keys (products, profiles, enrollments, feedback, views, etc.)
+        │     └─► Reads 9 localStorage keys (products, profiles, enrollments dictionary, feedback, views, etc.)
+        │     └─► Initializes IndexedDB connection (buildboard_media_db) for local screenshots/media
         │     └─► Merges seed products (src/data/products.js) with custom user products
+        │     └─► Initializes seed problems (src/data/problems.js) with custom community problems
         │     └─► Initializes all store state & exposed action handlers
-        │
-        ├─► <BrowserRouter> (react-router)
-        │     └─► Initializes HTML5 History API listeners
         │
         └─► <App /> (src/App.jsx)
               ├─► <SkipToContent /> (Accessibility)
               ├─► <OpeningIntro /> (Mount animation - ~400ms check)
-              ├─► <Navbar /> (Sticky header, auth status, theme toggle)
-              ├─► <Suspense fallback={<PageFallback />}>
-              │     └─► <Routes>...</Routes> (Matched page component)
-              └─► <Footer />
+              └─► <Suspense fallback={<PageFallback />}>
+                    └─► <Routes>...</Routes> (Matched page component)
+                          └─► Note: Each individual page component renders its own
+                              modular <Navbar /> and <Footer /> instances.
 ```
 
 ### Key Execution Details
 1. **Context Order Dependency**:
-   - `ThemeProvider` wraps everything first so dark mode styling applies before DOM rendering (preventing white flash).
-   - `AuthProvider` wraps `DemoDataProvider` because several data methods (like `addProduct` or `enrollInProduct`) can infer the current user session if not passed explicitly.
-   - `DemoDataProvider` reads `localStorage` synchronously during initial state declaration via lazy initializers (`useState(() => JSON.parse(...))`) to avoid re-renders or hydration mismatches.
+   - `BrowserRouter` wraps the root so child providers can utilize route hooks if needed.
+   - `ThemeProvider` wraps everything next so dark mode styling applies before DOM rendering (preventing white flash).
+   - `AuthProvider` wraps `DemoDataProvider` because several data methods (like `addProduct` or `enrollInProduct`) infer the current user session.
+   - `DemoDataProvider` reads `localStorage` synchronously during initial state declaration via lazy initializers (`useState(() => JSON.parse(...))`) to avoid re-renders or hydration mismatches, while media blobs load asynchronously via IndexedDB.
 
 ---
 
@@ -66,7 +68,7 @@ When the browser navigates to a URL (e.g., `/explore`):
 User navigates to URL
        │
        ▼
-React Router 8 matches path in src/App.jsx
+React Router ^8.4.0 matches path in src/App.jsx
        │
        ▼
 Triggers React.lazy() dynamic import (e.g. import('./pages/ExplorePage.jsx'))
@@ -75,7 +77,7 @@ Triggers React.lazy() dynamic import (e.g. import('./pages/ExplorePage.jsx'))
        │     └─► Render <PageFallback /> (Smooth terracotta pulse skeleton)
        │
        └─► Chunk loaded:
-             ├─► Mount page component
+             ├─► Mount page component (including its localized <Navbar /> & <Footer />)
              ├─► App.jsx useEffect triggers window.scrollTo(0, 0)
              └─► useDocumentTitle hook sets document.title (e.g., "Explore Products | BuildBoard")
 ```
@@ -93,8 +95,8 @@ sequenceDiagram
     participant Page as SubmitProductPage.jsx
     participant Auth as AuthContext.jsx
     participant DemoData as DemoDataContext.jsx
-    participant Storage as Browser LocalStorage
-    participant Router as React Router 8
+    participant Storage as Browser LocalStorage & IndexedDB
+    participant Router as React Router ^8.4.0
 
     Builder->>Page: Navigates to /products/new
     Page->>Auth: Reads user session via useAuth()
@@ -105,11 +107,12 @@ sequenceDiagram
     end
 
     Builder->>Page: Fills name, tagline, description, prototypeUrl, target audience tags, whatToTry
+    Builder->>Page: Optionally uploads gallery images (stored in IndexedDB)
     Builder->>Page: Clicks "Publish Prototype"
     Page->>Page: Validates required inputs (name, tagline, URL, instructions)
     
     Page->>DemoData: addProduct(productPayload)
-    Note over DemoData: Injects creatorEmail: user.email<br/>Generates unique ID: 'prod_' + Date.now()<br/>Sets createdAt & updatedAt: ISO string<br/>Sets enrollmentPaused: false
+    Note over DemoData: Injects creatorEmail: user.email<br/>Generates slug ID: slugify(name) + suffix on collision<br/>Sets createdAt & updatedAt: ISO string<br/>Sets enrollmentPaused: false
     DemoData->>DemoData: setCustomProducts([newProduct, ...customProducts])
     DemoData->>Storage: localStorage.setItem('buildboard_demo_custom_products', JSON.stringify(...))
     DemoData-->>Page: Returns created newProduct object
@@ -121,7 +124,7 @@ sequenceDiagram
 ### Function Call Sequence:
 1. `SubmitProductPage.jsx` → `handleSubmit(e)`
 2. `useAuth()` → validates `user`
-3. `useDemoData()` → `addProduct(formData)`
+3. `useDemoData()` → `addProduct(formData)` (generates human-readable slug ID)
 4. `DemoDataContext.jsx` → `setCustomProducts(prev => [created, ...prev])`
 5. `DemoDataContext.jsx` → `localStorage.setItem('buildboard_demo_custom_products', ...)`
 6. `useNavigate()` → `navigate('/products/' + newProduct.id)`
@@ -143,22 +146,22 @@ flowchart TD
     
     F --> G{"Profile has targeting fields?"}
     G -- "No" --> E
-    G -- "Yes" --> H["Loop each product: call computeProductMatch(product, profile)"]
+    G -- "Yes" --> H["Call getRecommendedProducts(products, profile, limit = 4)"]
     
-    subgraph "src/utils/recommendations.js: computeProductMatch"
-        I["Check Category matches (+3 pts each)"]
-        J["Check Target Role matches (+3 pts each)"]
-        K["Check Technology matches (+2 pts each)"]
-        L["Check Industry matches (+2 pts each)"]
+    subgraph "src/utils/recommendations.js: getRecommendedProducts"
+        I["Check Category matches (+1 pt each)"]
+        J["Check Target Role matches (+1 pt each)"]
+        K["Check Technology matches (+1 pt each)"]
+        L["Check Industry matches (+1 pt each)"]
         M["Check Experience Level (+1 pt if matched)"]
-        N["Compile human-readable match reasons[]"]
+        N["Score = reasons.length (count of matching reasons)"]
         I --> J --> K --> L --> M --> N
     end
     
     H --> I
-    N --> O["Sort products: highest match score first"]
+    N --> O["Sort products: highest matchScore first (score > 0)"]
     O --> P["Filter by user search query & active category pills via useMemo()"]
-    P --> Q["Render ProductCard.jsx instances with 'High Match' badge and reasons preview"]
+    P --> Q["Render product cards with score count and transparent reason bullets (no High/Mod/Low labels)"]
 ```
 
 ---
@@ -177,23 +180,23 @@ sequenceDiagram
 
     Tester->>Page: Navigates to /products/:productId
     Note over Page: Component mounts
-    Page->>DemoData: recordView(productId)
+    Page->>DemoData: recordProductView(productId)
     DemoData->>DemoData: views[productId] = (views[productId] || 0) + 1
     DemoData->>Storage: localStorage.setItem('buildboard_demo_views', ...)
 
-    Page->>DemoData: Check isEnrolled: enrollments.some(...)
+    Page->>DemoData: Check isEnrolled: !!enrollments[user.email + ':' + productId]
     
     alt Tester is NOT Enrolled
         Page-->>Tester: Renders Product Overview<br/>External URL: MASKED<br/>Test Checklist: LOCKED<br/>Shows CTA: "Enroll to Test Prototype"
         Tester->>Page: Clicks "Enroll in Test"
         Page->>DemoData: enrollInProduct(productId, user.email)
-        DemoData->>DemoData: enrollments.push({ productId, testerEmail, enrolledAt: ISO })
-        DemoData->>Storage: localStorage.setItem('buildboard_demo_enrollments', ...)
+        DemoData->>DemoData: enrollments[email + ':' + productId] = ISO timestamp
+        DemoData->>Storage: localStorage.setItem('buildboard_demo_enrollments', JSON.stringify(...))
         DemoData-->>Page: State updates -> triggers re-render
     end
 
     alt Tester IS Enrolled
-        Page-->>Tester: External URL: UNLOCKED ("Open Prototype ↗")<br/>Test Checklist: UNLOCKED ("What to Try")<br/>Feedback Form: UNLOCKED
+        Page-->>Tester: External URL: UNLOCKED ("Open Prototype ↗")<br/>Test Checklist: UNLOCKED ("What to Try")<br/>Feedback Form: UNLOCKED<br/>FeedbackReminderBanner displayed (recent / early / followup)
     end
 ```
 
@@ -206,13 +209,15 @@ How a tester submits high-signal, categorized critique.
 ```
 ProductDetailsPage.jsx (Feedback Form Component)
   │
-  ├─► Tester selects Category: ['Bug', 'UX / Usability', 'Feature Request', 'Performance', 'General']
+  ├─► Tester selects Category from 6 options:
+  │     ['What worked well', 'Bug or issue', 'Usability', 'UI', 'Feature idea', 'Other']
   ├─► Tester fills 'Workflow': (e.g. "Attempted to invite a team member via OAuth")
   ├─► Tester fills 'Outcome': (e.g. "Received a blank 500 error screen on redirect")
+  ├─► Tester optionally provides 'Experience' qualitative rating
   ├─► Clicks "Submit Feedback"
   │
   ▼
-Calls submitFeedback({ productId, category, workflow, outcome, testerEmail, testerName })
+Calls addFeedback({ productId, category, workflow, outcome, experience, userEmail, userName })
   │
   ▼
 DemoDataContext.jsx:
@@ -220,13 +225,15 @@ DemoDataContext.jsx:
   │     {
   │       id: 'fb_' + Date.now(),
   │       productId,
-  │       testerEmail: user.email,
-  │       testerName: user.name,
+  │       userEmail: user.email,
+  │       userName: user.name,
   │       category,
   │       workflow,
   │       outcome,
+  │       experience,
+  │       likes: 0,
   │       createdAt: new Date().toISOString(),
-  │       replies: [],
+  │       reply: null,
   │       isHelpful: false
   │     }
   ├─► setFeedback(prev => [newFeedback, ...prev])
@@ -242,7 +249,7 @@ ProductDetailsPage.jsx Re-renders:
 
 ## 7. Journey 5: Builder Feedback Review, Reply & Recognition Flow
 
-How builders review feedback, reply, and reward testers with recognition points.
+How builders review feedback, submit a single editable reply, and reward testers with recognition points.
 
 ```mermaid
 sequenceDiagram
@@ -258,8 +265,9 @@ sequenceDiagram
     Note over Details: Checks creatorEmail === user.email<br/>Enables Builder Reply & Helpful Toggle
     
     Builder->>Details: Writes reply: "Fixed in patch v0.4, thank you!"
-    Details->>DemoData: addBuilderReply(feedbackId, replyText)
-    DemoData->>DemoData: Appends reply object to feedback.replies[]
+    Details->>DemoData: replyToFeedback(feedbackId, replyText)
+    DemoData->>DemoData: Sets single reply object: { text, repliedBy, repliedAt, updatedAt }
+    DemoData->>DemoData: Persists updated feedback array to localStorage
     
     Builder->>Details: Clicks "Mark Helpful"
     Details->>DemoData: toggleFeedbackHelpful(feedbackId)
@@ -269,8 +277,8 @@ sequenceDiagram
     Note over Activity: Later, Tester visits /tester/activity
     Tester->>Activity: Views Recognition & Stats
     Activity->>DemoData: Reads feedback collection
-    Activity->>Activity: Computes: feedback.filter(f => f.testerEmail === user.email && f.isHelpful).length
-    Activity-->>Tester: Displays "+1 Recognition Point" & Builder's reply badge
+    Activity->>Activity: Computes: feedback.filter(f => f.userEmail === user.email && f.isHelpful).length
+    Activity-->>Tester: Displays "+1 Recognition Point" & Maker reply badge
 ```
 
 ---
@@ -278,38 +286,37 @@ sequenceDiagram
 ## 8. Journey 6: Time-Tiered Feedback Reminder Engine Flow
 
 ```
-Tester visits /tester/activity (TesterActivityPage.jsx)
+Tester visits /products/:productId (ProductDetailsPage.jsx)
   │
   ▼
-Calls getActiveReminders(enrollments, feedback, reminderDismissals, user.email)
+Calls getFeedbackReminderInfo(enrollmentTimestamp, hasSubmittedFeedback)
   │ (located in src/utils/feedbackReminder.js)
   │
   ▼
-Iterates through all user enrollments:
+Evaluates conditions:
   ├─► Check 1: Has user already submitted feedback for this product?
-  │     └─► YES: Exclude (No reminder needed)
+  │     └─► YES: Returns null (No reminder banner rendered)
   │
-  ├─► Check 2: Has user dismissed this product's reminder?
-  │     └─► YES: Exclude (Respect dismissal)
-  │
-  └─► Check 3: Calculate hours since enrollment:
-        hoursElapsed = (Date.now() - Date.parse(enrolledAt)) / (1000 * 60 * 60)
-        │
-        ├─► hoursElapsed < 24h:
-        │     Tier = 'early' ("Just enrolled? Try exploring the primary flow...")
-        ├─► hoursElapsed >= 24h and < 72h:
-        │     Tier = 'medium' ("Have you tried [Product]? Your feedback helps...")
-        └─► hoursElapsed >= 72h:
-              Tier = 'late' ("Still planning to test? Let the maker know...")
+  ├─► Check 2: Calculate hours elapsed since enrollment:
+  │     hoursElapsed = (Date.now() - Date.parse(enrollmentTimestamp)) / (1000 * 60 * 60)
+  │     │
+  │     ├─► hoursElapsed < 24h:
+  │     │     Tier = 'recent' ("You enrolled recently — explore the product when ready!")
+  │     ├─► hoursElapsed >= 24h and < 72h:
+  │     │     Tier = 'early' ("Ready to share early thoughts? The builder is eager for feedback.")
+  │     └─► hoursElapsed >= 72h:
+  │           Tier = 'followup' ("It's been a few days since enrollment — every critique helps!")
   │
   ▼
-TesterActivityPage renders Dismissable Reminder Banners
+ProductDetailsPage renders Reminder Banner directly above the feedback section:
   │
-  └─► If Tester clicks "Dismiss":
-        Calls dismissReminder(productId, user.email)
-        DemoDataContext records { productId, testerEmail, dismissedAt }
-        Banner vanishes instantly without reload
+  └─► If Tester dismisses:
+        Dismissal recorded in localStorage key 'buildboard_demo_reminder_dismissals'
+        Banner hides immediately
 ```
+
+> [!NOTE]
+> Feedback reminders are displayed as contextual banners on the **Product Details Page** via `getFeedbackReminderInfo()`. There is no separate global `getActiveReminders()` polling function on the activity page.
 
 ---
 
@@ -317,20 +324,25 @@ TesterActivityPage renders Dismissable Reminder Banners
 
 ```
 1. Builder or User visits /problems/new (SubmitProblemPage.jsx)
-   └─► Enters title, description, target industry, target role
+   └─► Enters title, description/statement, category, workarounds, target role/industry
    └─► Calls addProblem() in DemoDataContext.jsx
    └─► Problem is persisted to 'buildboard_demo_problems'
 
 2. Community views /problems/:problemId (ProblemDetailsPage.jsx)
    ├─► Calls validateProblem(problemId, user.email)
-   │     └─► Toggles user email in problem.validations[] array (Like / Upvote equivalent)
+   │     └─► Toggles user email in problem.validatedBy[] array (Validation upvote)
    │
-   └─► Solution Attachment Hub:
-         ├─► Builder clicks "Link Prototype Solution"
-         ├─► Selects one of their products from customProducts
-         └─► Calls attachSolutionToProblem(problemId, productId)
-         └─► Bidirectional link created: problem displays linked prototype,
-             and prototype details page displays "Solves Problem #..."
+   ├─► Solution Attachment Hub:
+   │     ├─► Builder clicks "Link Prototype Solution"
+   │     ├─► Selects one of their products from customProducts
+   │     └─► Calls attachProblemSolution(problemId, productId)
+   │     └─► Bidirectional link created: problem displays linked prototype,
+   │         and prototype details page displays "Solves Problem #..."
+   │
+   └─► Reddit-Style Nested Comment Hierarchy:
+         ├─► Users post root comments or threaded replies (addProblemComment)
+         ├─► Comments feature collapsible toggle arrows for nested threads
+         └─► Helpful toggles allow community recognition (toggleProblemCommentHelpful)
 ```
 
 ---
@@ -339,12 +351,13 @@ TesterActivityPage renders Dismissable Reminder Banners
 
 ```
 +---------------+           +---------------+           +-----------------+          +-------------------+
-|    BUILDER    |           |    BROWSER    |           | DEMODATA CONTEXT|          |   LOCALSTORAGE    |
+|    BUILDER    |           |    BROWSER    |           | DEMODATA CONTEXT|          |STORAGE & INDEXEDDB|
 +---------------+           +---------------+           +-----------------+          +-------------------+
         |                           |                            |                             |
         |--- 1. Submit Product ---->|                            |                             |
         |                           |--- addProduct(payload) --->|                             |
         |                           |                            |--- setItem('products') ---->|
+        |                           |                            |--- saveMedia(IndexedDB) --->|
         |                           |<-- return created product -|                             |
         |<-- Redirect /products/:id |                            |                             |
         |                           |                            |                             |
@@ -353,24 +366,26 @@ TesterActivityPage renders Dismissable Reminder Banners
 +---------------+                   |                            |                             |
         |                           |                            |                             |
         |--- 2. Visit /explore ---->|                            |                             |
-        |                           |--- compute recommendations |                             |
-        |<-- Display Matched Cards -|                            |                             |
+        |                           |-- getRecommendedProducts ->|                             |
+        |<-- Display Matched Cards -|   (+1 pt per match reason) |                             |
         |                           |                            |                             |
         |--- 3. View & Enroll ----->|                            |                             |
-        |                           |--- recordView(prodId) ---->|--- setItem('views') ------->|
-        |                           |--- enrollInProduct() ----->|--- setItem('enrollments') ->|
+        |                           |-- recordProductView(id) -->|--- setItem('views') ------->|
+        |                           |-- enrollInProduct(id) ---->|--- setItem('enrollments') ->|
+        |                           |                            |    (key: "email:productId") |
         |<-- Reveal Prototype URL --|                            |                             |
         |                           |                            |                             |
         |--- 4. Submit Feedback --->|                            |                             |
-        |                           |--- submitFeedback() ------>|--- setItem('feedback') ---->|
+        |    (6 categories, exp)    |--- addFeedback() --------->|--- setItem('feedback') ---->|
         |                           |                            |                             |
         |                           |                            |                             |
 +---------------+                   |                            |                             |
 |    BUILDER    |                   |                            |                             |
 +---------------+                   |                            |                             |
         |                           |                            |                             |
-        |--- 5. Review & Mark ----->|                            |                             |
-        |       Helpful             |--- toggleHelpful() ------->|--- setItem('feedback') ---->|
+        |--- 5. Review & Reply ---->|                            |                             |
+        |    (Single editable reply)|--- replyToFeedback() ----->|--- setItem('feedback') ---->|
+        |    Mark Helpful           |--- toggleHelpful() ------->|--- setItem('feedback') ---->|
         |                           |                            |                             |
 +---------------+                   |                            |                             |
 |    TESTER     |                   |                            |                             |

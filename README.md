@@ -48,9 +48,12 @@ From the `frontend/` directory:
 
 ## Architecture & Technology Stack
 
-- **Core**: React 19, React Router 7
-- **Bundler**: Vite
-- **Styling**: Tailwind CSS with custom warm studio theme tokens (supporting dark and light modes)
+- **Core**: React 19, React Router 8 (`react-router ^8.4.0`)
+- **Bundler**: Vite 8
+- **Styling**: Tailwind CSS v4 (`@tailwindcss/vite`) with custom warm studio theme tokens (supporting dark and light modes)
 - **Animations**: `motion/react` with `prefers-reduced-motion` compliance
-- **State & Data**: Client-side React Context (`AuthContext`, `DemoDataContext`, `ThemeContext`) backed by `localStorage`
-- **Backend & Database**: Future work (not implemented in the current repository)
+- **State & Data**: Client-side React Context (`AuthContext`, `DemoDataContext`, `ThemeContext`) backed by 9 `localStorage` namespaces
+- **Media Storage**: Client-side media upload persistence (screenshot gallery and demo video) implemented via browser `IndexedDB`
+- **Features Shipped**: Product catalog & explainable matching, gated prototype testing, structured feedback & maker replies, pre-MVP problem validation forum (`/problems`) with Reddit-style nested comments, and simulated email verification (`/verify-email`)
+- **Testing**: Automated test suites are not currently implemented in the repo
+- **Backend & Database**: Production cloud database & API integration are planned for future milestones

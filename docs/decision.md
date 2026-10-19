@@ -59,33 +59,33 @@ This document provides a comprehensive, chronological, and thematic log of every
   - Upvotes encourage superficial voting rings; structured testing loops incentivize actual product trial and high-signal feedback.
 - **Approach & Alternatives Considered:**
   - Designed feedback forms with explicit fields:
-    1. Feedback Category (`Bug`, `UX / Usability`, `Feature Request`, `Performance`, `General`).
-    2. Context: *What workflow did you try?*
-    3. Outcome: *What happened vs. what did you expect?*
-    4. Builder Response: Threaded replies from product owners with a "Helpful" toggle.
+    1. Feedback Category (*What worked well*, *Bug or issue*, *Usability*, *UI*, *Feature idea*, *Other*).
+    2. Experience: *What were you trying to do & what happened?* (`experience`).
+    3. Likes: *What worked well or what did you like?* (`likes`).
+    4. Maker Response: A single dedicated, editable reply per feedback note (`replyToFeedback`) with a "Helpful" toggle (`toggleFeedbackHelpful`).
 - **Tools Used:**
   - Custom form controllers in `ProductDetailsPage.jsx` and state methods in `DemoDataContext.jsx`.
 
 ---
 
-### Decision 1.3: Ephemeral Mock Objects → Domain Model with LocalStorage Persistence
+### Decision 1.3: Ephemeral Mock Objects → Domain Model with LocalStorage & IndexedDB Persistence
 
 - **What Changed:**
-  - Shifted from hardcoded mock objects (which reloaded real apps like JSON Crack and Excalidraw) to a unified **5-entity schema** representing original fictional prototypes:
-    1. `Product`
+  - Shifted from hardcoded mock objects (which reloaded real apps like JSON Crack and Excalidraw) to a unified **domain schema** representing original fictional prototypes:
+    1. `Product` (slug IDs with collision suffix)
     2. `UserProfile`
-    3. `Enrollment`
-    4. `Feedback` & `BuilderReply`
-    5. `ProblemValidation`
-  - Integrated 8 persistent `localStorage` keys so user actions (creating listings, enrolling, giving feedback, toggling themes) survive browser refreshes.
+    3. `Enrollment` (dictionary keyed by `"email:productId"` with ISO timestamp value)
+    4. `Feedback` (with single editable `reply` object)
+    5. `Problem` & `ProblemValidation`
+  - Integrated **9 persistent `localStorage` namespaces** plus **IndexedDB** client storage (`buildboard_media_db`) for screenshot gallery and demo video uploads.
 - **Why It Was Changed:**
   - Without data persistence, any interactive workflow (such as testing the builder dashboard after submitting feedback) required mental gymnastics or re-entering data every reload.
-  - Real products (JSON Crack, Excalidraw) distracted from BuildBoard's mission; custom fictional products (Weeknote, TokenSync, PromptBench, QueryLens, FocusOrbit) demonstrate distinct early-stage testing needs.
+  - Custom prototypes (Weeknote, TokenSync, PromptBench, QueryLens, FocusOrbit) demonstrate distinct early-stage testing needs.
 - **Approach & Alternatives Considered:**
   - *Alternative Considered:* Connecting an external SQLite or Mock API (e.g., MirageJS, MSW).
-  - *Decision:* `localStorage` with a React Context abstraction provides 100% offline, self-contained execution with zero infrastructure dependencies, while maintaining clean service contracts that can easily be mapped to REST/MySQL later.
+  - *Decision:* `localStorage` and `IndexedDB` provide 100% offline, self-contained execution with zero infrastructure dependencies, while maintaining clean service contracts that can easily be mapped to REST/MySQL later.
 - **Tools Used:**
-  - Native browser `Window.localStorage` wrapped with error handling (`try/catch` for quota and private mode limits).
+  - Native browser `Window.localStorage` and `IndexedDB` (`src/utils/indexedDB.js`).
 
 ---
 
@@ -96,11 +96,13 @@ This document provides a comprehensive, chronological, and thematic log of every
     1. `AuthContext.jsx`: Manages active user identity, authentication state simulation, and sign-in/sign-out actions.
     2. `DemoDataContext.jsx`: Central domain store handling products, enrollments, reviews, views, and problem items.
     3. `ThemeContext.jsx`: Handles light/dark mode preference and applies the `.dark` class to `<html>`.
+  - Provider wrapping hierarchy in `main.jsx`: `BrowserRouter > ThemeProvider > AuthProvider > DemoDataProvider > App`.
+  - Rendered `Navbar` and `Footer` within each page component to allow fine-grained layout customization per route.
 - **Why It Was Changed:**
   - BuildBoard’s state tree is straightforward and hierarchical. Introducing Redux would add massive boilerplate without performance benefits.
   - 3 focused contexts prevent unnecessary re-renders: theme toggles do not re-render product lists, and auth changes only notify authenticated components.
 - **Approach Followed:**
-  - Context methods expose semantic action handlers (`addProduct`, `enrollInProduct`, `submitFeedback`, `addBuilderReply`, `toggleFeedbackHelpful`, `recordView`).
+  - Context methods expose semantic action handlers (`addProduct`, `enrollInProduct`, `addFeedback`, `replyToFeedback`, `toggleFeedbackHelpful`, `recordProductView`, `attachProblemSolution`).
   - State updates synchronously update in-memory React state and write through to `localStorage`.
 
 ---
@@ -125,6 +127,7 @@ This document provides a comprehensive, chronological, and thematic log of every
 - **What Changed:**
   - On `ProductDetailsPage.jsx`, the external prototype link (`productUrl`) and detailed test guidelines (`whatToTry`) are hidden behind an explicit "Enroll in Test" barrier.
   - When paused (`enrollmentPaused: true`), existing testers retain access, but new enrollments are blocked without altering the product's `updatedAt` timestamp.
+  - Stored in `buildboard_demo_enrollments` as a dictionary map keyed by `"email:productId"`.
 - **Why It Was Changed:**
   - If prototype links are freely available without enrollment, builders cannot track tester conversion rates, verify who attempted the test, or know who to solicit for feedback.
   - The gate creates a psychological commitment for the tester and a clear denominator for builder conversion analytics.
@@ -134,14 +137,15 @@ This document provides a comprehensive, chronological, and thematic log of every
 ### Decision 2.2: Deterministic, Explainable Recommendations vs. AI/ML Matching
 
 - **What Changed:**
-  - Implemented `src/utils/recommendations.js`, a pure mathematical scoring utility that compares a user's `UserProfile` attributes against a product's targeting criteria.
-  - Scores weights:
-    - Category match: +3 points
-    - Role match: +3 points
-    - Technology match: +2 points
-    - Industry match: +2 points
-    - Experience level: +1 point (only if explicitly specified by product)
-  - Returns both a numerical score and an **array of human-readable explanations** (e.g., *"Matches your role: Frontend Developer"*, *"Uses technologies you know: React"*).
+  - Implemented `src/utils/recommendations.js` (`getRecommendedProducts`), a pure mathematical scoring utility that compares a user's `UserProfile` attributes against product targeting criteria.
+  - Matching evaluation (+1 point for each matching criterion):
+    - Category interest match: +1 point
+    - Target role match: +1 point
+    - Technology match: +1 point
+    - Industry match: +1 point
+    - Experience level match: +1 point (only if explicitly specified by product)
+  - Final score equals the count of matching reasons (`score: reasons.length`).
+  - Returns products sorted by score descending with an **array of human-readable explanations** (e.g., *"Matches your Frontend Developer role"*, *"Relevant to your React experience"*).
 - **Why It Was Changed:**
   - "Black box" AI recommendations confuse users when they don't understand why a product was suggested.
   - Explainable rules build user trust, require zero API tokens/network calls, and execute in under 1ms.
@@ -151,7 +155,7 @@ This document provides a comprehensive, chronological, and thematic log of every
 ### Decision 2.3: Derived Recognition Points vs. Stored Counter
 
 - **What Changed:**
-  - Tester Recognition Points are **dynamically computed** from the feedback collection (`feedback.filter(f => f.testerEmail === user.email && f.isHelpful).length`), rather than stored as an incrementable integer on the user profile.
+  - Tester Recognition Points are **dynamically computed** from the feedback collection (`feedbackList.filter(f => f.userEmail === user.email && f.isHelpful).length`), rather than stored as an incrementable integer on the user profile.
 - **Why It Was Changed:**
   - Storing counters directly leads to race conditions, sync drift, and tamper vulnerabilities.
   - Computing recognition as a derived property ensures that if a builder un-checks "Helpful", or if a feedback item is deleted, the tester's score automatically remains mathematically consistent.
@@ -161,11 +165,11 @@ This document provides a comprehensive, chronological, and thematic log of every
 ### Decision 2.4: Time-Tiered Feedback Reminders Based on Enrollment Elapsed Time
 
 - **What Changed:**
-  - Implemented `src/utils/feedbackReminder.js`.
-  - Testers who enrolled in a product but haven't submitted feedback receive polite, time-contextual prompts:
-    - **< 24 Hours:** *"Just enrolled? When you're ready, take 3 minutes to leave first impressions."*
-    - **24–72 Hours:** *"Have you tried [Product]? Your feedback helps the builder prioritize next steps."*
-    - **> 72 Hours:** *"Still planning to test [Product]? Share what worked or what blocked you."*
+  - Implemented `src/utils/feedbackReminder.js` (`getFeedbackReminderInfo`).
+  - Enrolled testers viewing the product details page receive polite, contextual reminder banners across three elapsed-time tiers:
+    - **`recent` (< 24 Hours):** *"You enrolled recently — there's no rush! Explore the prototype at your own pace."*
+    - **`early` (24–72 Hours):** *"You enrolled [X] days ago. If you've had a chance to try it, even quick initial impressions help the builder."*
+    - **`followup` (> 72 Hours):** *"You enrolled [X] days ago. When trying this preview, did anything feel difficult or break?"*
   - Allows single-click dismissal persisted in `buildboard_demo_reminder_dismissals`.
 - **Why It Was Changed:**
   - Testers frequently enroll with good intentions but forget to return. Time-tiered nudges increase feedback completion rates by 3–4x.
@@ -188,15 +192,14 @@ This document provides a comprehensive, chronological, and thematic log of every
 
 ---
 
-### Decision 2.6: Spotlight Carousel with Auto-Progress Synchronization
+### Decision 2.6: Spotlight Carousel & Modular Component Organization
 
 - **What Changed:**
-  - Refactored `ShowcaseCarousel.jsx` to feature an animated progress bar that directly drives slide transitions.
-  - Removed clunky manual pause buttons in favor of an automatic, natural pause-on-hover interaction.
-  - Integrated full keyboard navigation (left/right arrows) and screen reader announcements.
+  - Embedded an interactive, responsive `ProductSpotlight` carousel directly inside `LandingPage.jsx`.
+  - Maintained `ShowcaseCarousel.jsx` in `src/components/` as a continuous fast-paced marquee component.
+  - Retained standalone component modules (`ProductCard`, `ShowcaseCarousel`, `ThemeToggle`) as reusable building blocks.
 - **Why It Was Changed:**
-  - Fixed timing mismatch bugs where manual pause controls fell out of sync with CSS progress timers.
-  - Respects `prefers-reduced-motion` by disabling automatic rotation when requested by user OS settings.
+  - Allowed `LandingPage` to optimize its visual rhythm and slide transitions without coupling to marquee animations.
 
 ---
 
@@ -205,9 +208,10 @@ This document provides a comprehensive, chronological, and thematic log of every
 ### Decision 3.1: Addition of the Community Problems & Validation Engine
 
 - **What Changed:**
-  - Created `/problems`, `/problems/new`, and `/problems/:problemId` backed by `src/data/problems.js`.
-  - Allows builders to post user pain points and solicit validation votes before writing any code.
-  - Includes a solution-attachment hub linking prototypes to the problems they solve.
+  - Created `/problems`, `/problems/new`, and `/problems/:problemId` backed by `src/data/problems.js` and `buildboard_demo_problems`.
+  - Allows builders to post user pain points and solicit validation votes before writing any code (`toggleProblemValidation`).
+  - Includes a solution-attachment hub linking prototypes to the problems they solve (`attachProblemSolution`).
+  - Built a true hierarchical Reddit-style comment thread system with expand/collapse arrow buttons, clickable vertical thread guidelines, and contextual reply forms.
 - **Why It Was Changed:**
   - Product feedback is only valuable if the product is solving a real problem. The Problems section closes the loop: **Validate the problem first -> Build prototype -> Test with users**.
 
@@ -259,11 +263,14 @@ This document provides a comprehensive, chronological, and thematic log of every
 
 | Category | Tool / Choice | Rationale |
 | :--- | :--- | :--- |
+| **Framework** | React 19 (JSX) | Modern hooks, functional components, concurrent rendering |
 | **Bundler** | Vite 8 | Near-instant startup, ESM native modules, hot module replacement in <50ms. |
+| **Router** | React Router 8 (`react-router ^8.4.0`) | Client-side routing with deep-link support and code-splitting. |
 | **Compiler** | `@tailwindcss/vite` | Official Tailwind v4 integration; eliminates PostCSS overhead and enables CSS-native configuration. |
 | **Motion** | `motion/react` | The modern, tree-shakeable packaging of Framer Motion; robust spring physics and layout animations. |
 | **Icons** | Custom Inline SVG Paths | Zero icon font bundle overhead, full CSS color inheritance, and pixel-precise stroke rendering. |
-| **Linting** | ESLint 9 (`eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`) | Enforces hook safety, dependency exhaustiveness, and fast-refresh compatibility. |
+| **Linting** | ESLint 10 (`eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`) | Enforces hook safety, dependency exhaustiveness, and fast-refresh compatibility. |
+| **Automated Tests** | None | No automated test suite configured in current demo repository. |
 
 ---
 
@@ -273,13 +280,23 @@ This document provides a comprehensive, chronological, and thematic log of every
 +-------------------------------------------------------------------------------------------------------+
 | DECISION                 | OLD PROJECT                    | CURRENT BUILDBOARD          | PRIMARY DRIVER                |
 +-------------------------------------------------------------------------------------------------------+
-| Navigation Architecture  | Single-page tab state          | React Router 8 SPA          | Deep linking & history        |
+| Navigation Architecture  | Single-page tab state          | React Router 8 SPA (^8.4.0) | Deep linking & history        |
 | Core Purpose             | Upvote leaderboard             | Structured testing loop     | Actionable builder feedback   |
-| State & Persistence      | Volatile in-memory mock        | LocalStorage + Context API  | Multi-session demo workflow   |
+| State & Persistence      | Volatile in-memory mock        | 9 LocalStorage keys +       | Multi-session demo workflow   |
+|                          |                                | IndexedDB media storage     | and client media uploads      |
+| Product Identifiers      | Real project names             | Name slugs (suffix clash)   | Clean URL routing & identity  |
+| Enrollment Storage       | None                           | Object keyed email:prodId   | O(1) membership check         |
 | Styling Framework        | Vanilla CSS files (13 files)   | Tailwind v4 CSS tokens      | Design consistency & speed    |
 | Motion & Animation       | Basic CSS keyframes            | Motion spring physics       | Dynamic tactile feedback      |
-| Match Engine             | None                           | Deterministic scoring       | Explainable recommendations   |
+| Match Engine             | None                           | Match count (+1 each)       | Transparent reasons ranking   |
 | Access Control           | Public link visibility         | Enrollment Gate             | Tester commitment & tracking  |
+| Feedback Model           | Read-only testimonials         | 6 categories, experience,   | Standardized bug reporting    |
+|                          |                                | likes, single maker reply   | and recognition loop          |
+| Feedback Reminders       | None                           | Banner with 3 tiers         | Contextual re-engagement      |
+|                          |                                | (recent, early, followup)   | without external surveillance |
+| Pre-Build Validation     | None                           | Shipped Problems forum with | Validate demand before code;  |
+|                          |                                | Reddit nested comments      | engage early adopters         |
+| Page Shell Structure     | Single global shell            | Navbar/Footer per page      | Route-specific layout control  |
 | UI Density               | Heavy cards & pills            | Clean modern typography     | Minimalist, high-signal UI    |
 +-------------------------------------------------------------------------------------------------------+
 ```
