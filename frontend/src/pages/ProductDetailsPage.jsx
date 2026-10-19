@@ -831,7 +831,7 @@ export default function ProductDetailsPage() {
                       )}
 
                       <Link
-                        to="/dashboard"
+                        to="/builder/dashboard"
                         className="w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition hover:border-[#d96b43] hover:text-[#d96b43] flex items-center justify-center gap-2"
                       >
                         <span>Manage in Builder Dashboard</span>
@@ -959,7 +959,7 @@ export default function ProductDetailsPage() {
                       Review Tester Critiques ({productFeedback.length}) ↓
                     </button>
                     <Link
-                      to="/dashboard"
+                      to="/builder/dashboard"
                       className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-semibold text-[var(--text-main)] transition hover:border-[#d96b43] hover:text-[#d96b43] text-center"
                     >
                       Open Builder Dashboard →

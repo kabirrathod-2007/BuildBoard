@@ -50,6 +50,7 @@ function App() {
             <Route path="/problems/new" element={<SubmitProblemPage />} />
             <Route path="/problems/:problemId" element={<ProblemDetailsPage />} />
             <Route path="/builder/dashboard" element={<BuilderDashboardPage />} />
+            <Route path="/dashboard" element={<Navigate to="/builder/dashboard" replace />} />
             <Route path="/tester/activity" element={<TesterActivityPage />} />
             <Route path="/activity" element={<Navigate to="/tester/activity" replace />} />
             <Route path="/tester/recognition" element={<Navigate to="/tester/activity" replace />} />
