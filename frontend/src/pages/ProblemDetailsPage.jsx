@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router'
 import { motion, AnimatePresence } from 'motion/react'
 import { useDemoData } from '../context/DemoDataContext.jsx'
@@ -19,6 +19,362 @@ function formatDate(isoString) {
   } catch {
     return ''
   }
+}
+
+function countTotalReplies(node) {
+  if (!node.replies || node.replies.length === 0) return 0
+  let count = node.replies.length
+  for (const child of node.replies) {
+    count += countTotalReplies(child)
+  }
+  return count
+}
+
+function CommentThreadNode({
+  comment,
+  depth = 0,
+  getProfile,
+  formatDate,
+  handleStartReply,
+  replyingToCommentId,
+  replyingToAuthor,
+  replyText,
+  setReplyText,
+  replyError,
+  setReplyError,
+  handleReplySubmit,
+  handleCancelReply,
+  isSubmittingReply,
+  collapsedComments,
+  toggleCollapse,
+}) {
+  const isCollapsed = collapsedComments.has(comment.id)
+  const totalReplies = countTotalReplies(comment)
+  const hasReplies = comment.replies && comment.replies.length > 0
+  const isReplyingHere = replyingToCommentId === comment.id
+
+  const profile = comment.authorEmail ? getProfile(comment.authorEmail) : null
+  const authorName = profile?.displayName?.trim() || comment.authorName || 'Contributor'
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col"
+    >
+      {/* Comment Card */}
+      <div
+        className={`relative overflow-hidden transition-colors ${
+          depth === 0
+            ? `rounded-2xl border p-4 sm:p-5 text-sm shadow-warm-xs ${
+                comment.isMakerReply
+                  ? 'border-[#d96b43]/30 bg-[#d96b43]/5'
+                  : 'border-[var(--border-main)] bg-[var(--bg-surface)]'
+              }`
+            : `rounded-xl border p-3.5 sm:p-4 text-sm shadow-xs ${
+                comment.isMakerReply
+                  ? 'border-[#d96b43]/35 bg-[#d96b43]/6'
+                  : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)]/70'
+              }`
+        }`}
+      >
+        {/* Comment Header */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <span
+              className={`flex shrink-0 items-center justify-center rounded-full font-bold ${
+                depth === 0 ? 'h-7 w-7 text-xs' : 'h-6 w-6 text-[10px]'
+              } ${
+                comment.isMakerReply
+                  ? 'bg-[#d96b43] text-white shadow-xs'
+                  : 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+              }`}
+            >
+              {authorName.charAt(0).toUpperCase()}
+            </span>
+            <span
+              className={`font-bold text-[var(--text-main)] truncate ${
+                depth === 0 ? 'text-xs sm:text-sm' : 'text-xs'
+              }`}
+            >
+              {authorName}
+            </span>
+            {comment.isMakerReply && (
+              <span className="shrink-0 rounded-md bg-[#d96b43]/20 px-2 py-0.5 text-[9px] font-bold text-[#b85028] dark:text-[#eb8b72]">
+                Maker
+              </span>
+            )}
+            {comment.replyToAuthor && (
+              <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 font-medium">
+                <svg
+                  className="w-2.5 h-2.5 opacity-50"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+                replying to{' '}
+                <span className="font-semibold text-[var(--text-main)]">
+                  @{comment.replyToAuthor}
+                </span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Reddit-style collapse arrow button on header when comment has replies */}
+            {hasReplies && (
+              <button
+                type="button"
+                onClick={() => toggleCollapse(comment.id)}
+                title={isCollapsed ? `Expand ${totalReplies} replies` : 'Collapse replies'}
+                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[var(--text-muted)] hover:text-[#d96b43] hover:bg-[#d96b43]/10 transition-colors cursor-pointer"
+                aria-expanded={!isCollapsed}
+              >
+                <svg
+                  className={`w-3.5 h-3.5 text-[#d96b43] transition-transform duration-200 ${
+                    isCollapsed ? '-rotate-90' : 'rotate-0'
+                  }`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+                <span>
+                  {isCollapsed
+                    ? `${totalReplies} ${totalReplies === 1 ? 'reply' : 'replies'}`
+                    : 'Collapse'}
+                </span>
+              </button>
+            )}
+            <span className="text-[10px] text-[var(--text-subtle)]">
+              {formatDate(comment.createdAt)}
+            </span>
+          </div>
+        </div>
+
+        {/* Comment Body */}
+        <p
+          className={`leading-relaxed text-[var(--text-main)] whitespace-pre-line break-words [overflow-wrap:anywhere] ${
+            depth === 0 ? 'text-xs sm:text-sm pl-8 sm:pl-9.5' : 'text-xs sm:text-sm pl-8'
+          }`}
+        >
+          {comment.text}
+        </p>
+
+        {/* Action Footer */}
+        <div
+          className={`mt-3 flex items-center justify-between border-t border-[var(--border-main)]/50 pt-2.5 ${
+            depth === 0 ? 'pl-8 sm:pl-9.5' : 'pl-8'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleStartReply(comment, authorName)}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4"
+                />
+              </svg>
+              <span>Reply</span>
+            </button>
+          </div>
+
+          {/* Arrow / toggle count button in footer */}
+          {hasReplies && (
+            <button
+              type="button"
+              onClick={() => toggleCollapse(comment.id)}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
+            >
+              <svg
+                className={`w-3.5 h-3.5 text-[#d96b43] transition-transform duration-200 ${
+                  isCollapsed ? '-rotate-90' : 'rotate-0'
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+              <span>
+                {isCollapsed
+                  ? `Show ${totalReplies} ${totalReplies === 1 ? 'reply' : 'replies'}`
+                  : `Hide ${totalReplies} ${totalReplies === 1 ? 'reply' : 'replies'}`}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Inline Reply Form (nested directly under the comment being replied to) */}
+      <AnimatePresence>
+        {isReplyingHere && (
+          <motion.form
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            onSubmit={(e) => handleReplySubmit(e, comment.id)}
+            className={`mt-2.5 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 sm:p-4 shadow-sm flex flex-col gap-2.5 ${
+              depth > 0 ? 'ml-3 sm:ml-6' : ''
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[var(--text-muted)] flex items-center gap-1.5">
+                <svg
+                  className="w-3.5 h-3.5 text-[#d96b43]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4"
+                  />
+                </svg>
+                Replying to <span className="font-bold text-[#d96b43]">@{replyingToAuthor}</span>
+              </span>
+              <button
+                type="button"
+                onClick={handleCancelReply}
+                className="text-[11px] font-medium text-[var(--text-subtle)] hover:text-[var(--text-main)] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <textarea
+              rows={2}
+              autoFocus
+              value={replyText}
+              onChange={(e) => {
+                setReplyText(e.target.value)
+                if (replyError) setReplyError('')
+              }}
+              placeholder={`Write a reply to @${replyingToAuthor}...`}
+              className={`w-full rounded-lg border bg-[var(--bg-page)] p-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder-[var(--text-subtle)] focus:outline-none focus:ring-1 transition-colors ${
+                replyError
+                  ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/30'
+                  : 'border-[var(--border-main)] focus:border-[#d96b43] focus:ring-[#d96b43]'
+              }`}
+            />
+
+            {replyError && (
+              <p className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+                {replyError}
+              </p>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleCancelReply}
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmittingReply}
+                className="rounded-lg bg-[#d96b43] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#e57b54] disabled:opacity-50 shadow-warm-xs cursor-pointer"
+              >
+                {isSubmittingReply ? 'Posting...' : 'Post Reply'}
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      {/* Children replies thread */}
+      {hasReplies && (
+        <>
+          {isCollapsed ? (
+            <motion.button
+              type="button"
+              onClick={() => toggleCollapse(comment.id)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-2 ml-3 sm:ml-6 flex items-center gap-2 rounded-xl border border-[var(--border-main)]/70 bg-[var(--bg-surface-subtle)]/60 hover:bg-[#d96b43]/10 hover:border-[#d96b43]/40 px-3.5 py-2 text-xs font-medium text-[var(--text-muted)] hover:text-[#d96b43] transition-all cursor-pointer text-left w-fit"
+            >
+              <svg
+                className="w-3.5 h-3.5 text-[#d96b43]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              <span>
+                <strong className="font-semibold text-[var(--text-main)]">
+                  {totalReplies} {totalReplies === 1 ? 'reply' : 'replies'}
+                </strong>{' '}
+                collapsed — click to expand
+              </span>
+            </motion.button>
+          ) : (
+            <div
+              className={`relative mt-2.5 space-y-2.5 border-l-2 border-[#d96b43]/30 hover:border-[#d96b43] transition-colors ${
+                depth < 4 ? 'ml-3 sm:ml-6 pl-3 sm:pl-5' : 'ml-1 sm:ml-2 pl-2 sm:pl-3'
+              }`}
+            >
+              {/* Reddit-style clickable guide line to collapse thread */}
+              <button
+                type="button"
+                onClick={() => toggleCollapse(comment.id)}
+                title="Click line to collapse thread"
+                aria-label="Collapse comment thread"
+                className="absolute -left-[5px] top-0 bottom-0 w-2.5 cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
+              />
+              {comment.replies.map((childReply) => (
+                <CommentThreadNode
+                  key={childReply.id}
+                  comment={childReply}
+                  depth={depth + 1}
+                  getProfile={getProfile}
+                  formatDate={formatDate}
+                  handleStartReply={handleStartReply}
+                  replyingToCommentId={replyingToCommentId}
+                  replyingToAuthor={replyingToAuthor}
+                  replyText={replyText}
+                  setReplyText={setReplyText}
+                  replyError={replyError}
+                  setReplyError={setReplyError}
+                  handleReplySubmit={handleReplySubmit}
+                  handleCancelReply={handleCancelReply}
+                  isSubmittingReply={isSubmittingReply}
+                  collapsedComments={collapsedComments}
+                  toggleCollapse={toggleCollapse}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </motion.div>
+  )
 }
 
 export default function ProblemDetailsPage() {
@@ -50,6 +406,21 @@ export default function ProblemDetailsPage() {
   const [replyError, setReplyError] = useState('')
   const [isSubmittingReply, setIsSubmittingReply] = useState(false)
 
+  // Reddit-style collapsed comment threads
+  const [collapsedComments, setCollapsedComments] = useState(() => new Set())
+
+  const toggleCollapse = (commentId) => {
+    setCollapsedComments((prev) => {
+      const next = new Set(prev)
+      if (next.has(commentId)) {
+        next.delete(commentId)
+      } else {
+        next.add(commentId)
+      }
+      return next
+    })
+  }
+
   // Modals state
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showAttachModal, setShowAttachModal] = useState(false)
@@ -65,6 +436,56 @@ export default function ProblemDetailsPage() {
     problemMakerProfile?.displayName?.trim() ||
     problem?.maker ||
     (problem?.creatorEmail ? problem.creatorEmail.split('@')[0] : 'Originator')
+
+  // Build recursive Reddit-style comment tree with backwards compatibility
+  const rawComments = problem?.comments || []
+  const normalizedComments = rawComments.map((c) => {
+    if (!c.parentId) {
+      if (c.id === 'c2') return { ...c, parentId: 'c1', replyToAuthor: 'Alex Mercer' }
+      if (c.id === 'c3') return { ...c, parentId: 'c2', replyToAuthor: 'Elena Rostova' }
+      if (c.id === 'c6') return { ...c, parentId: 'c5', replyToAuthor: 'Priya N.' }
+    }
+    return { ...c }
+  })
+
+  const commentMap = new Map()
+  normalizedComments.forEach((c) => {
+    commentMap.set(c.id, { ...c, replies: [] })
+  })
+
+  // Smart parent re-association for legacy/flat replies:
+  // If a comment was saved with a parentId pointing to a root comment or ancestor,
+  // but replyToAuthor matches a specific comment in that same branch,
+  // re-parent it under that comment so it nests correctly!
+  normalizedComments.forEach((c) => {
+    const node = commentMap.get(c.id)
+    if (node.replyToAuthor) {
+      const currentParent = node.parentId ? commentMap.get(node.parentId) : null
+      const parentAuthor = currentParent?.authorName?.trim()
+      if (!currentParent || (parentAuthor && parentAuthor !== node.replyToAuthor.trim())) {
+        const matchingTarget = normalizedComments.find(
+          (other) =>
+            other.id !== node.id &&
+            (other.authorName?.trim() === node.replyToAuthor.trim() ||
+              (other.authorEmail &&
+                other.authorEmail.toLowerCase().startsWith(node.replyToAuthor.toLowerCase().trim())))
+        )
+        if (matchingTarget) {
+          node.parentId = matchingTarget.id
+        }
+      }
+    }
+  })
+
+  const commentTreeRoots = []
+  normalizedComments.forEach((c) => {
+    const node = commentMap.get(c.id)
+    if (node.parentId && commentMap.has(node.parentId) && node.parentId !== node.id) {
+      commentMap.get(node.parentId).replies.push(node)
+    } else {
+      commentTreeRoots.push(node)
+    }
+  })
 
   useDocumentTitle(
     problem ? `${problem.title} — Pre-MVP Problem Validation` : 'Problem Not Found — BuildBoard'
@@ -241,7 +662,7 @@ export default function ProblemDetailsPage() {
     setReplyError('')
   }
 
-  const handleReplySubmit = (e, rootCommentId) => {
+  const handleReplySubmit = (e, targetParentId) => {
     e.preventDefault()
     if (!user) {
       navigate('/sign-in', { state: { from: location } })
@@ -265,9 +686,21 @@ export default function ProblemDetailsPage() {
       authorEmail: user.email,
       authorName: currentUserName,
       text: trimmed,
-      parentId: rootCommentId,
+      parentId: targetParentId,
       replyToAuthor: replyingToAuthor,
     })
+
+    // Automatically expand the thread replied to so the user sees their reply
+    if (targetParentId) {
+      setCollapsedComments((prev) => {
+        if (prev.has(targetParentId)) {
+          const next = new Set(prev)
+          next.delete(targetParentId)
+          return next
+        }
+        return prev
+      })
+    }
 
     setReplyingToCommentId(null)
     setReplyingToAuthor('')
@@ -275,53 +708,7 @@ export default function ProblemDetailsPage() {
     setIsSubmittingReply(false)
   }
 
-  // Group comments into root comments and their threaded replies
-  const { rootComments, repliesByRootId } = useMemo(() => {
-    const rawComments = problem?.comments || []
-    const sanitizedComments = rawComments.map((c) => {
-      if (!c.parentId) {
-        if (c.id === 'c2') return { ...c, parentId: 'c1', replyToAuthor: 'Alex Mercer' }
-        if (c.id === 'c3') return { ...c, parentId: 'c1', replyToAuthor: 'Elena Rostova' }
-        if (c.id === 'c6') return { ...c, parentId: 'c5', replyToAuthor: 'Priya N.' }
-      }
-      return c
-    })
 
-    const commentMap = new Map(sanitizedComments.map((c) => [c.id, c]))
-    const roots = []
-    const repliesMap = {}
-
-    // Identify root comments
-    for (const c of sanitizedComments) {
-      if (!c.parentId || !commentMap.has(c.parentId)) {
-        roots.push(c)
-      }
-    }
-
-    // Map each child to its root thread
-    const findRootId = (comment) => {
-      let curr = comment
-      const visited = new Set([curr.id])
-      while (curr?.parentId && commentMap.has(curr.parentId)) {
-        if (visited.has(curr.parentId)) break
-        visited.add(curr.parentId)
-        curr = commentMap.get(curr.parentId)
-      }
-      return curr?.id
-    }
-
-    for (const c of sanitizedComments) {
-      if (c.parentId && commentMap.has(c.parentId)) {
-        const rootId = findRootId(c)
-        if (rootId && rootId !== c.id) {
-          if (!repliesMap[rootId]) repliesMap[rootId] = []
-          repliesMap[rootId].push(c)
-        }
-      }
-    }
-
-    return { rootComments: roots, repliesByRootId: repliesMap }
-  }, [problem?.comments])
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] transition-colors">
@@ -695,221 +1082,27 @@ export default function ProblemDetailsPage() {
                     No community insights yet. Be the first to validate or share your thoughts!
                   </p>
                 ) : (
-                  rootComments.map((rootComment) => {
-                    const replies = repliesByRootId[rootComment.id] || []
-                    const isThreadActive =
-                      replyingToCommentId === rootComment.id ||
-                      replies.some((r) => r.id === replyingToCommentId)
-                    const rootProfile = rootComment.authorEmail ? getProfile(rootComment.authorEmail) : null
-                    const rootName =
-                      rootProfile?.displayName?.trim() || rootComment.authorName || 'Contributor'
-
-                    return (
-                      <motion.div
-                        key={rootComment.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col"
-                      >
-                        {/* Parent Comment Card */}
-                        <div
-                          className={`overflow-hidden rounded-2xl border p-4 sm:p-5 text-sm transition-colors shadow-warm-xs ${
-                            rootComment.isMakerReply
-                              ? 'border-[#d96b43]/30 bg-[#d96b43]/5'
-                              : 'border-[var(--border-main)] bg-[var(--bg-surface)]'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span
-                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                                  rootComment.isMakerReply
-                                    ? 'bg-[#d96b43] text-white shadow-xs'
-                                    : 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]'
-                                }`}
-                              >
-                                {rootName.charAt(0).toUpperCase()}
-                              </span>
-                              <span className="font-bold text-[var(--text-main)] text-xs sm:text-sm truncate">
-                                {rootName}
-                              </span>
-                              {rootComment.isMakerReply && (
-                                <span className="shrink-0 rounded-md bg-[#d96b43]/20 px-2 py-0.5 text-[9px] font-bold text-[#b85028] dark:text-[#eb8b72]">
-                                  Maker
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-[var(--text-subtle)] shrink-0">
-                              {formatDate(rootComment.createdAt)}
-                            </span>
-                          </div>
-
-                          <p className="text-xs sm:text-sm leading-relaxed text-[var(--text-main)] whitespace-pre-line pl-9.5 break-words [overflow-wrap:anywhere]">
-                            {rootComment.text}
-                          </p>
-
-                          {/* Action Footer */}
-                          <div className="mt-3.5 pl-9.5 flex items-center justify-between border-t border-[var(--border-main)]/50 pt-2.5">
-                            <button
-                              type="button"
-                              onClick={() => handleStartReply(rootComment, rootName)}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
-                            >
-                              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4" />
-                              </svg>
-                              <span>Reply</span>
-                            </button>
-                            {replies.length > 0 && (
-                              <span className="text-[11px] font-medium text-[var(--text-subtle)]">
-                                {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Thread Replies Branch */}
-                        {(replies.length > 0 || isThreadActive) && (
-                          <div className="relative mt-2.5 ml-4 sm:ml-8 space-y-2.5 pl-3.5 sm:pl-5 border-l-2 border-[#d96b43]/30 dark:border-[#d96b43]/20">
-                            {replies.map((reply) => {
-                              const replyProfile = reply.authorEmail ? getProfile(reply.authorEmail) : null
-                              const replyName =
-                                replyProfile?.displayName?.trim() || reply.authorName || 'Contributor'
-
-                              return (
-                                <motion.div
-                                  key={reply.id}
-                                  initial={{ opacity: 0, y: 6 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  className={`relative rounded-xl border p-3.5 sm:p-4 text-sm transition-colors shadow-xs ${
-                                    reply.isMakerReply
-                                      ? 'border-[#d96b43]/35 bg-[#d96b43]/6'
-                                      : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)]/70'
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between gap-2 mb-2">
-                                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                                      <span
-                                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                                          reply.isMakerReply
-                                            ? 'bg-[#d96b43] text-white shadow-xs'
-                                            : 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]'
-                                        }`}
-                                      >
-                                        {replyName.charAt(0).toUpperCase()}
-                                      </span>
-                                      <span className="font-bold text-[var(--text-main)] text-xs truncate">
-                                        {replyName}
-                                      </span>
-                                      {reply.isMakerReply && (
-                                        <span className="shrink-0 rounded-md bg-[#d96b43]/20 px-2 py-0.5 text-[9px] font-bold text-[#b85028] dark:text-[#eb8b72]">
-                                          Maker
-                                        </span>
-                                      )}
-                                      {reply.replyToAuthor && (
-                                        <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 font-medium">
-                                          <svg className="w-2.5 h-2.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                          </svg>
-                                          replying to <span className="font-semibold text-[var(--text-main)]">@{reply.replyToAuthor}</span>
-                                        </span>
-                                      )}
-                                    </div>
-                                    <span className="text-[10px] text-[var(--text-subtle)] shrink-0">
-                                      {formatDate(reply.createdAt)}
-                                    </span>
-                                  </div>
-
-                                  <p className="text-xs sm:text-sm leading-relaxed text-[var(--text-main)] whitespace-pre-line pl-8 break-words [overflow-wrap:anywhere]">
-                                    {reply.text}
-                                  </p>
-
-                                  <div className="mt-2.5 pl-8 flex items-center gap-3">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleStartReply(reply, replyName)}
-                                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
-                                    >
-                                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4" />
-                                      </svg>
-                                      <span>Reply</span>
-                                    </button>
-                                  </div>
-                                </motion.div>
-                              )
-                            })}
-
-                            {/* Inline Reply Form */}
-                            {isThreadActive && (
-                              <motion.form
-                                initial={{ opacity: 0, y: 4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 4 }}
-                                onSubmit={(e) => handleReplySubmit(e, rootComment.id)}
-                                className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 sm:p-4 shadow-sm flex flex-col gap-2.5"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs font-semibold text-[var(--text-muted)] flex items-center gap-1.5">
-                                    <svg className="w-3.5 h-3.5 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4" />
-                                    </svg>
-                                    Replying to <span className="font-bold text-[#d96b43]">@{replyingToAuthor}</span>
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={handleCancelReply}
-                                    className="text-[11px] font-medium text-[var(--text-subtle)] hover:text-[var(--text-main)] transition-colors cursor-pointer"
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-
-                                <textarea
-                                  rows={2}
-                                  autoFocus
-                                  value={replyText}
-                                  onChange={(e) => {
-                                    setReplyText(e.target.value)
-                                    if (replyError) setReplyError('')
-                                  }}
-                                  placeholder={`Write a reply to @${replyingToAuthor}...`}
-                                  className={`w-full rounded-lg border bg-[var(--bg-page)] p-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder-[var(--text-subtle)] focus:outline-none focus:ring-1 transition-colors ${
-                                    replyError
-                                      ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/30'
-                                      : 'border-[var(--border-main)] focus:border-[#d96b43] focus:ring-[#d96b43]'
-                                  }`}
-                                />
-
-                                {replyError && (
-                                  <p className="text-xs font-semibold text-rose-600 dark:text-rose-400">
-                                    {replyError}
-                                  </p>
-                                )}
-
-                                <div className="flex items-center justify-end gap-2 pt-1">
-                                  <button
-                                    type="button"
-                                    onClick={handleCancelReply}
-                                    className="rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors cursor-pointer"
-                                  >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    type="submit"
-                                    disabled={isSubmittingReply}
-                                    className="rounded-lg bg-[#d96b43] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#e57b54] disabled:opacity-50 shadow-warm-xs cursor-pointer"
-                                  >
-                                    {isSubmittingReply ? 'Posting...' : 'Post Reply'}
-                                  </button>
-                                </div>
-                              </motion.form>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
-                    )
-                  })
+                  commentTreeRoots.map((rootComment) => (
+                    <CommentThreadNode
+                      key={rootComment.id}
+                      comment={rootComment}
+                      depth={0}
+                      getProfile={getProfile}
+                      formatDate={formatDate}
+                      handleStartReply={handleStartReply}
+                      replyingToCommentId={replyingToCommentId}
+                      replyingToAuthor={replyingToAuthor}
+                      replyText={replyText}
+                      setReplyText={setReplyText}
+                      replyError={replyError}
+                      setReplyError={setReplyError}
+                      handleReplySubmit={handleReplySubmit}
+                      handleCancelReply={handleCancelReply}
+                      isSubmittingReply={isSubmittingReply}
+                      collapsedComments={collapsedComments}
+                      toggleCollapse={toggleCollapse}
+                    />
+                  ))
                 )}
               </div>
             </section>

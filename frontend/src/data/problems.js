@@ -65,7 +65,7 @@ export const seedProblems = [
       },
       {
         id: 'c3',
-        parentId: 'c1',
+        parentId: 'c2',
         replyToAuthor: 'Elena Rostova',
         authorEmail: 'marcus.ui@buildboard.dev',
         authorName: 'Marcus Vance',
