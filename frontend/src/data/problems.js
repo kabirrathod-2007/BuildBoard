@@ -55,6 +55,8 @@ export const seedProblems = [
       },
       {
         id: 'c2',
+        parentId: 'c1',
+        replyToAuthor: 'Alex Mercer',
         authorEmail: 'elena.design@buildboard.dev',
         authorName: 'Elena Rostova',
         text: 'Thanks Alex! Would you prefer a GitHub Action that submits a PR, or an npx CLI command you run manually before shipping a release?',
@@ -63,6 +65,8 @@ export const seedProblems = [
       },
       {
         id: 'c3',
+        parentId: 'c1',
+        replyToAuthor: 'Elena Rostova',
         authorEmail: 'marcus.ui@buildboard.dev',
         authorName: 'Marcus Vance',
         text: 'Definitely automated PRs. That way CI tests the diff against our visual regression suite before merging.',
@@ -149,6 +153,8 @@ export const seedProblems = [
       },
       {
         id: 'c6',
+        parentId: 'c5',
+        replyToAuthor: 'Priya N.',
         authorEmail: 'devon.mentor@buildboard.dev',
         authorName: 'Devon Hayes',
         text: 'Exactly Priya—the 200-line scoping is key so it feels like a bite-sized 10-minute task rather than a daunting whole-repo code review.',
