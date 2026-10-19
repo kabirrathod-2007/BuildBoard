@@ -509,7 +509,7 @@ export default function ProductDetailsPage() {
                     {category}
                   </span>
                 ))}
-                <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 text-xs font-semibold text-[var(--text-muted)]">
+                <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs font-semibold text-[var(--text-muted)]">
                   {product.stage}
                 </span>
                 {product.enrollmentPaused ? (
@@ -522,7 +522,7 @@ export default function ProductDetailsPage() {
                   </span>
                 )}
                 {(product.isSample || product.isLocalDemo) && (
-                  <span className="rounded-full border border-[#d96b43]/30 bg-[#d96b43]/10 px-2.5 py-0.5 text-xs font-semibold text-[#b85028] dark:text-[#eb8b72]">
+                  <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs font-semibold text-[var(--text-muted)]">
                     {product.isSample ? 'Featured' : 'Community'}
                   </span>
                 )}
