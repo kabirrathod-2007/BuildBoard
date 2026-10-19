@@ -234,6 +234,9 @@ export const DemoDataProvider = ({ children }) => {
   const enrollInProduct = (productId, userEmail) => {
     if (!productId || !userEmail) return { success: false, error: 'User and product ID are required.' }
     const product = products.find((p) => p.id === productId)
+    if (product?.creatorEmail && product.creatorEmail.toLowerCase().trim() === userEmail.toLowerCase().trim()) {
+      return { success: false, error: 'You are the creator of this product.' }
+    }
     if (product?.enrollmentPaused) {
       return { success: false, error: 'Enrollment for this product is currently paused by the builder.' }
     }
@@ -621,6 +624,19 @@ export const DemoDataProvider = ({ children }) => {
     return updated
   }
 
+  // Migration helper to link seed replies if loaded from older localStorage
+  const migrateComments = (commentsList) => {
+    if (!Array.isArray(commentsList)) return []
+    return commentsList.map((c) => {
+      if (!c.parentId) {
+        if (c.id === 'c2') return { ...c, parentId: 'c1', replyToAuthor: 'Alex Mercer' }
+        if (c.id === 'c3') return { ...c, parentId: 'c1', replyToAuthor: 'Elena Rostova' }
+        if (c.id === 'c6') return { ...c, parentId: 'c5', replyToAuthor: 'Priya N.' }
+      }
+      return c
+    })
+  }
+
   // --- Community Problems & Pre-MVP Validation ---
   const [problems, setProblems] = useState(() => {
     try {
@@ -630,9 +646,16 @@ export const DemoDataProvider = ({ children }) => {
         // Ensure initial seed problems are merged in if not present
         const savedIds = new Set(parsed.map((p) => p.id))
         const unaddedSeeds = initialSeedProblems.filter((p) => !savedIds.has(p.id))
-        return [...parsed, ...unaddedSeeds]
+        const combined = [...parsed, ...unaddedSeeds]
+        return combined.map((p) => ({
+          ...p,
+          comments: migrateComments(p.comments),
+        }))
       }
-      return initialSeedProblems
+      return initialSeedProblems.map((p) => ({
+        ...p,
+        comments: migrateComments(p.comments),
+      }))
     } catch {
       return initialSeedProblems
     }
@@ -722,12 +745,14 @@ export const DemoDataProvider = ({ children }) => {
     return { success: true, signedUp: updatedSignedUp }
   }
 
-  const addProblemComment = (problemId, { text, authorEmail, authorName }) => {
+  const addProblemComment = (problemId, { text, authorEmail, authorName, parentId = null, replyToAuthor = null }) => {
     if (!problemId || !text?.trim() || !authorEmail) return null
     const normalizedEmail = authorEmail.toLowerCase().trim()
 
     const newComment = {
       id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      parentId: parentId || null,
+      replyToAuthor: replyToAuthor || null,
       authorEmail: normalizedEmail,
       authorName: authorName || profiles[normalizedEmail]?.displayName?.trim() || normalizedEmail.split('@')[0],
       text: text.trim(),
