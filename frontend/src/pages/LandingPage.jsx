@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { MotionConfig, motion, AnimatePresence, useReducedMotion, useTransform, useMotionValue, useSpring } from 'motion/react'
 import { Link } from 'react-router'
 import { useDemoData } from '../context/DemoDataContext.jsx'
+import { useIndexedDbMedia } from '../utils/indexedDB.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
@@ -92,6 +93,9 @@ function ProductSpotlight({ products = [] }) {
 
   const count = products.length
   const currentProduct = count > 0 ? products[currentIndex % count] : null
+  const defaultFallbackImg = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'
+  const { url: spotlightMediaUrl } = useIndexedDbMedia(currentProduct?.mediaId, currentProduct?.image)
+  const displayImage = spotlightMediaUrl || currentProduct?.image || defaultFallbackImg
   const currentMakerProfile = currentProduct?.creatorEmail ? getProfile(currentProduct.creatorEmail) : null
   const currentMakerName =
     currentMakerProfile?.displayName?.trim() ||
@@ -248,12 +252,18 @@ function ProductSpotlight({ products = [] }) {
           <div className="lg:col-span-7">
             <div className="overflow-hidden rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] shadow-warm-sm">
               <motion.img
-                src={currentProduct.image}
+                key={displayImage}
+                src={displayImage}
                 alt={`${currentProduct.name} interface preview`}
                 className="w-full h-auto object-cover object-top max-h-[380px]"
                 whileHover={{ scale: 1.025 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 loading="lazy"
+                onError={(e) => {
+                  if (e.currentTarget.src !== defaultFallbackImg) {
+                    e.currentTarget.src = defaultFallbackImg
+                  }
+                }}
               />
             </div>
           </div>
