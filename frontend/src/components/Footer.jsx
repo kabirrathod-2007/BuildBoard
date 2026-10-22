@@ -12,7 +12,7 @@ export default function Footer({ className = '' }) {
       className={`relative mt-24 border-t border-[var(--border-main)] bg-[var(--bg-page)] pt-16 pb-8 transition-colors overflow-hidden ${className}`}
     >
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="grid gap-12 pb-12 border-b border-[var(--border-main)] lg:grid-cols-5">
+        <div className="grid gap-12 pb-12 border-b border-[var(--border-main)] lg:grid-cols-4">
           {/* Brand Info */}
           <div className="flex flex-col gap-3.5 lg:col-span-2">
             <Link to="/" aria-label="BuildBoard Home" className="no-underline">
@@ -91,23 +91,6 @@ export default function Footer({ className = '' }) {
             >
               Tester Profiles
             </Link>
-          </div>
-
-          {/* Links Column: System & Health */}
-          <div className="flex flex-col gap-2.5">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--text-main)] mb-1">
-              System
-            </h4>
-            <div className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)]">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-              <span className="font-medium text-[var(--text-main)]">Operational Studio</span>
-            </div>
-            <p className="text-sm text-[var(--text-subtle)] leading-relaxed">
-              All systems online. Fast client-side performance and persistent state.
-            </p>
           </div>
         </div>
 
