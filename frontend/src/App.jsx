@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from 'react-router'
 import LandingPage from './pages/LandingPage.jsx'
 import SkipToContent from './components/SkipToContent.jsx'
 import OpeningIntro from './components/OpeningIntro.jsx'
+import ScrollToTop from './components/ScrollToTop.jsx'
 
 const SignInPage = lazy(() => import('./pages/SignInPage.jsx'))
 const SignUpPage = lazy(() => import('./pages/SignUpPage.jsx'))
@@ -31,6 +32,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       {introActive && (
         <OpeningIntro onDone={() => setIntroActive(false)} />
       )}
