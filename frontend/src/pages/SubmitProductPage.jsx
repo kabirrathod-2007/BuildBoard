@@ -280,9 +280,8 @@ export default function SubmitProductPage() {
     setIsSavingMedia(false)
     setErrors({})
 
-    const defaultImg = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'
-    const finalImage = imageUrl.trim() || coverPreview || defaultImg
-    const finalGallery = [finalImage]
+    const finalImage = imageUrl.trim() || coverPreview || ''
+    const finalGallery = finalImage ? [finalImage] : []
 
     const newProduct = addProduct({
       name: formData.name.trim(),
@@ -419,12 +418,23 @@ export default function SubmitProductPage() {
 
                   {/* Media Preview Box */}
                   <div className="overflow-hidden rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] shadow-warm-sm">
-                    <img
-                      src={submittedData.image || "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80"}
-                      alt={`Preview schematic for ${submittedData.name}`}
-                      className="w-full h-56 object-cover"
-                      loading="lazy"
-                    />
+                    {submittedData.image ? (
+                      <img
+                        src={submittedData.image}
+                        alt={`Preview schematic for ${submittedData.name}`}
+                        className="w-full h-56 object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-44 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] text-center p-4">
+                        <span className="font-display text-4xl font-extrabold text-[#d96b43]">
+                          {submittedData.name?.charAt(0)?.toUpperCase() || 'P'}
+                        </span>
+                        <span className="mt-2 text-xs font-semibold text-[var(--text-subtle)]">
+                          No preview media attached
+                        </span>
+                      </div>
+                    )}
                     <div className="p-4 border-t border-[var(--border-main)] text-center">
                       <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
                         Verified Prototype
