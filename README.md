@@ -54,6 +54,7 @@ From the `frontend/` directory:
 - **Animations**: `motion/react` with `prefers-reduced-motion` compliance
 - **State & Data**: Client-side React Context (`AuthContext`, `DemoDataContext`, `ThemeContext`) backed by 9 `localStorage` namespaces
 - **Media Storage**: Client-side media upload persistence (screenshot gallery and demo video) implemented via browser `IndexedDB`
-- **Features Shipped**: Product catalog & explainable matching, gated prototype testing, structured feedback & maker replies, pre-MVP problem validation forum (`/problems`) with Reddit-style nested comments, and simulated email verification (`/verify-email`)
+- **Features Shipped**: Product catalog & explainable matching, gated prototype testing, structured feedback & maker replies, pre-MVP problem validation forum (`/problems`) with Reddit-style nested comments, simulated email verification (`/verify-email`), and **Live Market Radar** (real-time builder friction & launch signals powered by the Hacker News Search REST API via native `fetch()`)
+- **External API Integration**: Native browser `fetch()` implementation consuming Algolia's Hacker News REST API (`https://hn.algolia.com/api/v1`) in `src/utils/hackerNewsApi.js` with live tab filtering, error boundaries, request abortion (`AbortController`), and loading skeleton states
 - **Testing**: Automated test suites are not currently implemented in the repo
-- **Backend & Database**: Production cloud database & API integration are planned for future milestones
+- **Backend & Database**: Production cloud database & centralized backend persistence are planned for future milestones

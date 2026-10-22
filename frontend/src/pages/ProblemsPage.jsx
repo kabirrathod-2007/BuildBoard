@@ -7,6 +7,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PROBLEM_CATEGORIES } from '../data/problems.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
+import LiveMarketRadar from '../components/LiveMarketRadar.jsx'
 
 function ProblemItem({ problem, index }) {
   const { user } = useAuth()
@@ -302,6 +303,9 @@ export default function ProblemsPage() {
               </div>
             </div>
           </section>
+
+          {/* Live Market Radar (External REST API via fetch()) */}
+          <LiveMarketRadar />
 
           {/* Directory Controls & Filter Bar */}
           <section className="mt-12" aria-labelledby="problem-directory-heading">

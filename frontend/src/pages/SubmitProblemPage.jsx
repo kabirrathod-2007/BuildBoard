@@ -14,8 +14,10 @@ export default function SubmitProblemPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const initialTitle = searchParams.get('title') || ''
 
-  const [title, setTitle] = useState('')
+  const [title, setTitle] = useState(initialTitle)
   const [statement, setStatement] = useState('')
   const [workarounds, setWorkarounds] = useState('')
   const [targetAudience, setTargetAudience] = useState('')

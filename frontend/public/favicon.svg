@@ -1,6 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="7" fill="#111B39" stroke="#EAFF52" stroke-width="2"/>
-  <path d="M10 8H17C19.2 8 21 9.4 21 11.4C21 12.8 20.1 14 18.8 14.5C20.6 15.1 21.8 16.5 21.8 18.3C21.8 20.7 19.8 22.5 17.2 22.5H10V8Z" fill="#EAFF52"/>
-  <path d="M13.5 10.6V13.6H16.6C17.4 13.6 18.1 13 18.1 12.1C18.1 11.2 17.4 10.6 16.6 10.6H13.5ZM13.5 16.2V19.9H17C17.9 19.9 18.7 19.2 18.7 18.1C18.7 17 17.9 16.2 17 16.2H13.5Z" fill="#111B39"/>
-  <circle cx="24.5" cy="21.5" r="2" fill="#FF694B"/>
+  <defs>
+    <linearGradient id="bbTerracotta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eb8b72" />
+      <stop offset="100%" stop-color="#d96b43" />
+    </linearGradient>
+  </defs>
+
+  <!-- Tactile Studio Obsidian Frame -->
+  <rect width="32" height="32" rx="8" fill="#141a15" />
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="7.25" stroke="#d96b43" stroke-width="1.5" stroke-opacity="0.3" fill="none" />
+
+  <!-- BuildBoard Monogram 'B' (Artisanal Studio Craft) -->
+  <!-- Left Ivory Spine -->
+  <rect x="7" y="7" width="3.5" height="18" rx="1.25" fill="#f4ede2" />
+
+  <!-- Top Segment (Terracotta) -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 7H17C19.4853 7 21.5 8.90294 21.5 11.25C21.5 13.5971 19.4853 15.5 17 15.5H10.5V7ZM13.5 9.75H16.5C17.6046 9.75 18.5 10.4216 18.5 11.25C18.5 12.0784 17.6046 12.75 16.5 12.75H13.5V9.75Z" fill="url(#bbTerracotta)" />
+
+  <!-- Bottom Segment (Terracotta) -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 14.5H17.8C20.451 14.5 22.6 16.4029 22.6 18.75C22.6 21.0971 20.451 23 17.8 23H10.5V14.5ZM13.5 17.25H17.2C18.415 17.25 19.4 17.9216 19.4 18.75C19.4 19.5784 18.415 20.25 17.2 20.25H13.5V17.25Z" fill="url(#bbTerracotta)" />
+
+  <!-- Builder Accent Spark / Node -->
+  <circle cx="24.5" cy="8" r="1.75" fill="#eb8b72" />
 </svg>
