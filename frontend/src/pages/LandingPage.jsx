@@ -93,8 +93,9 @@ function ProductSpotlight({ products = [] }) {
 
   const count = products.length
   const currentProduct = count > 0 ? products[currentIndex % count] : null
+  const defaultFallbackImg = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'
   const { url: spotlightMediaUrl } = useIndexedDbMedia(currentProduct?.mediaId, currentProduct?.image)
-  const displayImage = spotlightMediaUrl || currentProduct?.image || ''
+  const displayImage = spotlightMediaUrl || currentProduct?.image || defaultFallbackImg
   const currentMakerProfile = currentProduct?.creatorEmail ? getProfile(currentProduct.creatorEmail) : null
   const currentMakerName =
     currentMakerProfile?.displayName?.trim() ||
@@ -250,25 +251,20 @@ function ProductSpotlight({ products = [] }) {
           {/* Right Screenshot / Interface Column */}
           <div className="lg:col-span-7">
             <div className="overflow-hidden rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] shadow-warm-sm">
-              {displayImage ? (
-                <motion.img
-                  key={displayImage}
-                  src={displayImage}
-                  alt={`${currentProduct.name} interface preview`}
-                  className="w-full h-auto object-cover object-top max-h-[380px]"
-                  whileHover={{ scale: 1.025 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  loading="lazy"
-                />
-              ) : (
-                <div className="flex h-64 sm:h-80 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d96b43]/10 text-[#d96b43] dark:bg-[#d96b43]/20 border border-[#d96b43]/20 mb-3 shadow-warm-xs">
-                    <span className="font-display text-3xl font-extrabold">{currentProduct.name?.charAt(0)?.toUpperCase() || 'P'}</span>
-                  </div>
-                  <p className="font-display text-lg font-bold text-[var(--text-main)]">Prototype Preview</p>
-                  <p className="mt-1 text-xs text-[var(--text-subtle)]">No screenshots uploaded yet</p>
-                </div>
-              )}
+              <motion.img
+                key={displayImage}
+                src={displayImage}
+                alt={`${currentProduct.name} interface preview`}
+                className="w-full h-auto object-cover object-top max-h-[380px]"
+                whileHover={{ scale: 1.025 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                loading="lazy"
+                onError={(e) => {
+                  if (e.currentTarget.src !== defaultFallbackImg) {
+                    e.currentTarget.src = defaultFallbackImg
+                  }
+                }}
+              />
             </div>
           </div>
         </motion.div>

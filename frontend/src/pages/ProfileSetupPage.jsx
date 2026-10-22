@@ -17,7 +17,6 @@ import {
   FEEDBACK_FOCUS_AREAS,
   AVAILABILITY_HOURS,
   DEFAULT_VIEW_OPTIONS,
-  REMINDER_CADENCE_OPTIONS,
 } from '../data/targetingOptions.js'
 
 function ProfilePageContent({
@@ -76,22 +75,12 @@ function ProfilePageContent({
     savedProfile?.defaultLandingView || 'explore'
   )
 
-  // Notification & reminder settings
-  const [reminderCadence, setReminderCadence] = useState(
-    savedProfile?.reminderCadence || 'standard'
-  )
-  const [notifyBuilderReplies, setNotifyBuilderReplies] = useState(
-    savedProfile?.notifyBuilderReplies ?? true
-  )
-  const [notifyHelpfulNotes, setNotifyHelpfulNotes] = useState(
-    savedProfile?.notifyHelpfulNotes ?? true
-  )
-  const [notifyWeeklyDigest, setNotifyWeeklyDigest] = useState(
-    savedProfile?.notifyWeeklyDigest ?? true
-  )
-  const [soundEffects, setSoundEffects] = useState(
-    savedProfile?.soundEffects ?? true
-  )
+  // Preserved background settings
+  const reminderCadence = savedProfile?.reminderCadence || 'standard'
+  const notifyBuilderReplies = savedProfile?.notifyBuilderReplies ?? true
+  const notifyHelpfulNotes = savedProfile?.notifyHelpfulNotes ?? true
+  const notifyWeeklyDigest = savedProfile?.notifyWeeklyDigest ?? true
+  const soundEffects = savedProfile?.soundEffects ?? true
 
   // Appearance settings
   const [cardDensity, setCardDensity] = useState(
@@ -195,19 +184,6 @@ function ProfilePageContent({
     setSavedSuccessMessage('Account and profile details saved successfully.')
   }
 
-  const handleSaveNotificationSettings = (e) => {
-    if (e) e.preventDefault()
-    const updatedData = {
-      ...(savedProfile || {}),
-      reminderCadence,
-      notifyBuilderReplies,
-      notifyHelpfulNotes,
-      notifyWeeklyDigest,
-      soundEffects,
-    }
-    onSaveProfile(updatedData)
-    setSavedSuccessMessage('Notification and reminder preferences saved.')
-  }
 
   const handleSaveAppearance = (newTheme, newDensity) => {
     if (newTheme) setTheme(newTheme)
@@ -501,7 +477,6 @@ function ProfilePageContent({
           {[
             { id: 'preferences', label: 'Preferences & Matching', icon: 'M12 6V4m0 16v-2m8-8h2M4 12H2m15.364-5.364l1.414-1.414M5.222 18.778l1.414-1.414m0-10.748L5.222 5.202m13.556 13.576l-1.414-1.414' },
             { id: 'account', label: 'Account & Identity', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
-            { id: 'notifications', label: 'Notifications & Alerts', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
             { id: 'appearance', label: 'Display & Theme', icon: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z' },
             { id: 'data', label: 'Data & Privacy', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
           ].map((tab) => {
@@ -1446,154 +1421,6 @@ function ProfilePageContent({
               className="min-h-[48px] rounded-full bg-[#d96b43] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] cursor-pointer"
             >
               Save Account Settings
-            </button>
-          </div>
-        </motion.form>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 3: NOTIFICATIONS & REMINDERS                                          */}
-      {/* ========================================================================= */}
-      {activeTab === 'notifications' && (
-        <motion.form
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          onSubmit={handleSaveNotificationSettings}
-          className="space-y-8"
-        >
-          {/* Feedback Reminder Schedule */}
-          <div className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-warm-sm space-y-5">
-            <div className="border-b border-[var(--border-main)] pb-4">
-              <h2 className="font-display text-xl font-bold tracking-tight text-[var(--text-main)]">
-                Feedback Reminder Cadence
-              </h2>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">
-                BuildBoard reminds you to submit feedback after you enroll in a prototype so makers get timely critique.
-              </p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {REMINDER_CADENCE_OPTIONS.map((cadence) => {
-                const checked = reminderCadence === cadence.value
-                return (
-                  <label
-                    key={cadence.value}
-                    className={`flex flex-col justify-between rounded-2xl border p-4 transition cursor-pointer select-none ${
-                      checked
-                        ? 'border-[#d96b43] bg-[#d96b43]/10 text-[var(--text-main)] shadow-warm-xs'
-                        : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-display text-sm font-bold text-[var(--text-main)]">
-                        {cadence.label}
-                      </span>
-                      <input
-                        type="radio"
-                        name="reminderCadence"
-                        value={cadence.value}
-                        checked={checked}
-                        onChange={() => setReminderCadence(cadence.value)}
-                        className="mt-0.5 h-4 w-4 accent-[#d96b43] cursor-pointer"
-                      />
-                    </div>
-                    <span className="mt-2 text-xs text-[var(--text-muted)]">
-                      {cadence.desc}
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Email & Web Alerts Simulation */}
-          <div className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-warm-sm space-y-5">
-            <div className="border-b border-[var(--border-main)] pb-4">
-              <h2 className="font-display text-xl font-bold tracking-tight text-[var(--text-main)]">
-                Notification Channels
-              </h2>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">
-                Configure notifications for builder replies and prototype discoveries.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <label className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 transition cursor-pointer hover:bg-[var(--bg-surface-subtle)]">
-                <div>
-                  <span className="block font-semibold text-sm text-[var(--text-main)]">
-                    Builder Reply Notifications
-                  </span>
-                  <span className="block text-xs text-[var(--text-muted)] mt-0.5">
-                    Receive alert when a product creator replies to your feedback note.
-                  </span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={notifyBuilderReplies}
-                  onChange={(e) => setNotifyBuilderReplies(e.target.checked)}
-                  className="mt-1 h-5 w-5 rounded accent-[#d96b43] cursor-pointer"
-                />
-              </label>
-
-              <label className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 transition cursor-pointer hover:bg-[var(--bg-surface-subtle)]">
-                <div>
-                  <span className="block font-semibold text-sm text-[var(--text-main)]">
-                    Helpful Recognition Badges
-                  </span>
-                  <span className="block text-xs text-[var(--text-muted)] mt-0.5">
-                    Notify when your critique earns a helpful recognition point from a builder.
-                  </span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={notifyHelpfulNotes}
-                  onChange={(e) => setNotifyHelpfulNotes(e.target.checked)}
-                  className="mt-1 h-5 w-5 rounded accent-[#d96b43] cursor-pointer"
-                />
-              </label>
-
-              <label className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 transition cursor-pointer hover:bg-[var(--bg-surface-subtle)]">
-                <div>
-                  <span className="block font-semibold text-sm text-[var(--text-main)]">
-                    Weekly Prototype Digest
-                  </span>
-                  <span className="block text-xs text-[var(--text-muted)] mt-0.5">
-                    Curated weekly summary of newly listed prototypes matching your categories.
-                  </span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={notifyWeeklyDigest}
-                  onChange={(e) => setNotifyWeeklyDigest(e.target.checked)}
-                  className="mt-1 h-5 w-5 rounded accent-[#d96b43] cursor-pointer"
-                />
-              </label>
-
-              <label className="flex items-start justify-between gap-4 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 transition cursor-pointer hover:bg-[var(--bg-surface-subtle)]">
-                <div>
-                  <span className="block font-semibold text-sm text-[var(--text-main)]">
-                    UI Sound Effects & Audio Cues
-                  </span>
-                  <span className="block text-xs text-[var(--text-muted)] mt-0.5">
-                    Play gentle confirmation cues when submitting feedback or changing modes.
-                  </span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={soundEffects}
-                  onChange={(e) => setSoundEffects(e.target.checked)}
-                  className="mt-1 h-5 w-5 rounded accent-[#d96b43] cursor-pointer"
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <button
-              type="submit"
-              className="min-h-[48px] rounded-full bg-[#d96b43] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] cursor-pointer"
-            >
-              Save Notification Preferences
             </button>
           </div>
         </motion.form>

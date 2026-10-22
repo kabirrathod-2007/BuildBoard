@@ -592,7 +592,7 @@ export default function ProductDetailsPage() {
                       poster={effectiveCover}
                     />
                   </div>
-                ) : activeImage ? (
+                ) : (
                   <AnimatePresence mode="wait">
                     <motion.img
                       key={activeImage}
@@ -605,23 +605,11 @@ export default function ProductDetailsPage() {
                       className="h-64 w-full object-cover object-top sm:h-[400px]"
                     />
                   </AnimatePresence>
-                ) : (
-                  <div className="flex h-56 sm:h-72 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d96b43]/10 text-[#d96b43] dark:bg-[#d96b43]/20 border border-[#d96b43]/20 mb-3 shadow-warm-xs">
-                      <span className="font-display text-3xl font-extrabold">{product.name?.charAt(0)?.toUpperCase() || 'P'}</span>
-                    </div>
-                    <p className="font-display text-lg sm:text-xl font-bold text-[var(--text-main)]">
-                      No Media Preview Uploaded
-                    </p>
-                    <p className="mt-1.5 text-xs sm:text-sm text-[var(--text-muted)] max-w-md">
-                      The maker hasn&apos;t attached screenshots or a walkthrough video for this prototype yet. You can still test it via the live link below!
-                    </p>
-                  </div>
                 )}
               </div>
 
               {/* Interactive Gallery Thumbnails */}
-              {mediaTab === 'screenshots' && Boolean(activeImage || product.gallery?.length > 0 || product.galleryMediaIds?.length > 0) && (
+              {mediaTab === 'screenshots' && (
                 <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1">
                   {/* Primary cover thumbnail if more items exist */}
                   {effectiveCover && (product.gallery?.length > 1 || product.galleryMediaIds?.length > 0) && (

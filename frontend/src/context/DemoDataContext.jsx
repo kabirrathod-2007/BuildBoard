@@ -38,23 +38,7 @@ export const DemoDataProvider = ({ children }) => {
   const [customProducts, setCustomProducts] = useState(() => {
     try {
       const saved = localStorage.getItem(PRODUCTS_STORAGE_KEY)
-      if (!saved) return []
-      const parsed = JSON.parse(saved)
-      const UNSPLASH_FALLBACK = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'
-      // Clean up legacy fallback image from products created without an image
-      return parsed.map((p) => {
-        let updated = p
-        if (p.image === UNSPLASH_FALLBACK) {
-          updated = { ...updated, image: '' }
-        }
-        if (Array.isArray(updated.gallery)) {
-          const cleanedGallery = updated.gallery.filter((g) => g !== UNSPLASH_FALLBACK)
-          if (cleanedGallery.length !== updated.gallery.length) {
-            updated = { ...updated, gallery: cleanedGallery }
-          }
-        }
-        return updated
-      })
+      return saved ? JSON.parse(saved) : []
     } catch {
       return []
     }
@@ -211,9 +195,12 @@ export const DemoDataProvider = ({ children }) => {
         'Check for usability friction or confusing steps',
         'Share what you expected to happen vs what occurred',
       ],
-      image: formData.image ? formData.image.trim() : '',
+      image:
+        formData.image || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
       mediaId: formData.mediaId || null,
-      gallery: Array.isArray(formData.gallery) ? formData.gallery : [],
+      gallery: Array.isArray(formData.gallery) && formData.gallery.length > 0
+        ? formData.gallery
+        : [formData.image || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'],
       galleryMediaIds: Array.isArray(formData.galleryMediaIds) ? formData.galleryMediaIds : [],
       videoUrl: formData.videoUrl ? formData.videoUrl.trim() : '',
       videoMediaId: formData.videoMediaId || null,
