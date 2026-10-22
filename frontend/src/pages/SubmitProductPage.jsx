@@ -146,6 +146,7 @@ export default function SubmitProductPage() {
   const handleRemoveCover = () => {
     setCoverFile(null)
     setCoverPreview('')
+    setImageUrl('')
   }
 
   const handleGalleryFilesChange = (e) => {
@@ -158,6 +159,7 @@ export default function SubmitProductPage() {
       name: f.name,
     }))
     setGalleryFiles((prev) => [...prev, ...newItems].slice(0, 8))
+    if (errors.cover) setErrors((prev) => ({ ...prev, cover: undefined }))
   }
 
   const handleRemoveGalleryFile = (index) => {
@@ -221,6 +223,21 @@ export default function SubmitProductPage() {
     if (!formData.feedbackRequest.trim()) {
       validationErrors.feedbackRequest =
         'Describe what you want testers to try or provide feedback on.'
+    }
+
+    // Mandatory Photo Validation: at least one photo file or image URL must be provided
+    const hasPhoto = Boolean(
+      coverFile ||
+      (imageUrl && imageUrl.trim()) ||
+      galleryFiles.length > 0
+    )
+
+    if (!hasPhoto) {
+      validationErrors.cover =
+        'Please upload at least one photo or screenshot of your prototype.'
+    } else if (imageUrl.trim() && !coverFile && !isValidUrl(imageUrl)) {
+      validationErrors.cover =
+        'Enter a valid image URL including http:// or https://'
     }
 
     if (Object.keys(validationErrors).length > 0) {
@@ -693,8 +710,9 @@ export default function SubmitProductPage() {
 
                   {/* 1. Cover Image */}
                   <div className="space-y-3">
-                    <label className="block text-sm font-semibold text-[var(--text-main)]">
-                      Primary Cover Image <span className="text-xs font-normal text-[var(--text-subtle)]">(Upload file or provide image link)</span>
+                    <label htmlFor="cover-file-upload" className="block text-sm font-semibold text-[var(--text-main)]">
+                      Primary Cover Photo <span className="text-[#d96b43]">*</span>{' '}
+                      <span className="text-xs font-normal text-[var(--text-subtle)]">(Required: upload photo or provide image link)</span>
                     </label>
 
                     <div className="grid gap-4 sm:grid-cols-2 items-start">
@@ -702,15 +720,19 @@ export default function SubmitProductPage() {
                       <div>
                         <label
                           htmlFor="cover-file-upload"
-                          className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] p-4 text-center cursor-pointer transition hover:border-[#d96b43] hover:bg-[var(--bg-surface-subtle)]"
+                          className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center cursor-pointer transition ${
+                            errors.cover
+                              ? 'border-rose-500 bg-rose-50/20 dark:bg-rose-950/20'
+                              : 'border-[var(--border-main)] bg-[var(--bg-surface)] hover:border-[#d96b43] hover:bg-[var(--bg-surface-subtle)]'
+                          }`}
                         >
-                          <svg className="h-8 w-8 text-[#d96b43] mb-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <svg className={`h-8 w-8 mb-1.5 ${errors.cover ? 'text-rose-500' : 'text-[#d96b43]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                             <circle cx="9" cy="9" r="2" />
                             <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                           </svg>
                           <span className="text-xs sm:text-sm font-semibold text-[var(--text-main)]">
-                            {coverFile ? coverFile.name : 'Choose cover image file'}
+                            {coverFile ? coverFile.name : 'Choose cover photo file'}
                           </span>
                           <span className="text-[11px] text-[var(--text-subtle)] mt-0.5">
                             PNG, JPG, WebP, SVG (IndexedDB)
@@ -734,13 +756,18 @@ export default function SubmitProductPage() {
                             setImageUrl(e.target.value)
                             if (e.target.value) {
                               setCoverPreview(e.target.value)
+                              if (errors.cover) setErrors((prev) => ({ ...prev, cover: undefined }))
                             }
                           }}
                           placeholder="Or paste image URL (https://...)"
-                          className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none focus:border-[#d96b43]"
+                          className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#d96b43] ${
+                            errors.cover && !coverFile
+                              ? 'border-rose-500'
+                              : 'border-[var(--border-main)]'
+                          }`}
                         />
                         <p className="mt-1 text-[11px] text-[var(--text-subtle)]">
-                          Leave empty to automatically use our high-res curated prototype placeholder.
+                          Upload your screenshot/mockup above or paste a direct image URL.
                         </p>
                       </div>
                     </div>
@@ -767,7 +794,9 @@ export default function SubmitProductPage() {
                       </div>
                     )}
                     {errors.cover && (
-                      <p className="text-xs font-semibold text-rose-500">{errors.cover}</p>
+                      <p id="cover-error" className="mt-1 text-sm font-semibold text-rose-500">
+                        {errors.cover}
+                      </p>
                     )}
                   </div>
 
