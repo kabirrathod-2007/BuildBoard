@@ -37,12 +37,20 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
           aria-label={`View details for ${product.name}`}
           className="relative block md:w-72 lg:w-80 shrink-0 overflow-hidden border-b md:border-b-0 md:border-r border-[var(--border-main)] bg-[var(--bg-surface-subtle)]"
         >
-          <img
-            src={displayImage}
-            alt={`${product.name} preview`}
-            loading="lazy"
-            className="h-52 md:h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.03]"
-          />
+          {displayImage ? (
+            <img
+              src={displayImage}
+              alt={`${product.name} preview`}
+              loading="lazy"
+              className="h-52 md:h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div className="flex h-52 md:h-full w-full min-h-[180px] flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
+              <span className="font-display text-4xl font-extrabold text-[#d96b43]">
+                {product.name?.charAt(0)?.toUpperCase() || 'P'}
+              </span>
+            </div>
+          )}
           {product.stage && (
             <span className="absolute top-3 left-3 rounded-full border border-black/10 bg-black/60 backdrop-blur px-2.5 py-0.5 text-xs font-semibold text-white">
               {product.stage}
@@ -189,12 +197,20 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
         aria-label={`View details for ${product.name}`}
         className="relative block overflow-hidden border-b border-[var(--border-main)] bg-[var(--bg-surface-subtle)]"
       >
-        <img
-          src={displayImage}
-          alt={`${product.name} preview`}
-          loading="lazy"
-          className="h-52 w-full object-cover object-top transition duration-300 group-hover:scale-[1.02]"
-        />
+        {displayImage ? (
+          <img
+            src={displayImage}
+            alt={`${product.name} preview`}
+            loading="lazy"
+            className="h-52 w-full object-cover object-top transition duration-300 group-hover:scale-[1.02]"
+          />
+        ) : (
+          <div className="flex h-52 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
+            <span className="font-display text-4xl font-extrabold text-[#d96b43]">
+              {product.name?.charAt(0)?.toUpperCase() || 'P'}
+            </span>
+          </div>
+        )}
         {product.stage && (
           <span className="absolute top-3 left-3 rounded-full border border-black/10 bg-black/60 backdrop-blur px-2.5 py-0.5 text-xs font-semibold text-white">
             {product.stage}
