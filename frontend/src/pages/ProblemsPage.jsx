@@ -41,7 +41,7 @@ function ProblemItem({ problem, index }) {
     >
       <div className="flex items-start gap-4 sm:gap-6">
         {/* Tactile Vote / Validation Pillar */}
-        <div className="shrink-0 pt-0.5">
+        <div className="shrink-0 pt-0.5 relative z-10">
           {user ? (
             <button
               type="button"
@@ -181,10 +181,13 @@ function ProblemItem({ problem, index }) {
               )}
             </div>
 
-            <span className="relative z-10 font-semibold text-[#d96b43] group-hover:text-[#b85028] transition inline-flex items-center gap-1">
+            <Link
+              to={`/problems/${problem.id}`}
+              className="relative z-10 font-semibold text-[#d96b43] group-hover:text-[#b85028] hover:underline transition inline-flex items-center gap-1 cursor-pointer"
+            >
               <span>View discussion</span>
               <span aria-hidden="true">&rarr;</span>
-            </span>
+            </Link>
           </div>
         </div>
       </div>

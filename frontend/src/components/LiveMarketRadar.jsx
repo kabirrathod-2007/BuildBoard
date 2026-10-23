@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   Radio,
@@ -13,7 +12,6 @@ import {
   User,
   MessageSquare,
   ExternalLink,
-  Sparkles,
 } from 'lucide-react'
 import { fetchLiveMarketDiscussions } from '../utils/hackerNewsApi.js'
 
@@ -251,13 +249,8 @@ export default function LiveMarketRadar() {
                     className="group relative flex flex-col justify-between rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#d96b43]/60 hover:shadow-warm-md"
                   >
                     <div>
-                      {/* Top Row: Points Badge + Clock Time Ago */}
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#d96b43]/10 dark:bg-[#d96b43]/20 px-2.5 py-1 text-xs sm:text-sm font-bold text-[#b85028] dark:text-[#eb8b72] border border-[#d96b43]/20">
-                          <ChevronUp className="h-4 w-4 stroke-[3]" aria-hidden="true" />
-                          <span>{item.points} {item.points === 1 ? 'pt' : 'pts'}</span>
-                        </span>
-                        
+                      {/* Top Row: Clock Time Ago */}
+                      <div className="flex items-center justify-end gap-2 mb-3">
                         <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-[var(--text-subtle)]">
                           <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                           <span>{formatTimeAgo(item.createdAt)}</span>
@@ -309,15 +302,6 @@ export default function LiveMarketRadar() {
                         <MessageSquare className="h-4 w-4" aria-hidden="true" />
                         <span>{item.commentsCount} {item.commentsCount === 1 ? 'comment' : 'comments'}</span>
                       </a>
-
-                      <Link
-                        to={`/problems/new?title=${encodeURIComponent(item.title)}`}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#d96b43]/10 px-3 py-1.5 text-xs sm:text-sm font-bold text-[#d96b43] hover:bg-[#d96b43] hover:text-white dark:bg-[#d96b43]/20 dark:hover:bg-[#d96b43] transition-all shadow-warm-xs active:scale-95"
-                        title="Turn this pain point into a BuildBoard hypothesis"
-                      >
-                        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Validate Idea</span>
-                      </Link>
                     </div>
                   </motion.article>
                 ))}
