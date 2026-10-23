@@ -218,18 +218,19 @@ export default function LiveMarketRadar() {
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
-                  className="animate-pulse rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] p-5"
+                  className="animate-pulse flex flex-col justify-between rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] p-5"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="h-6 w-20 rounded-lg bg-[var(--border-main)]" />
-                    <div className="h-4 w-16 rounded bg-[var(--border-main)]" />
+                  <div>
+                    <div className="h-5 w-5/6 rounded bg-[var(--border-main)] mb-2.5" />
+                    <div className="h-5 w-3/5 rounded bg-[var(--border-main)] mb-4" />
+                    <div className="flex items-center justify-between">
+                      <div className="h-4 w-24 rounded bg-[var(--border-main)]" />
+                      <div className="h-4 w-4 rounded bg-[var(--border-main)]" />
+                    </div>
                   </div>
-                  <div className="h-5 w-5/6 rounded bg-[var(--border-main)] mb-2.5" />
-                  <div className="h-5 w-3/5 rounded bg-[var(--border-main)] mb-4" />
-                  <div className="h-4 w-28 rounded bg-[var(--border-main)] mb-5" />
-                  <div className="flex items-center justify-between pt-3.5 border-t border-[var(--border-main)]">
-                    <div className="h-4 w-24 rounded bg-[var(--border-main)]" />
-                    <div className="h-7 w-28 rounded-xl bg-[var(--border-main)]" />
+                  <div className="mt-5 flex items-center justify-between border-t border-[var(--border-main)] pt-3.5">
+                    <div className="h-4 w-20 rounded bg-[var(--border-main)]" />
+                    <div className="h-4 w-16 rounded bg-[var(--border-main)]" />
                   </div>
                 </div>
               ))}
@@ -249,14 +250,6 @@ export default function LiveMarketRadar() {
                     className="group relative flex flex-col justify-between rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#d96b43]/60 hover:shadow-warm-md"
                   >
                     <div>
-                      {/* Top Row: Clock Time Ago */}
-                      <div className="flex items-center justify-end gap-2 mb-3">
-                        <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-[var(--text-subtle)]">
-                          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>{formatTimeAgo(item.createdAt)}</span>
-                        </span>
-                      </div>
-
                       {/* Post Title */}
                       <h3 className="font-display text-base sm:text-lg font-bold leading-snug tracking-tight text-[var(--text-main)] group-hover:text-[#d96b43] transition-colors line-clamp-2">
                         <a
@@ -270,7 +263,7 @@ export default function LiveMarketRadar() {
                       </h3>
 
                       {/* Author Details & External Source */}
-                      <div className="mt-2.5 flex items-center justify-between text-xs sm:text-sm text-[var(--text-muted)]">
+                      <div className="mt-3 flex items-center justify-between text-xs sm:text-sm text-[var(--text-muted)]">
                         <span className="inline-flex items-center gap-1.5">
                           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--bg-surface-subtle)] border border-[var(--border-main)] text-[var(--text-subtle)]">
                             <User className="h-3 w-3" aria-hidden="true" />
@@ -290,7 +283,7 @@ export default function LiveMarketRadar() {
                       </div>
                     </div>
 
-                    {/* Bottom Action Footer with Clearer Separation */}
+                    {/* Bottom Action Footer with Comments (Left) and Time Ago (Right) */}
                     <div className="mt-5 flex items-center justify-between border-t border-[var(--border-main)] pt-3.5">
                       <a
                         href={item.hnDiscussionUrl}
@@ -302,6 +295,11 @@ export default function LiveMarketRadar() {
                         <MessageSquare className="h-4 w-4" aria-hidden="true" />
                         <span>{item.commentsCount} {item.commentsCount === 1 ? 'comment' : 'comments'}</span>
                       </a>
+
+                      <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-[var(--text-subtle)]">
+                        <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>{formatTimeAgo(item.createdAt)}</span>
+                      </span>
                     </div>
                   </motion.article>
                 ))}
