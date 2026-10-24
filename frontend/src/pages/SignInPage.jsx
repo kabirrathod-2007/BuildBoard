@@ -53,12 +53,6 @@ export default function SignInPage() {
     }
   }
 
-  const fillDemoAccount = (demoEmail, demoPass = 'password123') => {
-    setEmail(demoEmail)
-    setPassword(demoPass)
-    setErrors({})
-    clearAuthError?.()
-  }
 
   return (
     <MotionConfig reducedMotion="user">
@@ -108,15 +102,9 @@ export default function SignInPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
           >
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
-                Welcome back
-              </p>
-              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Auth API Connected
-              </span>
-            </div>
+            <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+              Welcome back
+            </p>
 
             <h2 className="mt-2 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-[var(--text-main)]">
               Sign in to BuildBoard
@@ -124,27 +112,6 @@ export default function SignInPage() {
             <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-muted)]">
               Enter your account email and password to authenticate.
             </p>
-
-            {/* Quick Demo Credentials Switcher */}
-            <div className="mt-5 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-3 text-xs">
-              <span className="font-bold text-[var(--text-main)]">Quick Demo Profiles (1-Click Fill):</span>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => fillDemoAccount('builder@buildboard.dev')}
-                  className="rounded-lg border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-1 font-medium text-[var(--text-main)] hover:border-[#d96b43] transition cursor-pointer"
-                >
-                  🛠 Builder Account
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillDemoAccount('tester@buildboard.dev')}
-                  className="rounded-lg border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-1 font-medium text-[var(--text-main)] hover:border-[#d96b43] transition cursor-pointer"
-                >
-                  🔍 Community Tester
-                </button>
-              </div>
-            </div>
 
             {/* API Auth Error Alert */}
             {authError && (
