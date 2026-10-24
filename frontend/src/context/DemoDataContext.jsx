@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
 import { products as initialSeedProducts } from '../data/products'
 import { seedProblems as initialSeedProblems } from '../data/problems'
+import { apiPublishProduct, apiSubmitFeedback } from '../services/apiClient'
 
 const DemoDataContext = createContext(null)
 
@@ -34,6 +35,14 @@ function slugify(text) {
 }
 
 export const DemoDataProvider = ({ children }) => {
+  // Cloud REST API sync state
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncStatus, setSyncStatus] = useState({
+    status: 'idle',
+    message: 'Cloud REST API ready',
+    lastSyncedAt: null,
+  })
+
   // Custom products created on this device
   const [customProducts, setCustomProducts] = useState(() => {
     try {
@@ -225,6 +234,38 @@ export const DemoDataProvider = ({ children }) => {
     }
 
     setCustomProducts((prev) => [newProduct, ...prev])
+
+    // Background asynchronous sync to Cloud REST API (Optimistic UI pattern)
+    setIsSyncing(true)
+    setSyncStatus({ status: 'syncing', message: 'Publishing prototype to cloud registry...', lastSyncedAt: null })
+    apiPublishProduct(newProduct)
+      .then((res) => {
+        if (res.success) {
+          setSyncStatus({
+            status: 'synced',
+            message: 'Product synced with cloud registry',
+            lastSyncedAt: new Date().toISOString(),
+          })
+        } else {
+          setSyncStatus({
+            status: 'fallback',
+            message: 'Saved locally (Offline/Fallback mode)',
+            lastSyncedAt: new Date().toISOString(),
+          })
+        }
+      })
+      .catch((err) => {
+        console.warn('apiPublishProduct sync warning:', err)
+        setSyncStatus({
+          status: 'fallback',
+          message: 'Saved locally',
+          lastSyncedAt: new Date().toISOString(),
+        })
+      })
+      .finally(() => {
+        setIsSyncing(false)
+      })
+
     return newProduct
   }
 
@@ -313,6 +354,26 @@ export const DemoDataProvider = ({ children }) => {
     }
 
     setFeedbackList((prev) => [newFeedback, ...prev])
+
+    // Background asynchronous sync to Cloud REST API (Optimistic UI pattern)
+    setIsSyncing(true)
+    apiSubmitFeedback(newFeedback)
+      .then((res) => {
+        if (res.success) {
+          setSyncStatus({
+            status: 'synced',
+            message: 'Critique synced to cloud registry',
+            lastSyncedAt: new Date().toISOString(),
+          })
+        }
+      })
+      .catch((err) => {
+        console.warn('apiSubmitFeedback sync warning:', err)
+      })
+      .finally(() => {
+        setIsSyncing(false)
+      })
+
     return newFeedback
   }
 
@@ -881,6 +942,8 @@ export const DemoDataProvider = ({ children }) => {
   return (
     <DemoDataContext.Provider
       value={{
+        isSyncing,
+        syncStatus,
         products,
         addProduct,
         updateProduct,
