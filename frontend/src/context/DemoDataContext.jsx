@@ -21,6 +21,7 @@ const VIEWS_STORAGE_KEY = 'buildboard_demo_views'
 const PROFILES_STORAGE_KEY = 'buildboard_demo_profiles'
 const REMINDER_DISMISSALS_STORAGE_KEY = 'buildboard_demo_reminder_dismissals'
 const PROBLEMS_STORAGE_KEY = 'buildboard_demo_problems'
+const DELETED_PRODUCTS_STORAGE_KEY = 'buildboard_demo_deleted_products'
 
 function slugify(text) {
   return text
@@ -44,6 +45,23 @@ export const DemoDataProvider = ({ children }) => {
   })
 
   // Custom products created on this device
+  const [deletedProductIds, setDeletedProductIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem(DELETED_PRODUCTS_STORAGE_KEY)
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(DELETED_PRODUCTS_STORAGE_KEY, JSON.stringify(deletedProductIds))
+    } catch (e) {
+      console.error('Failed to sync deleted products to localStorage', e)
+    }
+  }, [deletedProductIds])
+
   const [customProducts, setCustomProducts] = useState(() => {
     try {
       const saved = localStorage.getItem(PRODUCTS_STORAGE_KEY)
@@ -177,9 +195,10 @@ export const DemoDataProvider = ({ children }) => {
 
   // Combined product list (user-submitted and edited demo products override seed products, then remaining seed products)
   const products = useMemo(() => {
+    const deletedSet = new Set(deletedProductIds)
     const customIds = new Set(customProducts.map((p) => p.id))
-    const remainingSeed = initialSeedProducts.filter((p) => !customIds.has(p.id))
-    const all = [...customProducts, ...remainingSeed]
+    const remainingSeed = initialSeedProducts.filter((p) => !customIds.has(p.id) && !deletedSet.has(p.id))
+    const all = [...customProducts.filter((p) => !deletedSet.has(p.id)), ...remainingSeed]
     return all.map((p) => {
       const email = (p.creatorEmail || '').toLowerCase().trim()
       if (email && profiles[email]?.displayName?.trim()) {
@@ -190,7 +209,7 @@ export const DemoDataProvider = ({ children }) => {
       }
       return p
     })
-  }, [customProducts, profiles])
+  }, [customProducts, profiles, deletedProductIds])
 
   const addProduct = (formData) => {
     const baseSlug = slugify(formData.name) || 'product'
@@ -660,6 +679,25 @@ export const DemoDataProvider = ({ children }) => {
     return { success: true, enrollmentPaused: nextPaused }
   }
 
+  const deleteProduct = (productId, userEmail) => {
+    if (!productId || !userEmail) {
+      return { success: false, error: 'Product ID and user email are required.' }
+    }
+    const target = products.find((p) => p.id === productId)
+    if (!target) {
+      return { success: false, error: 'Product listing not found.' }
+    }
+    const normalized = userEmail.toLowerCase().trim()
+    if (target.creatorEmail && target.creatorEmail.toLowerCase().trim() !== normalized) {
+      return { success: false, error: 'Only the builder who created this listing can remove it.' }
+    }
+
+    setCustomProducts((prev) => prev.filter((p) => p.id !== productId))
+    setDeletedProductIds((prev) => (prev.includes(productId) ? prev : [...prev, productId]))
+
+    return { success: true }
+  }
+
   // --- Profile Management ---
   const getProfile = useCallback((userEmail) => {
     if (!userEmail) return null
@@ -947,6 +985,7 @@ export const DemoDataProvider = ({ children }) => {
         products,
         addProduct,
         updateProduct,
+        deleteProduct,
         toggleProductEnrollment,
         views,
         recordProductView,

@@ -43,6 +43,7 @@ export default function BuilderDashboardPage() {
     replyToFeedback,
     toggleFeedbackHelpful,
     updateProduct,
+    deleteProduct,
     toggleProductEnrollment,
     getProfile,
   } = useDemoData()
@@ -100,6 +101,33 @@ export default function BuilderDashboardPage() {
   })
   const [editErrors, setEditErrors] = useState({})
   const [actionNotice, setActionNotice] = useState(null)
+
+  // Remove Listing State
+  const [productToDelete, setProductToDelete] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleConfirmDelete = () => {
+    if (!productToDelete || !user) return
+    setIsDeleting(true)
+    const name = productToDelete.name
+    const res = deleteProduct(productToDelete.id, user.email)
+    setIsDeleting(false)
+    setProductToDelete(null)
+
+    if (res.success) {
+      setActionNotice({
+        type: 'success',
+        message: `Listing "${name}" has been permanently removed.`,
+      })
+      setTimeout(() => setActionNotice(null), 4000)
+    } else {
+      setActionNotice({
+        type: 'error',
+        message: res.error || 'Failed to remove listing.',
+      })
+      setTimeout(() => setActionNotice(null), 4000)
+    }
+  }
 
   const handleStartEdit = (product) => {
     setEditingProduct(product)
@@ -690,6 +718,13 @@ export default function BuilderDashboardPage() {
                               >
                                 {product.enrollmentPaused ? 'Resume enrollment' : 'Pause enrollment'}
                               </button>
+                              <button
+                                type="button"
+                                onClick={() => setProductToDelete(product)}
+                                className="min-h-[40px] rounded-full border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-500/20 dark:text-rose-300 transition-colors cursor-pointer"
+                              >
+                                Remove
+                              </button>
                             </div>
 
                             <div className="flex items-center gap-3">
@@ -1278,6 +1313,61 @@ export default function BuilderDashboardPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Remove Product Confirmation Modal */}
+        {productToDelete && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-product-modal-heading"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+            onClick={() => setProductToDelete(null)}
+          >
+            <div
+              className="w-full max-w-md rounded-3xl border border-rose-500/30 bg-[var(--bg-surface)] p-6 sm:p-7 text-[var(--text-main)] shadow-warm-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 id="delete-product-modal-heading" className="font-display text-xl font-bold tracking-tight text-[var(--text-main)]">
+                    Remove Listing?
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)]">
+                Are you sure you want to permanently remove <strong className="text-[var(--text-main)]">&ldquo;{productToDelete.name}&rdquo;</strong>? The listing and its tester feedback notes will be removed from your dashboard and directory.
+              </p>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setProductToDelete(null)}
+                  disabled={isDeleting}
+                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={isDeleting}
+                  className="rounded-full border border-rose-600 bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-warm-xs hover:bg-rose-700 transition cursor-pointer"
+                >
+                  {isDeleting ? 'Removing...' : 'Yes, Remove Listing'}
+                </button>
+              </div>
             </div>
           </div>
         )}
