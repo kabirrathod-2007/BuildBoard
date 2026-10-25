@@ -809,9 +809,8 @@ export default function LandingPage() {
           <section id="pillars" className="py-14 sm:py-18 lg:py-20 border-b border-[var(--border-main)] bg-[var(--bg-surface)]">
             <div className="mx-auto max-w-7xl px-5 sm:px-8">
               <SectionHeader
-                badgeText="The Testing Infrastructure"
-                title="Engineered for Thoughtful Feedback"
-                description="Explore the live interactive mechanics that connect working prototypes with actionable tester critique."
+                title="How Testing & Points Work"
+                description="A transparent, closed-loop system connecting prototypes to qualified testers."
               />
 
               <InteractiveBentoShowcase />
