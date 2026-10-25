@@ -358,7 +358,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
 /* ------------------------------------------------------------------ */
 export default function ExplorePage() {
   useDocumentTitle('Explore Early Products | BuildBoard')
-  const { products, getProfile, isSyncing, syncStatus } = useDemoData()
+  const { products, getProfile } = useDemoData()
   const { user } = useAuth()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -711,22 +711,9 @@ export default function ExplorePage() {
             >
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
-                      Directory
-                    </span>
-                    <span
-                      title={syncStatus?.message || 'Cloud REST API ready'}
-                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border border-emerald-500/20 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300"
-                    >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          isSyncing ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'
-                        }`}
-                      />
-                      <span>{isSyncing ? 'Syncing with API...' : 'Cloud REST API Online'}</span>
-                    </span>
-                  </div>
+                  <span className="text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                    Directory
+                  </span>
                   <h2
                     id="discover-heading"
                     className="mt-1 font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-main)]"

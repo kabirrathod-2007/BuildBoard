@@ -9,7 +9,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 
 export default function SignInPage() {
   useDocumentTitle('Sign In | BuildBoard')
-  const { signIn, isLoading, authError, clearAuthError } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -35,24 +35,19 @@ export default function SignInPage() {
     return Object.keys(nextErrors).length === 0
   }
 
-  async function handleSubmit(event) {
+  function handleSubmit(event) {
     event.preventDefault()
     if (!validate()) return
 
-    clearAuthError?.()
-    const result = await signIn(email.trim(), password)
-
-    if (result?.success) {
-      const from = location.state?.from
-      const redirect = typeof from === 'string'
-        ? from
-        : from?.pathname
-          ? `${from.pathname}${from.search || ''}${from.hash || ''}`
-          : '/'
-      navigate(redirect)
-    }
+    signIn(email.trim())
+    const from = location.state?.from
+    const redirect = typeof from === 'string'
+      ? from
+      : from?.pathname
+        ? `${from.pathname}${from.search || ''}${from.hash || ''}`
+        : '/'
+    navigate(redirect)
   }
-
 
   return (
     <MotionConfig reducedMotion="user">
@@ -105,30 +100,14 @@ export default function SignInPage() {
             <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
               Welcome back
             </p>
-
             <h2 className="mt-2 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-[var(--text-main)]">
               Sign in to BuildBoard
             </h2>
             <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-muted)]">
-              Enter your account email and password to authenticate.
+              Enter your account email and password to continue.
             </p>
 
-            {/* API Auth Error Alert */}
-            {authError && (
-              <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-800 dark:text-rose-200">
-                <div className="flex items-center gap-2 font-bold">
-                  <svg className="h-4 w-4 shrink-0 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <span>Authentication Notice</span>
-                </div>
-                <p className="mt-1 leading-relaxed">{authError}</p>
-              </div>
-            )}
-
-            <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
+            <form className="mt-7 space-y-4" onSubmit={handleSubmit} noValidate>
               <div>
                 <label
                   className="mb-1.5 block text-sm font-semibold text-[var(--text-main)]"
@@ -146,7 +125,6 @@ export default function SignInPage() {
                   name="email"
                   type="email"
                   value={email}
-                  disabled={isLoading}
                   onChange={(e) => {
                     setEmail(e.target.value)
                     if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
@@ -175,7 +153,6 @@ export default function SignInPage() {
                   id="password"
                   name="password"
                   value={password}
-                  disabled={isLoading}
                   onChange={(e) => {
                     setPassword(e.target.value)
                     if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
@@ -192,21 +169,10 @@ export default function SignInPage() {
               </div>
 
               <button
-                className="mt-2 w-full rounded-full bg-[#d96b43] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition duration-150 hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                className="mt-2 w-full rounded-full bg-[#d96b43] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition duration-150 hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer"
                 type="submit"
-                disabled={isLoading}
               >
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                    </svg>
-                    <span>Verifying with Auth API...</span>
-                  </span>
-                ) : (
-                  <span>Sign in to BuildBoard</span>
-                )}
+                Sign in
               </button>
             </form>
 
