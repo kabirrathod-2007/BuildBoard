@@ -1,8 +1,6 @@
-# BuildBoard 🛠️
+# BuildBoard
 
 <div align="center">
-
-![BuildBoard Hero Banner](frontend/public/assets/landing/hero-builder-workspace.webp)
 
 **Working prototypes. Real feedback. Zero superficial launch noise.**
 
@@ -21,11 +19,11 @@ A collaborative platform where early-stage software builders connect with releva
 
 </div>
 
-## 💡 Why BuildBoard?
+## Why BuildBoard?
 
 Traditional launch platforms (Product Hunt, Reddit, Hacker News) are great for hype and marketing, but **painful for early validation**:
 
-| The Traditional Launch Trap ❌ | The BuildBoard Solution ✅ |
+| The Traditional Launch Trap | The BuildBoard Solution |
 | :--- | :--- |
 | **Popularity Contests**: Prioritizes flashy graphics and upvote rings over raw product utility. | **Utility-First**: Focuses on functioning prototypes with clear "What to Try" task checklists. |
 | **Superficial Feedback**: Comments like *"Great idea! Upvoted!"* provide zero actionable signal. | **Structured Critiques**: High-signal categorization (Bugs, Usability, UI, Features, Likes). |
@@ -34,44 +32,44 @@ Traditional launch platforms (Product Hunt, Reddit, Hacker News) are great for h
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🎯 Explainable Tester Matching & Catalog
+### Explainable Tester Matching & Catalog
 - **Target Audience Specification**: Builders define precise target criteria (roles, industries, tech stack, experience levels).
 - **Match Score Engine**: Transparent recommendation scoring (+1 per matching skill/criterion) explaining *why* a prototype fits a tester's profile.
 - **Instant Search & Filtering**: Multi-axis client-side filtering across keywords, categories, and technologies.
 
-### 🔒 Gated Prototype Testing & Checklists
+### Gated Prototype Testing & Checklists
 - **Protected URLs**: Prototype links are shielded behind an enrollment gate to ensure genuine tester commitment.
 - **"What to Try" Checklists**: Guides testers through critical user journeys and core feature flows.
 - **Live View Tracking**: Automatically records listing visits and feeds real-time conversion stats back to builders.
 
-### 💬 Structured Feedback & Recognition
+### Structured Feedback & Recognition
 - **Targeted Feedback Formats**: Critiques categorized by *What worked well*, *Bug / issue*, *Usability*, *UI*, or *Feature idea*.
 - **Maker Reply System**: Builders can post dedicated replies directly to individual critiques.
 - **Helpful Badges & Points**: Product owners endorse top feedback with a "Helpful" mark, awarding verifiable Recognition Points.
 
-### 💡 Pre-MVP Problem Validation Forum (`/problems`)
+### Pre-MVP Problem Validation Forum (`/problems`)
 - **Validate Before Coding**: Post raw user pain points to gauge demand before writing a line of code.
 - **One-Click Validation Upvotes**: Community-backed demand signals for emerging problems.
 - **Solution Linking**: Builders can attach their prototype directly as a solution to a validated problem.
 - **Reddit-Style Nested Threads**: Multi-level hierarchical discussions with collapsible threads and contextual replies.
 
-### 📡 Live Market Radar
+### Live Market Radar
 - **Real-Time Friction & Launch Radar**: Streams live builder questions and launch discussions directly via Algolia's Hacker News REST API.
 - **Resilient Client**: Native `fetch()` integration with error boundaries, loading skeletons, and `AbortController` cancellation.
 
-### 📊 Dashboards & Analytics
+### Dashboards & Analytics
 - **Builder Dashboard**: Aggregated view counts, enrollment numbers, feedback counts, and conversion funnel rates with instant pause/resume controls.
 - **Tester Activity Hub**: Manages enrolled prototypes, submission history, and time-tiered contextual feedback reminders (`<24h`, `24–72h`, `72h+`).
 
-### 🎨 Warm Studio Design System
+### Warm Studio Design System
 - **Dark & Light Mode**: Seamless theme switching with custom warm studio palette tokens.
 - **Smooth Micro-Interactions**: Physics-based 3D tilt cards, kinetic headline animations, and accessible motion with `prefers-reduced-motion` compliance.
 
 ---
 
-## 🔄 How It Works
+## How It Works
 
 ```mermaid
 flowchart LR
@@ -88,7 +86,7 @@ flowchart LR
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - **Node.js**: v20+ recommended
@@ -119,7 +117,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser to explore t
 
 ---
 
-## 📜 Available Scripts
+## Available Scripts
 
 Run these scripts from either the root directory or inside `frontend/`:
 
@@ -132,7 +130,7 @@ Run these scripts from either the root directory or inside `frontend/`:
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technologies |
 | :--- | :--- |
@@ -147,7 +145,7 @@ Run these scripts from either the root directory or inside `frontend/`:
 
 ---
 
-## 💾 Local Demo Architecture
+## Local Demo Architecture
 
 BuildBoard is currently architected as a **zero-dependency, frontend-only local demo**:
 
@@ -158,7 +156,7 @@ BuildBoard is currently architected as a **zero-dependency, frontend-only local 
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 BuildBoard/
@@ -186,7 +184,7 @@ BuildBoard/
 
 ---
 
-## 📚 Deep Dive Documentation
+## Deep Dive Documentation
 
 For in-depth architectural decisions, state management diagrams, and system specifications, explore the [`docs/`](./docs) directory:
 
