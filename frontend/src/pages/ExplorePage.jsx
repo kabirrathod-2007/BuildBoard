@@ -482,6 +482,61 @@ export default function ExplorePage() {
     return cats
   }, [products])
 
+  // Category carousel scroll handling
+  const categoryScrollRef = useRef(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const checkScroll = useCallback(() => {
+    const el = categoryScrollRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    setCanScrollLeft(scrollLeft > 4)
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 4)
+  }, [])
+
+  useEffect(() => {
+    checkScroll()
+    const el = categoryScrollRef.current
+    if (!el) return
+    el.addEventListener('scroll', checkScroll, { passive: true })
+    window.addEventListener('resize', checkScroll)
+    return () => {
+      el.removeEventListener('scroll', checkScroll)
+      window.removeEventListener('resize', checkScroll)
+    }
+  }, [checkScroll, categoriesWithCounts])
+
+  const scrollCategories = (direction) => {
+    const el = categoryScrollRef.current
+    if (!el) return
+    const distance = 260
+    el.scrollBy({ left: direction === 'left' ? -distance : distance, behavior: 'smooth' })
+  }
+
+  // Custom sleek sort dropdown state
+  const [isSortOpen, setIsSortOpen] = useState(false)
+  const sortRef = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setIsSortOpen(false)
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') setIsSortOpen(false)
+    }
+    if (isSortOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+        document.removeEventListener('keydown', handleKeyDown)
+      }
+    }
+  }, [isSortOpen])
+
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase()
 
@@ -762,113 +817,218 @@ export default function ExplorePage() {
                 </div>
               </div>
 
-              {/* Category pills with counts + animated indicator */}
-              <div className="flex flex-col justify-between gap-4 pt-4 border-t border-[var(--border-main)] sm:flex-row sm:items-center">
-                <div
-                  className="flex gap-2.5 overflow-x-auto pb-1 max-w-full"
-                  aria-label="Filter products by category"
-                >
-                  {categoriesWithCounts.map(({ name: category, count }) => {
-                    const isActive = activeCategory === category
-
-                    return (
+              {/* Category pills & controls bar */}
+              <div className="flex flex-col gap-4 pt-4 border-t border-[var(--border-main)]">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                  {/* Category Pills Carousel with subtle scroll buttons and edge fades */}
+                  <div className="relative min-w-0 flex-1 flex items-center group/carousel">
+                    {/* Left scroll chevron */}
+                    {canScrollLeft && (
                       <button
-                        key={category}
                         type="button"
-                        onClick={() => setActiveCategory(category)}
-                        aria-pressed={isActive}
-                        className={`relative shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition cursor-pointer ${
-                          isActive
-                            ? 'text-white'
-                            : 'border border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-strong)]'
-                        }`}
+                        onClick={() => scrollCategories('left')}
+                        aria-label="Scroll categories left"
+                        className="absolute left-0 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm hover:border-[#d96b43] hover:text-[#d96b43] transition cursor-pointer -ml-2"
                       >
-                        {/* Sliding background indicator */}
-                        {isActive && (
-                          <motion.span
-                            layoutId="explore-category-pill"
-                            className="absolute inset-0 rounded-full bg-[#d96b43] shadow-warm-xs border border-[#b85028]"
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                          />
-                        )}
-                        <span className="relative flex items-center gap-1.5">
-                          {category}
-                          <span
-                            className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-bold tabular-nums ${
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                      </button>
+                    )}
+
+                    {/* Gradient edge masks to indicate scrollable content */}
+                    {canScrollLeft && (
+                      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[var(--bg-page)] to-transparent z-10" />
+                    )}
+                    {canScrollRight && (
+                      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[var(--bg-page)] to-transparent z-10" />
+                    )}
+
+                    {/* Category pills track (with no-scrollbar) */}
+                    <div
+                      ref={categoryScrollRef}
+                      className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-1 px-0.5 max-w-full"
+                      aria-label="Filter products by category"
+                    >
+                      {categoriesWithCounts.map(({ name: category, count }) => {
+                        const isActive = activeCategory === category
+
+                        return (
+                          <button
+                            key={category}
+                            type="button"
+                            onClick={() => setActiveCategory(category)}
+                            aria-pressed={isActive}
+                            className={`relative shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer select-none ${
                               isActive
-                                ? 'bg-white/25 text-white'
-                                : 'bg-[var(--bg-surface-subtle)] text-[var(--text-subtle)]'
+                                ? 'text-white'
+                                : 'border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[#d96b43]/40 shadow-xs'
                             }`}
                           >
-                            {count}
-                          </span>
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
+                            {/* Sliding background indicator */}
+                            {isActive && (
+                              <motion.span
+                                layoutId="explore-category-pill"
+                                className="absolute inset-0 rounded-full bg-[#d96b43] shadow-warm-xs border border-[#b85028] dark:border-[#eb8b72]/40"
+                                transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                              />
+                            )}
+                            <span className="relative z-10">{category}</span>
+                            <span
+                              className={`relative z-10 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
+                                isActive
+                                  ? 'bg-white/25 text-white'
+                                  : 'bg-[var(--bg-surface-subtle)] text-[var(--text-subtle)]'
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
 
-                {/* Controls: View mode + Sort selector */}
-                <div className="flex flex-wrap items-center gap-3 shrink-0">
-                  {/* Grid / List view toggle */}
-                  <div
-                    className="flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-page)] p-1 text-[var(--text-muted)]"
-                    role="group"
-                    aria-label="View layout"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('grid')}
-                      aria-label="Grid layout"
-                      aria-pressed={viewMode === 'grid'}
-                      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
-                        viewMode === 'grid'
-                          ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
-                          : 'hover:text-[var(--text-main)]'
-                      }`}
-                    >
-                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <rect x="3" y="3" width="7" height="7" rx="1" />
-                        <rect x="14" y="3" width="7" height="7" rx="1" />
-                        <rect x="14" y="14" width="7" height="7" rx="1" />
-                        <rect x="3" y="14" width="7" height="7" rx="1" />
-                      </svg>
-                      <span>Grid</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode('list')}
-                      aria-label="List layout"
-                      aria-pressed={viewMode === 'list'}
-                      className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
-                        viewMode === 'list'
-                          ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
-                          : 'hover:text-[var(--text-main)]'
-                      }`}
-                    >
-                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <line x1="9" y1="6" x2="21" y2="6" />
-                        <line x1="9" y1="12" x2="21" y2="12" />
-                        <line x1="9" y1="18" x2="21" y2="18" />
-                        <line x1="4" y1="6" x2="4.01" y2="6" strokeWidth="3" />
-                        <line x1="4" y1="12" x2="4.01" y2="12" strokeWidth="3" />
-                        <line x1="4" y1="18" x2="4.01" y2="18" strokeWidth="3" />
-                      </svg>
-                      <span>List</span>
-                    </button>
+                    {/* Right scroll chevron */}
+                    {canScrollRight && (
+                      <button
+                        type="button"
+                        onClick={() => scrollCategories('right')}
+                        aria-label="Scroll categories right"
+                        className="absolute right-0 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm hover:border-[#d96b43] hover:text-[#d96b43] transition cursor-pointer -mr-2"
+                      >
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
 
-                  {/* Sort selector */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[var(--text-subtle)]">Sort:</span>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="rounded-full border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2 text-sm font-semibold text-[var(--text-main)] outline-none cursor-pointer focus:border-[#d96b43]"
+                  {/* Right Controls: View mode switcher + Custom Studio Sort dropdown */}
+                  <div className="flex items-center gap-2.5 shrink-0 self-end lg:self-center">
+                    {/* Grid / List view toggle */}
+                    <div
+                      className="flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] p-1 shadow-xs text-[var(--text-muted)]"
+                      role="group"
+                      aria-label="View layout"
                     >
-                      <option value="newest">Newest first</option>
-                      <option value="name">Alphabetical</option>
-                    </select>
+                      <button
+                        type="button"
+                        onClick={() => setViewMode('grid')}
+                        aria-label="Grid layout"
+                        aria-pressed={viewMode === 'grid'}
+                        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                          viewMode === 'grid'
+                            ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+                            : 'hover:text-[var(--text-main)]'
+                        }`}
+                      >
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <rect x="3" y="3" width="7" height="7" rx="1" />
+                          <rect x="14" y="3" width="7" height="7" rx="1" />
+                          <rect x="14" y="14" width="7" height="7" rx="1" />
+                          <rect x="3" y="14" width="7" height="7" rx="1" />
+                        </svg>
+                        <span>Grid</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setViewMode('list')}
+                        aria-label="List layout"
+                        aria-pressed={viewMode === 'list'}
+                        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                          viewMode === 'list'
+                            ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+                            : 'hover:text-[var(--text-main)]'
+                        }`}
+                      >
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <line x1="9" y1="6" x2="21" y2="6" />
+                          <line x1="9" y1="12" x2="21" y2="12" />
+                          <line x1="9" y1="18" x2="21" y2="18" />
+                          <line x1="4" y1="6" x2="4.01" y2="6" strokeWidth="3" />
+                          <line x1="4" y1="12" x2="4.01" y2="12" strokeWidth="3" />
+                          <line x1="4" y1="18" x2="4.01" y2="18" strokeWidth="3" />
+                        </svg>
+                        <span>List</span>
+                      </button>
+                    </div>
+
+                    {/* Custom Studio Sort Dropdown */}
+                    <div className="relative" ref={sortRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsSortOpen((prev) => !prev)}
+                        aria-haspopup="true"
+                        aria-expanded={isSortOpen}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold transition-all shadow-xs cursor-pointer ${
+                          isSortOpen || sortBy !== 'newest'
+                            ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
+                            : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5 text-current shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="m3 16 4 4 4-4" />
+                          <path d="M7 20V4" />
+                          <path d="m21 8-4-4-4 4" />
+                          <path d="M17 4v16" />
+                        </svg>
+                        <span>
+                          {sortBy === 'name' ? 'Alphabetical' : 'Newest first'}
+                        </span>
+                        <svg
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </button>
+
+                      {isSortOpen && (
+                        <div
+                          role="menu"
+                          className="absolute right-0 top-full mt-2 w-44 origin-top-right rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-1.5 text-[var(--text-main)] shadow-warm-xl focus:outline-none z-30 tdev-dropdown"
+                        >
+                          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)] border-b border-[var(--border-main)]/60 mb-1">
+                            Sort by
+                          </div>
+                          {[
+                            { id: 'newest', label: 'Newest first' },
+                            { id: 'name', label: 'Alphabetical' },
+                          ].map((opt) => {
+                            const isSelected = sortBy === opt.id
+                            return (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                  setSortBy(opt.id)
+                                  setIsSortOpen(false)
+                                }}
+                                className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer text-left ${
+                                  isSelected
+                                    ? 'bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
+                                    : 'text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
+                                }`}
+                              >
+                                <span>{opt.label}</span>
+                                {isSelected && (
+                                  <svg className="w-3.5 h-3.5 text-[#d96b43] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                )}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

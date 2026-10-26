@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
 import { motion, AnimatePresence, MotionConfig } from 'motion/react'
 import { useDemoData } from '../context/DemoDataContext.jsx'
@@ -242,6 +242,68 @@ export default function ProblemsPage() {
     [setSearchParams]
   )
 
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isSortOpen, setIsSortOpen] = useState(false)
+  const filterMenuRef = useRef(null)
+  const sortMenuRef = useRef(null)
+
+  const SORT_OPTIONS = useMemo(
+    () => [
+      {
+        id: 'all',
+        label: 'All Problems',
+        description: 'Default view ordered by creation',
+      },
+      {
+        id: 'most_validated',
+        label: 'Most Validated',
+        description: 'Ranked by highest community vote count',
+      },
+      {
+        id: 'needs_validation',
+        label: 'Needs Validation',
+        description: 'Under 5 validations seeking early feedback',
+      },
+      ...(user
+        ? [
+            {
+              id: 'my_hypotheses',
+              label: 'My Hypotheses',
+              description: 'Problems submitted by your account',
+            },
+          ]
+        : []),
+    ],
+    [user]
+  )
+
+  const currentSortOption = SORT_OPTIONS.find((opt) => opt.id === filterTab) || SORT_OPTIONS[0]
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
+        setIsFilterOpen(false)
+      }
+      if (sortMenuRef.current && !sortMenuRef.current.contains(event.target)) {
+        setIsSortOpen(false)
+      }
+    }
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsFilterOpen(false)
+        setIsSortOpen(false)
+      }
+    }
+    if (isFilterOpen || isSortOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+        document.removeEventListener('keydown', handleKeyDown)
+      }
+    }
+  }, [isFilterOpen, isSortOpen])
+
   // Filter & Search Logic
   const filteredProblems = useMemo(() => {
     let list = [...problems]
@@ -312,8 +374,8 @@ export default function ProblemsPage() {
 
           {/* Directory Controls & Filter Bar */}
           <section className="mt-12" aria-labelledby="problem-directory-heading">
-            <div className="flex flex-col gap-6 pb-6 border-b border-[var(--border-main)]">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col gap-4 pb-6 border-b border-[var(--border-main)]">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                   <h2
                     id="problem-directory-heading"
@@ -326,104 +388,255 @@ export default function ProblemsPage() {
                   </p>
                 </div>
 
-                {/* Search Box */}
-                <div className="relative w-full md:max-w-md">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-subtle)]">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                {/* Search, Filter & Sort Controls */}
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full lg:w-auto">
+                  {/* Search Box */}
+                  <div className="relative flex-1 sm:w-64 md:w-72">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--text-subtle)]">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="search"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search problems, pain points..."
+                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] pl-10 pr-8 py-2.5 text-xs sm:text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 shadow-warm-xs"
+                    />
+                    {search && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch('')}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--text-subtle)] hover:text-[var(--text-main)] cursor-pointer text-xs"
+                        title="Clear search"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
-                  <input
-                    type="search"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search problems, pain points, or audiences..."
-                    className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] pl-11 pr-10 py-3 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 shadow-warm-xs"
-                  />
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch('')}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[var(--text-subtle)] hover:text-[var(--text-main)] cursor-pointer"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
 
-              {/* View Tabs */}
-              <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-main)] pt-4">
-                <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm">
-                  <button
-                    type="button"
-                    onClick={() => setFilterTab('all')}
-                    className={`rounded-xl px-3.5 py-1.5 font-semibold transition cursor-pointer ${
-                      filterTab === 'all'
-                        ? 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
-                    }`}
-                  >
-                    All Problems
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterTab('most_validated')}
-                    className={`rounded-xl px-3.5 py-1.5 font-semibold transition cursor-pointer ${
-                      filterTab === 'most_validated'
-                        ? 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
-                    }`}
-                  >
-                    Most Validated
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFilterTab('needs_validation')}
-                    className={`rounded-xl px-3.5 py-1.5 font-semibold transition cursor-pointer ${
-                      filterTab === 'needs_validation'
-                        ? 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
-                    }`}
-                  >
-                    Needs Validation
-                  </button>
-                  {user && (
+                  {/* Filter Dropdown */}
+                  <div className="relative shrink-0" ref={filterMenuRef}>
                     <button
                       type="button"
-                      onClick={() => setFilterTab('my_hypotheses')}
-                      className={`rounded-xl px-3.5 py-1.5 font-semibold transition cursor-pointer ${
-                        filterTab === 'my_hypotheses'
-                          ? 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
-                          : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
+                      onClick={() => {
+                        setIsFilterOpen((prev) => !prev)
+                        setIsSortOpen(false)
+                      }}
+                      aria-haspopup="true"
+                      aria-expanded={isFilterOpen}
+                      className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all shadow-warm-xs cursor-pointer ${
+                        activeCategory !== 'All categories' || isFilterOpen
+                          ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
+                          : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
                       }`}
                     >
-                      My Hypotheses
-                    </button>
-                  )}
-                </div>
-
-                {/* Category Filter Pills */}
-                <div className="flex gap-2 overflow-x-auto pb-1 max-w-full">
-                  {PROBLEM_CATEGORIES.map((cat) => {
-                    const isActive = activeCategory === cat
-                    return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setActiveCategory(cat)}
-                        className={`shrink-0 rounded-xl px-3 py-1 text-xs font-semibold transition cursor-pointer ${
-                          isActive
-                            ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
-                            : 'border border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                        }`}
+                      <svg className="h-4 w-4 shrink-0 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                      </svg>
+                      <span>
+                        {activeCategory === 'All categories' ? 'Filter' : activeCategory}
+                      </span>
+                      {activeCategory !== 'All categories' && (
+                        <span className="flex h-1.5 w-1.5 rounded-full bg-[#d96b43]" />
+                      )}
+                      <svg
+                        className={`h-3.5 w-3.5 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
                       >
-                        {cat}
-                      </button>
-                    )
-                  })}
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+
+                    {isFilterOpen && (
+                      <div
+                        role="menu"
+                        className="absolute right-0 top-full mt-2 w-64 origin-top-right rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-2 text-[var(--text-main)] shadow-warm-xl focus:outline-none z-30 tdev-dropdown max-h-80 overflow-y-auto"
+                      >
+                        <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-subtle)] border-b border-[var(--border-main)]/60 mb-1">
+                          Filter by Category
+                        </div>
+                        {PROBLEM_CATEGORIES.map((cat) => {
+                          const isSelected = activeCategory === cat
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                setActiveCategory(cat)
+                                setIsFilterOpen(false)
+                              }}
+                              className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer text-left ${
+                                isSelected
+                                  ? 'bg-[#d96b43]/10 text-[#d96b43] font-bold dark:text-[#eb8b72]'
+                                  : 'text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
+                              }`}
+                            >
+                              <span>{cat}</span>
+                              {isSelected && (
+                                <svg className="w-3.5 h-3.5 text-[#d96b43] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Sort Dropdown */}
+                  <div className="relative shrink-0" ref={sortMenuRef}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSortOpen((prev) => !prev)
+                        setIsFilterOpen(false)
+                      }}
+                      aria-haspopup="true"
+                      aria-expanded={isSortOpen}
+                      className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all shadow-warm-xs cursor-pointer ${
+                        filterTab !== 'all' || isSortOpen
+                          ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
+                          : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
+                      }`}
+                    >
+                      <svg className="h-4 w-4 shrink-0 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="m3 16 4 4 4-4" />
+                        <path d="M7 20V4" />
+                        <path d="m21 8-4-4-4 4" />
+                        <path d="M17 4v16" />
+                      </svg>
+                      <span>
+                        {filterTab === 'all' ? 'Sort' : currentSortOption.label}
+                      </span>
+                      <svg
+                        className={`h-3.5 w-3.5 transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </button>
+
+                    {isSortOpen && (
+                      <div
+                        role="menu"
+                        className="absolute right-0 top-full mt-2 w-64 origin-top-right rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-2 text-[var(--text-main)] shadow-warm-xl focus:outline-none z-30 tdev-dropdown"
+                      >
+                        <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-subtle)] border-b border-[var(--border-main)]/60 mb-1">
+                          Sort & Status
+                        </div>
+                        {SORT_OPTIONS.map((opt) => {
+                          const isSelected = filterTab === opt.id
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                setFilterTab(opt.id)
+                                setIsSortOpen(false)
+                              }}
+                              className={`w-full flex items-start justify-between gap-2 px-3 py-2 rounded-xl text-left transition cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
+                                  : 'text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
+                              }`}
+                            >
+                              <div>
+                                <div className={`text-xs font-semibold ${isSelected ? 'text-[#d96b43] dark:text-[#eb8b72]' : 'text-[var(--text-main)]'}`}>
+                                  {opt.label}
+                                </div>
+                                <div className="text-[11px] text-[var(--text-muted)] mt-0.5 leading-snug">
+                                  {opt.description}
+                                </div>
+                              </div>
+                              {isSelected && (
+                                <svg className="w-3.5 h-3.5 text-[#d96b43] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Active Filters bar */}
+              {(activeCategory !== 'All categories' || filterTab !== 'all' || search) && (
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                  <span className="text-[var(--text-subtle)] text-[11px] uppercase tracking-wider font-bold mr-1">
+                    Active Filters:
+                  </span>
+                  {activeCategory !== 'All categories' && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d96b43]/30 bg-[#d96b43]/10 px-3 py-1 font-semibold text-[#b85028] dark:text-[#eb8b72]">
+                      <span>Category: {activeCategory}</span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveCategory('All categories')}
+                        className="hover:text-[var(--text-main)] cursor-pointer text-xs"
+                        title="Clear category filter"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  )}
+                  {filterTab !== 'all' && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 font-semibold text-[var(--text-main)]">
+                      <span>Sort: {currentSortOption.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFilterTab('all')}
+                        className="hover:text-[#d96b43] cursor-pointer text-xs"
+                        title="Reset sort to all"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  )}
+                  {search && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 font-semibold text-[var(--text-main)]">
+                      <span>Query: &ldquo;{search}&rdquo;</span>
+                      <button
+                        type="button"
+                        onClick={() => setSearch('')}
+                        className="hover:text-[#d96b43] cursor-pointer text-xs"
+                        title="Clear search"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveCategory('All categories')
+                      setFilterTab('all')
+                      setSearch('')
+                    }}
+                    className="text-xs font-semibold text-[#d96b43] hover:underline ml-1 cursor-pointer"
+                  >
+                    Reset all
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Problem Directory Stream */}

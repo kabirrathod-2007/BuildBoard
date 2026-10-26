@@ -188,10 +188,10 @@ BuildBoard/
 
 For in-depth architectural decisions, state management diagrams, and system specifications, explore the [`docs/`](./docs) directory:
 
-- 📖 [**Project Summary & Evolution (`docs/summary.md`)**](./docs/summary.md): Comprehensive feature inventory, rationale, and evolution from earlier prototypes.
-- 📐 [**System Architecture & Data (`docs/system.md`)**](./docs/system.md): In-depth look at state namespaces, storage schemas, and IndexedDB handling.
-- 🔀 [**User Flows & State Transitions (`docs/flow.md`)**](./docs/flow.md): Complete journey maps for builders, testers, and problem discoverers.
-- ⚖️ [**Architectural Decision Records (`docs/decision.md`)**](./docs/decision.md): Detailed ADRs explaining tech stack choices and engineering trade-offs.
+-  [**Project Summary & Evolution (`docs/summary.md`)**](./docs/summary.md): Comprehensive feature inventory, rationale, and evolution fro earlier prototypes.
+-  [**System Architecture & Data (`docs/system.md`)**](./docs/system.md) In-depth look at state namespaces, storage schemas, and IndexedDB hanling.
+-  [**User Flows & State Transitions (`docs/flow.md`)**](./docs/flow.md) Complete journey maps for builders, testers, and problem disoverers.
+-  [**Architectural Decision Records (`docs/decision.md`)**](./docs/decision.md): Detailed ADRs explaining tech stack choices and engineering trade-offs.
 
 ---
 

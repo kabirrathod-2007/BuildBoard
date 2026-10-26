@@ -45,10 +45,10 @@ function CommentThreadNode({
   handleReplySubmit,
   handleCancelReply,
   isSubmittingReply,
-  collapsedComments,
-  toggleCollapse,
+  expandedComments,
+  toggleExpand,
 }) {
-  const isCollapsed = collapsedComments.has(comment.id)
+  const isExpanded = expandedComments.has(comment.id)
   const totalReplies = countTotalReplies(comment)
   const hasReplies = comment.replies && comment.replies.length > 0
   const isReplyingHere = replyingToCommentId === comment.id
@@ -128,33 +128,6 @@ function CommentThreadNode({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Reddit-style collapse arrow button on header when comment has replies */}
-            {hasReplies && (
-              <button
-                type="button"
-                onClick={() => toggleCollapse(comment.id)}
-                title={isCollapsed ? `Expand ${totalReplies} replies` : 'Collapse replies'}
-                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-[var(--text-muted)] hover:text-[#d96b43] hover:bg-[#d96b43]/10 transition-colors cursor-pointer"
-                aria-expanded={!isCollapsed}
-              >
-                <svg
-                  className={`w-3.5 h-3.5 text-[#d96b43] transition-transform duration-200 ${
-                    isCollapsed ? '-rotate-90' : 'rotate-0'
-                  }`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-                <span>
-                  {isCollapsed
-                    ? `${totalReplies} ${totalReplies === 1 ? 'reply' : 'replies'}`
-                    : 'Collapse'}
-                </span>
-              </button>
-            )}
             <span className="text-[10px] text-[var(--text-subtle)]">
               {formatDate(comment.createdAt)}
             </span>
@@ -172,58 +145,30 @@ function CommentThreadNode({
 
         {/* Action Footer */}
         <div
-          className={`mt-3 flex items-center justify-between border-t border-[var(--border-main)]/50 pt-2.5 ${
+          className={`mt-2.5 flex items-center border-t border-[var(--border-main)]/40 pt-2 ${
             depth === 0 ? 'pl-8 sm:pl-9.5' : 'pl-8'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => handleStartReply(comment, authorName)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
+          <button
+            type="button"
+            onClick={() => handleStartReply(comment, authorName)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
+          >
+            <svg
+              className="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
             >
-              <svg
-                className="w-3.5 h-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4"
-                />
-              </svg>
-              <span>Reply</span>
-            </button>
-          </div>
-
-          {/* Arrow / toggle count button in footer */}
-          {hasReplies && (
-            <button
-              type="button"
-              onClick={() => toggleCollapse(comment.id)}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
-            >
-              <svg
-                className={`w-3.5 h-3.5 text-[#d96b43] transition-transform duration-200 ${
-                  isCollapsed ? '-rotate-90' : 'rotate-0'
-                }`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-              <span>
-                {isCollapsed
-                  ? `Show ${totalReplies} ${totalReplies === 1 ? 'reply' : 'replies'}`
-                  : `Hide ${totalReplies} ${totalReplies === 1 ? 'reply' : 'replies'}`}
-              </span>
-            </button>
-          )}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4"
+              />
+            </svg>
+            <span>Reply</span>
+          </button>
         </div>
       </div>
 
@@ -307,47 +252,37 @@ function CommentThreadNode({
         )}
       </AnimatePresence>
 
-      {/* Children replies thread */}
+      {/* Children replies thread — YouTube-style sleek single toggle */}
       {hasReplies && (
-        <>
-          {isCollapsed ? (
-            <motion.button
-              type="button"
-              onClick={() => toggleCollapse(comment.id)}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-2 ml-3 sm:ml-6 flex items-center gap-2 rounded-xl border border-[var(--border-main)]/70 bg-[var(--bg-surface-subtle)]/60 hover:bg-[#d96b43]/10 hover:border-[#d96b43]/40 px-3.5 py-2 text-xs font-medium text-[var(--text-muted)] hover:text-[#d96b43] transition-all cursor-pointer text-left w-fit"
-            >
-              <svg
-                className="w-3.5 h-3.5 text-[#d96b43]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-              <span>
-                <strong className="font-semibold text-[var(--text-main)]">
-                  {totalReplies} {totalReplies === 1 ? 'reply' : 'replies'}
-                </strong>{' '}
-                collapsed — click to expand
-              </span>
-            </motion.button>
-          ) : (
-            <div
-              className={`relative mt-2.5 space-y-2.5 border-l-2 border-[#d96b43]/30 hover:border-[#d96b43] transition-colors ${
-                depth < 4 ? 'ml-3 sm:ml-6 pl-3 sm:pl-5' : 'ml-1 sm:ml-2 pl-2 sm:pl-3'
+        <div className={`mt-2 ${depth === 0 ? 'ml-8 sm:ml-9.5' : 'ml-8'}`}>
+          <button
+            type="button"
+            onClick={() => toggleExpand(comment.id)}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-[#d96b43] hover:bg-[#d96b43]/10 dark:text-[#eb8b72] transition-colors cursor-pointer w-fit"
+            aria-expanded={isExpanded}
+          >
+            <svg
+              className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                isExpanded ? 'rotate-180' : 'rotate-0'
               }`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              {/* Reddit-style clickable guide line to collapse thread */}
-              <button
-                type="button"
-                onClick={() => toggleCollapse(comment.id)}
-                title="Click line to collapse thread"
-                aria-label="Collapse comment thread"
-                className="absolute -left-[5px] top-0 bottom-0 w-2.5 cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
-              />
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+            <span>
+              {isExpanded
+                ? `Hide ${totalReplies === 1 ? 'reply' : 'replies'}`
+                : `${totalReplies} ${totalReplies === 1 ? 'reply' : 'replies'}`}
+            </span>
+          </button>
+
+          {isExpanded && (
+            <div className="relative mt-2.5 space-y-2.5 border-l-2 border-[#d96b43]/30 pl-3 sm:pl-4 transition-colors">
               {comment.replies.map((childReply) => (
                 <CommentThreadNode
                   key={childReply.id}
@@ -365,13 +300,13 @@ function CommentThreadNode({
                   handleReplySubmit={handleReplySubmit}
                   handleCancelReply={handleCancelReply}
                   isSubmittingReply={isSubmittingReply}
-                  collapsedComments={collapsedComments}
-                  toggleCollapse={toggleCollapse}
+                  expandedComments={expandedComments}
+                  toggleExpand={toggleExpand}
                 />
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
     </motion.div>
   )
@@ -406,11 +341,11 @@ export default function ProblemDetailsPage() {
   const [replyError, setReplyError] = useState('')
   const [isSubmittingReply, setIsSubmittingReply] = useState(false)
 
-  // Reddit-style collapsed comment threads
-  const [collapsedComments, setCollapsedComments] = useState(() => new Set())
+  // YouTube-style expanded comment threads (collapsed by default)
+  const [expandedComments, setExpandedComments] = useState(() => new Set())
 
-  const toggleCollapse = (commentId) => {
-    setCollapsedComments((prev) => {
+  const toggleExpand = (commentId) => {
+    setExpandedComments((prev) => {
       const next = new Set(prev)
       if (next.has(commentId)) {
         next.delete(commentId)
@@ -692,14 +627,7 @@ export default function ProblemDetailsPage() {
 
     // Automatically expand the thread replied to so the user sees their reply
     if (targetParentId) {
-      setCollapsedComments((prev) => {
-        if (prev.has(targetParentId)) {
-          const next = new Set(prev)
-          next.delete(targetParentId)
-          return next
-        }
-        return prev
-      })
+      setExpandedComments((prev) => new Set(prev).add(targetParentId))
     }
 
     setReplyingToCommentId(null)
@@ -1099,8 +1027,8 @@ export default function ProblemDetailsPage() {
                       handleReplySubmit={handleReplySubmit}
                       handleCancelReply={handleCancelReply}
                       isSubmittingReply={isSubmittingReply}
-                      collapsedComments={collapsedComments}
-                      toggleCollapse={toggleCollapse}
+                      expandedComments={expandedComments}
+                      toggleExpand={toggleExpand}
                     />
                   ))
                 )}
@@ -1114,10 +1042,7 @@ export default function ProblemDetailsPage() {
             {/* Primary Action Card: Validate Problem */}
             <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-5 sm:p-7 shadow-warm-sm">
               <div className="text-center">
-                <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
-                  Pre-MVP Validation
-                </span>
-                <div className="mt-3 flex items-baseline justify-center gap-2">
+                <div className="flex items-baseline justify-center gap-2">
                   <span key={validationCount} className="font-display text-4xl sm:text-5xl font-black text-[var(--text-main)] tdev-pop-in">
                     {validationCount}
                   </span>
@@ -1125,9 +1050,6 @@ export default function ProblemDetailsPage() {
                     confirmed this problem
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-[var(--text-muted)] leading-relaxed">
-                  Confirms this is a real problem worth building software for.
-                </p>
               </div>
 
               {/* Action Buttons */}
