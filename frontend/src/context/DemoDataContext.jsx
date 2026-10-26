@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
 import { products as initialSeedProducts } from '../data/products'
 import { seedProblems as initialSeedProblems } from '../data/problems'
+import { deleteMediaFile } from '../utils/indexedDB'
 
 const DemoDataContext = createContext(null)
 
@@ -14,6 +15,7 @@ export const useDemoData = () => {
 }
 
 const PRODUCTS_STORAGE_KEY = 'buildboard_demo_custom_products'
+const DELETED_PRODUCTS_STORAGE_KEY = 'buildboard_demo_deleted_products'
 const ENROLLMENTS_STORAGE_KEY = 'buildboard_demo_enrollments'
 const FEEDBACK_STORAGE_KEY = 'buildboard_demo_feedback'
 const VIEWS_STORAGE_KEY = 'buildboard_demo_views'
@@ -166,11 +168,32 @@ export const DemoDataProvider = ({ children }) => {
     }
   }, [reminderDismissals])
 
-  // Combined product list (user-submitted and edited demo products override seed products, then remaining seed products)
+  // Deleted product IDs tracking (persisted across sessions)
+  const [deletedProductIds, setDeletedProductIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem(DELETED_PRODUCTS_STORAGE_KEY)
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  // Synchronize deleted product IDs to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(DELETED_PRODUCTS_STORAGE_KEY, JSON.stringify(deletedProductIds))
+    } catch (e) {
+      console.error('Failed to sync deleted product IDs to localStorage', e)
+    }
+  }, [deletedProductIds])
+
+  // Combined product list (user-submitted and edited demo products override seed products, excluding deleted products)
   const products = useMemo(() => {
-    const customIds = new Set(customProducts.map((p) => p.id))
-    const remainingSeed = initialSeedProducts.filter((p) => !customIds.has(p.id))
-    const all = [...customProducts, ...remainingSeed]
+    const deletedSet = new Set(deletedProductIds)
+    const activeCustom = customProducts.filter((p) => !deletedSet.has(p.id))
+    const customIds = new Set(activeCustom.map((p) => p.id))
+    const remainingSeed = initialSeedProducts.filter((p) => !customIds.has(p.id) && !deletedSet.has(p.id))
+    const all = [...activeCustom, ...remainingSeed]
     return all.map((p) => {
       const email = (p.creatorEmail || '').toLowerCase().trim()
       if (email && profiles[email]?.displayName?.trim()) {
@@ -181,7 +204,7 @@ export const DemoDataProvider = ({ children }) => {
       }
       return p
     })
-  }, [customProducts, profiles])
+  }, [customProducts, profiles, deletedProductIds])
 
   const addProduct = (formData) => {
     const baseSlug = slugify(formData.name) || 'product'
@@ -599,6 +622,80 @@ export const DemoDataProvider = ({ children }) => {
     return { success: true, enrollmentPaused: nextPaused }
   }
 
+  const deleteProduct = (productId, userEmail) => {
+    if (!productId || !userEmail) {
+      return { success: false, error: 'User and product ID are required.' }
+    }
+    const targetProduct = products.find((p) => p.id === productId)
+    if (!targetProduct) {
+      return { success: false, error: 'Product listing not found.' }
+    }
+    if (!isProductOwner(productId, userEmail)) {
+      return { success: false, error: 'Only the product creator can delete this listing.' }
+    }
+
+    // Clean up any IndexedDB media if present
+    if (targetProduct.mediaId) {
+      deleteMediaFile(targetProduct.mediaId).catch(() => {})
+    }
+    if (Array.isArray(targetProduct.galleryMediaIds)) {
+      targetProduct.galleryMediaIds.forEach((id) => {
+        deleteMediaFile(id).catch(() => {})
+      })
+    }
+    if (targetProduct.videoMediaId) {
+      deleteMediaFile(targetProduct.videoMediaId).catch(() => {})
+    }
+
+    // Remove from customProducts
+    setCustomProducts((prev) => prev.filter((p) => p.id !== productId))
+
+    // Track as deleted so even seed products or modified seed won't resurface
+    setDeletedProductIds((prev) => (prev.includes(productId) ? prev : [...prev, productId]))
+
+    // Clean up associated enrollments
+    setEnrollments((prev) => {
+      const copy = { ...prev }
+      Object.keys(copy).forEach((k) => {
+        if (k.endsWith(`:${productId}`)) {
+          delete copy[k]
+        }
+      })
+      return copy
+    })
+
+    // Clean up associated feedback
+    setFeedbackList((prev) => prev.filter((fb) => fb.productId !== productId))
+
+    // Clean up views
+    setViews((prev) => {
+      const copy = { ...prev }
+      delete copy[productId]
+      return copy
+    })
+
+    // Clean up problem solutions referencing this product
+    setProblems((prev) =>
+      prev.map((prob) => ({
+        ...prob,
+        solutions: (prob.solutions || []).filter((sol) => sol.productId !== productId),
+      }))
+    )
+
+    // Clean up reminder dismissals
+    setReminderDismissals((prev) => {
+      const copy = { ...prev }
+      Object.keys(copy).forEach((k) => {
+        if (k.endsWith(`:${productId}`)) {
+          delete copy[k]
+        }
+      })
+      return copy
+    })
+
+    return { success: true }
+  }
+
   // --- Profile Management ---
   const getProfile = useCallback((userEmail) => {
     if (!userEmail) return null
@@ -884,6 +981,7 @@ export const DemoDataProvider = ({ children }) => {
         products,
         addProduct,
         updateProduct,
+        deleteProduct,
         toggleProductEnrollment,
         views,
         recordProductView,

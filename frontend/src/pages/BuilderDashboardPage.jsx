@@ -43,6 +43,7 @@ export default function BuilderDashboardPage() {
     replyToFeedback,
     toggleFeedbackHelpful,
     updateProduct,
+    deleteProduct,
     toggleProductEnrollment,
     getProfile,
   } = useDemoData()
@@ -99,7 +100,15 @@ export default function BuilderDashboardPage() {
     targetTechnologies: [],
   })
   const [editErrors, setEditErrors] = useState({})
-  const [actionNotice, setActionNotice] = useState(null)
+  const [actionNotice, setActionNotice] = useState(() => {
+    if (location.state?.deletedProductName) {
+      return {
+        type: 'success',
+        message: `Listing "${location.state.deletedProductName}" was deleted successfully.`,
+      }
+    }
+    return null
+  })
 
   const handleStartEdit = (product) => {
     setEditingProduct(product)
@@ -246,6 +255,47 @@ export default function BuilderDashboardPage() {
     })
     setTimeout(() => setActionNotice(null), 4000)
   }
+
+  // Listing Deletion State & Handlers
+  const [productToDelete, setProductToDelete] = useState(null)
+
+  const handleConfirmDelete = () => {
+    if (!user || !productToDelete) return
+    const res = deleteProduct(productToDelete.id, user.email)
+    if (!res.success) {
+      setActionNotice({ type: 'error', message: res.error })
+    } else {
+      setActionNotice({
+        type: 'success',
+        message: `Listing "${productToDelete.name}" was permanently deleted.`,
+      })
+      if (selectedProductId === productToDelete.id) {
+        setSelectedProductId('all')
+      }
+    }
+    setProductToDelete(null)
+    setTimeout(() => setActionNotice(null), 4000)
+  }
+
+  useEffect(() => {
+    if (!productToDelete) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setProductToDelete(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [productToDelete])
+
+  // Clear location.state and set auto-dismiss timer after redirect from ProductDetailsPage
+  useEffect(() => {
+    if (location.state?.deletedProductName) {
+      navigate(location.pathname, { replace: true, state: {} })
+      const timer = setTimeout(() => setActionNotice(null), 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [location, navigate])
 
   // Get products owned by the signed-in user (empty array if not signed in)
   const userProducts = useMemo(() => {
@@ -689,6 +739,13 @@ export default function BuilderDashboardPage() {
                                 }`}
                               >
                                 {product.enrollmentPaused ? 'Resume enrollment' : 'Pause enrollment'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setProductToDelete(product)}
+                                className="min-h-[40px] rounded-full border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-500/20 dark:text-rose-400 transition-colors cursor-pointer"
+                              >
+                                Delete
                               </button>
                             </div>
 
@@ -1278,6 +1335,55 @@ export default function BuilderDashboardPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {productToDelete && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-modal-heading"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          >
+            <div className="w-full max-w-md rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-7 text-[var(--text-main)] shadow-warm-xl">
+              <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-500/15">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 id="delete-modal-heading" className="font-display text-lg font-bold tracking-tight text-[var(--text-main)]">
+                    Delete Prototype Listing?
+                  </h2>
+                  <p className="text-xs text-[var(--text-subtle)]">This action cannot be undone.</p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)]">
+                Are you sure you want to permanently delete <strong className="text-[var(--text-main)]">&ldquo;{productToDelete.name}&rdquo;</strong>? All associated tester critiques, views, and enrollment history on this device will be erased.
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-[var(--border-main)]">
+                <button
+                  type="button"
+                  onClick={() => setProductToDelete(null)}
+                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  className="rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-warm-xs hover:bg-rose-700 transition cursor-pointer active:scale-95"
+                >
+                  Delete Permanently
+                </button>
+              </div>
             </div>
           </div>
         )}

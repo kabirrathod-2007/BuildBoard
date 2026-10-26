@@ -132,6 +132,7 @@ export default function ProductDetailsPage() {
     replyToFeedback,
     toggleFeedbackHelpful,
     getProfile,
+    deleteProduct,
   } = useDemoData()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -184,6 +185,32 @@ export default function ProductDetailsPage() {
     setReplyDraft('')
     setReplyError('')
   }
+
+  // Deletion modal state & handler for owner
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  const handleDeleteProduct = () => {
+    if (!user || !product) return
+    const res = deleteProduct(product.id, user.email)
+    if (!res.success) {
+      alert(res.error || 'Failed to delete listing')
+      return
+    }
+    navigate('/builder/dashboard', {
+      state: { deletedProductName: product.name },
+    })
+  }
+
+  useEffect(() => {
+    if (!showDeleteModal) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowDeleteModal(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showDeleteModal])
 
   useDocumentTitle(product ? `${product.name} | BuildBoard` : 'Product Not Found | BuildBoard')
 
@@ -396,13 +423,26 @@ export default function ProductDetailsPage() {
             </Link>
 
             {isOwner && (
-              <Link
-                to="/builder/dashboard"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 py-1 text-xs font-semibold text-[var(--text-main)] shadow-xs hover:border-[#d96b43] hover:text-[#d96b43] transition-colors"
-              >
-                <span>Owner Dashboard</span>
-                <span aria-hidden="true">→</span>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/builder/dashboard"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 py-1 text-xs font-semibold text-[var(--text-main)] shadow-xs hover:border-[#d96b43] hover:text-[#d96b43] transition-colors"
+                >
+                  <span>Owner Dashboard</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-500/20 dark:text-rose-400 transition-colors cursor-pointer"
+                  title="Delete this prototype listing"
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                  <span>Delete Listing</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -850,6 +890,17 @@ export default function ProductDetailsPage() {
                         <span>Manage in Builder Dashboard</span>
                         <span aria-hidden="true">→</span>
                       </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteModal(true)}
+                        className="w-full rounded-2xl border border-rose-500/30 bg-rose-500/5 px-5 py-2.5 text-xs sm:text-sm font-semibold text-rose-700 hover:bg-rose-500/15 dark:text-rose-400 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        <span>Delete This Prototype</span>
+                      </button>
                     </div>
                   ) : !isEnrolled ? (
                     product.enrollmentPaused ? (
@@ -1416,6 +1467,55 @@ export default function ProductDetailsPage() {
               </div>
             )}
           </section>
+
+          {/* Delete Confirmation Modal for Product Owner */}
+          {showDeleteModal && product && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="product-delete-heading"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+            >
+              <div className="w-full max-w-md rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-7 text-[var(--text-main)] shadow-warm-xl">
+                <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-rose-500/15">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 id="product-delete-heading" className="font-display text-lg font-bold tracking-tight text-[var(--text-main)]">
+                      Delete &ldquo;{product.name}&rdquo;?
+                    </h2>
+                    <p className="text-xs text-[var(--text-subtle)]">This action cannot be undone.</p>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)]">
+                  Are you sure you want to permanently delete this prototype listing? All community critiques, view metrics, and tester enrollments will be erased from this device.
+                </p>
+
+                <div className="mt-6 flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-[var(--border-main)]">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(false)}
+                    className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteProduct}
+                    className="rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-warm-xs hover:bg-rose-700 transition cursor-pointer active:scale-95"
+                  >
+                    Delete Permanently
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <Footer />
         </div>
