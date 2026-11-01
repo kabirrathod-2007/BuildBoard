@@ -5,5 +5,5 @@ USE buildboard;
 -- ----------------------------------------------------------------------
 
 ALTER TABLE products 
-  ADD COLUMN IF NOT EXISTS views_count INT UNSIGNED NOT NULL DEFAULT 0;
+  ADD COLUMN views_count INT UNSIGNED NOT NULL DEFAULT 0;
 
