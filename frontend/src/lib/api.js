@@ -102,3 +102,27 @@ export async function deleteProductListing(slugOrId) {
   })
 }
 
+export async function enrollInProductApi(slugOrId) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}/enroll`, {
+    method: 'POST',
+  })
+}
+
+export async function unenrollFromProductApi(slugOrId) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}/enroll`, {
+    method: 'DELETE',
+  })
+}
+
+export async function fetchProductEnrollmentStatus(slugOrId) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}/enrollment`, {
+    method: 'GET',
+  })
+}
+
+export async function fetchMyEnrollments() {
+  return request('/api/enrollments/me', {
+    method: 'GET',
+  })
+}
+

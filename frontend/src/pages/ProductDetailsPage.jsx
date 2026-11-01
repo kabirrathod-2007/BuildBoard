@@ -255,15 +255,23 @@ export default function ProductDetailsPage() {
   const [submittedFeedbackPreview, setSubmittedFeedbackPreview] = useState(null)
   const [enrollmentError, setEnrollmentError] = useState('')
 
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
     setEnrollmentError('')
     if (!user) {
       navigate('/sign-in', { state: { from: location } })
       return
     }
 
-    const result = enrollInProduct(product.id, user.email)
-    if (!result.success) setEnrollmentError(result.error)
+    const result = await enrollInProduct(product.id, user.email)
+    if (!result.success) {
+      setEnrollmentError(result.error)
+    } else if (result.productUrl) {
+      setServerDetail((prev) => ({
+        ...(prev || product),
+        productUrl: result.productUrl,
+        isEnrolled: true,
+      }))
+    }
   }
 
   // Feedback list filter
@@ -957,7 +965,9 @@ export default function ProductDetailsPage() {
                           <span>Enroll to Unlock Prototype Link</span>
                         </button>
                         <p className="mt-2.5 text-center text-xs text-[var(--text-subtle)]">
-                          Enrollment is saved in this browser&apos;s demo data. The prototype URL &amp; repository link are client-side and aren&apos;t protected by a server.
+                          {product.isServerSynced
+                            ? 'Enrollment is verified by BuildBoard. Prototype access is securely unlocked for your account upon enrolling.'
+                            : "Enrollment is saved in this browser's demo data. The prototype URL & repository link are client-side and aren't protected by a server."}
                         </p>
                         {enrollmentError && (
                           <p role="alert" className="mt-3 text-center text-sm font-semibold text-rose-600 dark:text-rose-400">

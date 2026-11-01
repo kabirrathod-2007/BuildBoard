@@ -12,6 +12,9 @@ import {
   updateProductListing,
   toggleProductPause,
   deleteProductListing,
+  enrollInProductApi,
+  unenrollFromProductApi,
+  fetchMyEnrollments,
 } from '../lib/api.js'
 
 const DemoDataContext = createContext(null)
@@ -274,6 +277,40 @@ export const DemoDataProvider = ({ children }) => {
     }
   }, [user?.email, user?.emailVerified])
 
+  // Synchronize authenticated user enrollments with MySQL cloud API
+  useEffect(() => {
+    if (!user?.email || !user?.emailVerified) return
+    let active = true
+
+    async function loadCloudEnrollments() {
+      try {
+        const res = await fetchMyEnrollments()
+        if (active && Array.isArray(res?.enrollments)) {
+          const normalized = user.email.toLowerCase().trim()
+          const newEntries = {}
+          for (const item of res.enrollments) {
+            const enrolledAt = item.enrolledAt || new Date().toISOString()
+            if (item.product?.id) {
+              newEntries[`${normalized}:${item.product.id}`] = enrolledAt
+            }
+            if (item.product?.slug) {
+              newEntries[`${normalized}:${item.product.slug}`] = enrolledAt
+            }
+          }
+          setEnrollments((prev) => ({ ...prev, ...newEntries }))
+        }
+      } catch (err) {
+        console.warn('[BuildBoard] Could not load user enrollments:', err.message)
+      }
+    }
+
+    loadCloudEnrollments()
+
+    return () => {
+      active = false
+    }
+  }, [user?.email, user?.emailVerified])
+
   // Reminder dismissals mapping: key is "userEmail:productId", value is dismissal timestamp
   const [reminderDismissals, setReminderDismissals] = useState(() => {
     try {
@@ -441,15 +478,50 @@ export const DemoDataProvider = ({ children }) => {
 
 
   // --- Enrollments Tracking ---
-  const enrollInProduct = (productId, userEmail) => {
+  const enrollInProduct = async (productId, userEmail) => {
     if (!productId || !userEmail) return { success: false, error: 'User and product ID are required.' }
-    const product = products.find((p) => p.id === productId)
+    const product = products.find((p) => p.id === productId || p.slug === productId)
     if (product?.creatorEmail && product.creatorEmail.toLowerCase().trim() === userEmail.toLowerCase().trim()) {
       return { success: false, error: 'You are the creator of this product.' }
     }
-    if (product?.enrollmentPaused) {
+    if (product?.enrollmentPaused && !isEnrolledInProduct(productId, userEmail)) {
       return { success: false, error: 'Enrollment for this product is currently paused by the builder.' }
     }
+
+    // If authenticated & verified, sync with cloud API
+    if (user?.email && user?.emailVerified) {
+      try {
+        const res = await enrollInProductApi(product?.id || productId)
+        if (res?.enrolled) {
+          const enrolledTime = res.enrolledAt || new Date().toISOString()
+          const normalized = userEmail.toLowerCase().trim()
+          setEnrollments((prev) => ({
+            ...prev,
+            [`${normalized}:${productId}`]: enrolledTime,
+            ...(product?.id ? { [`${normalized}:${product.id}`]: enrolledTime } : {}),
+            ...(product?.slug ? { [`${normalized}:${product.slug}`]: enrolledTime } : {}),
+          }))
+
+          if (res.productUrl) {
+            setServerProducts((prev) =>
+              prev.map((p) => {
+                if (p.id === product?.id || p.slug === productId) {
+                  return { ...p, productUrl: res.productUrl, isEnrolled: true, enrolledAt: enrolledTime }
+                }
+                return p
+              })
+            )
+          }
+
+          return { success: true, enrolled: true, productUrl: res.productUrl, isServerSynced: true }
+        }
+      } catch (err) {
+        console.warn('[BuildBoard] Cloud enrollment failed:', err.message)
+        return { success: false, error: err.message }
+      }
+    }
+
+    // Local demo fallback
     const key = `${userEmail.toLowerCase().trim()}:${productId}`
     setEnrollments((prev) => ({
       ...prev,
@@ -458,22 +530,56 @@ export const DemoDataProvider = ({ children }) => {
     return { success: true }
   }
 
+  const unenrollFromProduct = async (productId, userEmail) => {
+    if (!productId || !userEmail) return { success: false, error: 'User and product ID are required.' }
+    const product = products.find((p) => p.id === productId || p.slug === productId)
+    const normalized = userEmail.toLowerCase().trim()
+
+    if (user?.email && user?.emailVerified) {
+      try {
+        await unenrollFromProductApi(product?.id || productId)
+      } catch (err) {
+        console.warn('[BuildBoard] Cloud unenroll failed:', err.message)
+      }
+    }
+
+    setEnrollments((prev) => {
+      const copy = { ...prev }
+      delete copy[`${normalized}:${productId}`]
+      if (product?.id) delete copy[`${normalized}:${product.id}`]
+      if (product?.slug) delete copy[`${normalized}:${product.slug}`]
+      return copy
+    })
+
+    return { success: true }
+  }
+
   const isEnrolledInProduct = (productId, userEmail) => {
     if (!productId || !userEmail) return false
-    const key = `${userEmail.toLowerCase().trim()}:${productId}`
-    return Boolean(enrollments[key])
+    const normalized = userEmail.toLowerCase().trim()
+    const product = products.find((p) => p.id === productId || p.slug === productId)
+    const key1 = `${normalized}:${productId}`
+    const key2 = product?.id ? `${normalized}:${product.id}` : null
+    const key3 = product?.slug ? `${normalized}:${product.slug}` : null
+    return Boolean(enrollments[key1] || (key2 && enrollments[key2]) || (key3 && enrollments[key3]))
   }
 
   const getProductEnrollmentCount = (productId) => {
     if (!productId) return 0
-    return Object.keys(enrollments).filter((key) => key.endsWith(`:${productId}`)).length
+    const product = products.find((p) => p.id === productId || p.slug === productId)
+    const localCount = Object.keys(enrollments).filter((key) => key.endsWith(`:${productId}`) || (product?.id && key.endsWith(`:${product.id}`))).length
+    return Math.max(localCount, product?.enrollmentCount || 0)
   }
 
   const getEnrollmentDate = useCallback((productId, userEmail) => {
     if (!productId || !userEmail) return null
-    const key = `${userEmail.toLowerCase().trim()}:${productId}`
-    return enrollments[key] || null
-  }, [enrollments])
+    const normalized = userEmail.toLowerCase().trim()
+    const product = products.find((p) => p.id === productId || p.slug === productId)
+    const key1 = `${normalized}:${productId}`
+    const key2 = product?.id ? `${normalized}:${product.id}` : null
+    const key3 = product?.slug ? `${normalized}:${product.slug}` : null
+    return enrollments[key1] || (key2 && enrollments[key2]) || (key3 && enrollments[key3]) || null
+  }, [enrollments, products])
 
   const dismissFeedbackReminder = (productId, userEmail) => {
     if (!productId || !userEmail) return
@@ -636,13 +742,16 @@ export const DemoDataProvider = ({ children }) => {
     const normalized = userEmail.toLowerCase().trim()
     const prefix = `${normalized}:`
     const list = []
+    const seenProductIds = new Set()
+
     for (const [key, enrolledAt] of Object.entries(enrollments)) {
       if (key.startsWith(prefix)) {
-        const productId = key.slice(prefix.length)
-        const product = products.find((p) => p.id === productId)
-        if (product) {
+        const productKey = key.slice(prefix.length)
+        const product = products.find((p) => p.id === productKey || p.slug === productKey)
+        if (product && !seenProductIds.has(product.id)) {
+          seenProductIds.add(product.id)
           list.push({
-            productId,
+            productId: product.id,
             enrolledAt,
             product,
           })
@@ -1237,6 +1346,7 @@ export const DemoDataProvider = ({ children }) => {
         getProductViewCount,
         enrollments,
         enrollInProduct,
+        unenrollFromProduct,
         isEnrolledInProduct,
         getProductEnrollmentCount,
         getEnrollmentDate,
