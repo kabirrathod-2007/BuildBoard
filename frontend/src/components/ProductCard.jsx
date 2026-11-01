@@ -33,6 +33,11 @@ export default function ProductCard({
     creatorProfile?.displayName?.trim() ||
     product.maker ||
     (product.creatorEmail ? product.creatorEmail.split('@')[0] : 'Independent Builder')
+  const authorUsername =
+    creatorProfile?.username ||
+    product.creatorUsername ||
+    product.makerUsername ||
+    ''
   const initial = title.charAt(0).toUpperCase()
 
   if (variant === 'feed') {
@@ -89,7 +94,18 @@ export default function ProductCard({
             {/* Author & Meta */}
             <div className="mt-1 flex flex-wrap items-center gap-2.5 text-xs sm:text-sm text-[var(--text-subtle)]">
               <span className="font-medium text-[var(--text-muted)]">
-                by {authorName}
+                by{' '}
+                {authorUsername ? (
+                  <Link
+                    to={`/u/${authorUsername}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:underline hover:text-[#1f3a6b] dark:hover:text-[#dbbf95]"
+                  >
+                    {authorName}
+                  </Link>
+                ) : (
+                  authorName
+                )}
               </span>
               <span aria-hidden="true">·</span>
               <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
@@ -202,9 +218,19 @@ export default function ProductCard({
         {/* Builder attribution */}
         <div className="mt-3.5 flex items-center gap-1.5 text-xs sm:text-sm text-[var(--text-subtle)]">
           <span>by</span>
-          <span className="font-semibold text-[var(--text-muted)]">
-            {authorName}
-          </span>
+          {authorUsername ? (
+            <Link
+              to={`/u/${authorUsername}`}
+              onClick={(e) => e.stopPropagation()}
+              className="font-semibold text-[var(--text-muted)] hover:underline hover:text-[#1f3a6b] dark:hover:text-[#dbbf95]"
+            >
+              {authorName}
+            </Link>
+          ) : (
+            <span className="font-semibold text-[var(--text-muted)]">
+              {authorName}
+            </span>
+          )}
         </div>
 
         {/* Footer Actions */}

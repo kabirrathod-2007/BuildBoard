@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/config/firebase.js && node --check src/config/database.js && node --check src/middleware/requireAuth.js && node --check src/middleware/optionalAuth.js && node --check src/routes/auth.js && node --check src/routes/profiles.js && node --check src/routes/products.js && node --check src/routes/enrollments.js && node --check src/routes/feedback.js && node --check src/routes/problems.js"
+    "check": "node --check src/server.js && node --check src/config/firebase.js && node --check src/config/database.js && node --check src/middleware/requireAuth.js && node --check src/middleware/optionalAuth.js && node --check src/routes/auth.js && node --check src/routes/profiles.js && node --check src/routes/products.js && node --check src/routes/enrollments.js && node --check src/routes/feedback.js && node --check src/routes/problems.js && node --check src/routes/notifications.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

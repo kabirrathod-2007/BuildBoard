@@ -18,6 +18,7 @@ const TesterActivityPage = lazy(() => import('./pages/TesterActivityPage.jsx'))
 const ProblemsPage = lazy(() => import('./pages/ProblemsPage.jsx'))
 const SubmitProblemPage = lazy(() => import('./pages/SubmitProblemPage.jsx'))
 const ProblemDetailsPage = lazy(() => import('./pages/ProblemDetailsPage.jsx'))
+const PublicProfilePage = lazy(() => import('./pages/PublicProfilePage.jsx'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'))
 
 function PageFallback() {
@@ -50,6 +51,8 @@ function App() {
             <Route path="/profile" element={<ProfileSetupPage />} />
             <Route path="/profile/setup" element={<ProfileSetupPage />} />
             <Route path="/profile/edit" element={<ProfileSetupPage />} />
+            <Route path="/u/:username" element={<PublicProfilePage />} />
+            <Route path="/user/:username" element={<PublicProfilePage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/problems" element={<ProblemsPage />} />
             <Route path="/problems/new" element={<SubmitProblemPage />} />

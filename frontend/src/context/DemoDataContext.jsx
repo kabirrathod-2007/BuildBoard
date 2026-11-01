@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { deleteMediaFile } from '../utils/indexedDB'
 import { useAuth } from './AuthContext.jsx'
 import {
@@ -25,6 +25,10 @@ import {
   toggleProblemTesterSignupApi,
   addProblemCommentApi,
   attachProblemSolutionApi,
+  recordProductViewApi,
+  fetchNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
 } from '../lib/api.js'
 
 const DemoDataContext = createContext(null)
@@ -245,6 +249,54 @@ export const DemoDataProvider = ({ children }) => {
     return []
   }, [user])
 
+  // Notifications state & synchronization
+  const [notifications, setNotifications] = useState([])
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0)
+  const [notificationsLoading, setNotificationsLoading] = useState(false)
+
+  const loadNotifications = useCallback(async () => {
+    if (!user?.email) {
+      setNotifications([])
+      setUnreadNotificationsCount(0)
+      return { notifications: [], unreadCount: 0 }
+    }
+    try {
+      setNotificationsLoading(true)
+      const res = await fetchNotifications()
+      const list = Array.isArray(res?.notifications) ? res.notifications : []
+      const unread = typeof res?.unreadCount === 'number' ? res.unreadCount : list.filter((n) => !n.isRead).length
+      setNotifications(list)
+      setUnreadNotificationsCount(unread)
+      return { notifications: list, unreadCount: unread }
+    } catch (err) {
+      console.warn('[BuildBoard] Could not load notifications:', err.message)
+      return { notifications: [], unreadCount: 0 }
+    } finally {
+      setNotificationsLoading(false)
+    }
+  }, [user?.email])
+
+  const markAsRead = useCallback(async (notificationId) => {
+    if (!notificationId) return
+    setNotifications((prev) => prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)))
+    setUnreadNotificationsCount((prev) => Math.max(0, prev - 1))
+    try {
+      await markNotificationRead(notificationId)
+    } catch (err) {
+      console.warn('[BuildBoard] Failed to mark notification read:', err.message)
+    }
+  }, [])
+
+  const markAllAsRead = useCallback(async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+    setUnreadNotificationsCount(0)
+    try {
+      await markAllNotificationsRead()
+    } catch (err) {
+      console.warn('[BuildBoard] Failed to mark all notifications read:', err.message)
+    }
+  }, [])
+
   useEffect(() => {
     let active = true
 
@@ -252,10 +304,12 @@ export const DemoDataProvider = ({ children }) => {
       if (!user?.email) {
         setEnrollments((prev) => (Object.keys(prev).length === 0 ? prev : {}))
         setFeedbackList((prev) => (prev.length === 0 ? prev : []))
+        setNotifications((prev) => (prev.length === 0 ? prev : []))
+        setUnreadNotificationsCount(0)
         return
       }
       if (active) {
-        await Promise.allSettled([loadMyEnrollments(), loadMyFeedback()])
+        await Promise.allSettled([loadMyEnrollments(), loadMyFeedback(), loadNotifications()])
       }
     }
 
@@ -264,7 +318,17 @@ export const DemoDataProvider = ({ children }) => {
     return () => {
       active = false
     }
-  }, [user?.email, loadMyEnrollments, loadMyFeedback])
+  }, [user?.email, loadMyEnrollments, loadMyFeedback, loadNotifications])
+
+  useEffect(() => {
+    if (!user?.email) return
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadNotifications()
+      }
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [user?.email, loadNotifications])
 
   // Synchronize community problems with MySQL cloud API
   const loadServerProblems = useCallback(async (params = {}) => {
@@ -447,19 +511,44 @@ export const DemoDataProvider = ({ children }) => {
     return newProduct
   }
 
-  // --- Views Tracking ---
-  const recordProductView = (productId) => {
+  // --- Views Tracking (Persistent & Deduplicated) ---
+  const viewedSessionSet = useRef(new Set())
+
+  const recordProductView = useCallback(async (productId) => {
     if (!productId) return
+    const key = String(productId).toLowerCase().trim()
+
     setViews((prev) => ({
       ...prev,
       [productId]: (prev[productId] || 0) + 1,
     }))
-  }
 
-  const getProductViewCount = (productId) => {
+    if (viewedSessionSet.current.has(key)) return
+    viewedSessionSet.current.add(key)
+
+    try {
+      await recordProductViewApi(productId)
+      setServerProducts((prev) =>
+        prev.map((p) => {
+          if (p.id === productId || p.slug === productId) {
+            return { ...p, viewsCount: (p.viewsCount || 0) + 1 }
+          }
+          return p
+        }),
+      )
+    } catch {
+      // view increment swallowed gracefully
+    }
+  }, [])
+
+  const getProductViewCount = useCallback((productId) => {
     if (!productId) return 0
+    const product = products.find((p) => p.id === productId || p.slug === productId)
+    if (product && typeof product.viewsCount === 'number' && product.viewsCount > 0) {
+      return product.viewsCount
+    }
     return views[productId] || 0
-  }
+  }, [products, views])
 
 
   // --- Enrollments Tracking ---
@@ -1404,6 +1493,12 @@ export const DemoDataProvider = ({ children }) => {
         saveProfile,
         profileLoading,
         profileError,
+        notifications,
+        unreadNotificationsCount,
+        notificationsLoading,
+        loadNotifications,
+        markAsRead,
+        markAllAsRead,
         problems: effectiveProblems,
         loadServerProblems,
         problemsLoading,

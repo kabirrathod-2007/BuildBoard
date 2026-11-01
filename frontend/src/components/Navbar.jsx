@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext.jsx'
 import Logo from './Logo.jsx'
 import SettingsMenu from './SettingsMenu.jsx'
+import NotificationBell from './NotificationBell.jsx'
 import MobileNav from './MobileNav.jsx'
 
 /**
@@ -103,6 +104,7 @@ export default function Navbar({ className = '' }) {
                 <span>+ Submit Prototype</span>
               </Link>
 
+              <NotificationBell />
               <SettingsMenu />
             </div>
           ) : (
@@ -127,6 +129,7 @@ export default function Navbar({ className = '' }) {
 
         {/* Mobile Navigation Drawer & Settings */}
         <div className="flex md:hidden items-center gap-2">
+          {user && <NotificationBell />}
           <SettingsMenu />
           <MobileNav
             user={user}

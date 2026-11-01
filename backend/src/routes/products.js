@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { database } from '../config/database.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { optionalAuth } from '../middleware/optionalAuth.js'
+import { createNotification } from '../utils/notifications.js'
 
 const router = Router()
 
@@ -283,12 +284,14 @@ async function attachCriteriaAndSteps(products, userId = null, isCatalog = false
       isSample: Boolean(row.is_sample),
       enrollmentPaused: Boolean(row.enrollment_paused),
       enrollmentCount,
+      viewsCount: Number(row.views_count || 0),
       isEnrolled,
       enrolledAt,
       isOwner,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       creatorEmail: row.creator_email,
+      creatorUsername: row.creator_username || '',
       maker: row.maker_name || row.creator_email.split('@')[0],
       categories: criteria.category.length > 0 ? criteria.category : ['Other'],
       targetRoles: criteria.role,
@@ -320,7 +323,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
         `SELECT 
            p.*, 
            u.email AS creator_email, 
-           up.profile_data->>'$.displayName' AS maker_name
+           up.profile_data->>'$.displayName' AS maker_name,
+           up.profile_data->>'$.username' AS creator_username
          FROM products p
          JOIN users u ON u.id = p.creator_id
          LEFT JOIN user_profiles up ON up.user_id = p.creator_id
@@ -336,7 +340,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
       SELECT 
         p.*, 
         u.email AS creator_email, 
-        up.profile_data->>'$.displayName' AS maker_name
+        up.profile_data->>'$.displayName' AS maker_name,
+        up.profile_data->>'$.username' AS creator_username
       FROM products p
       JOIN users u ON u.id = p.creator_id
       LEFT JOIN user_profiles up ON up.user_id = p.creator_id
@@ -380,7 +385,8 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
       SELECT 
         p.*, 
         u.email AS creator_email, 
-        up.profile_data->>'$.displayName' AS maker_name
+        up.profile_data->>'$.displayName' AS maker_name,
+        up.profile_data->>'$.username' AS creator_username
       FROM products p
       JOIN users u ON u.id = p.creator_id
       LEFT JOIN user_profiles up ON up.user_id = p.creator_id
@@ -396,6 +402,38 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
 
     const [product] = await attachCriteriaAndSteps(rows, userId, false)
     return res.json({ product })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// POST /api/products/:slugOrId/view (Increment views count)
+// ----------------------------------------------------------------------
+router.post('/:slugOrId/view', optionalAuth, async (req, res, next) => {
+  try {
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT id FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const productId = rows[0].id
+    try {
+      await database.execute(
+        'UPDATE products SET views_count = views_count + 1 WHERE id = ?',
+        [productId],
+      )
+    } catch (err) {
+      if (err.code !== 'ER_BAD_FIELD_ERROR' && err.code !== 'ER_NO_SUCH_TABLE') {
+        console.warn('[BuildBoard] Failed to increment views_count:', err.message)
+      }
+    }
+
+    return res.json({ success: true, productId })
   } catch (error) {
     return next(error)
   }
@@ -755,6 +793,15 @@ router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
       [userId, targetProduct.id],
     )
 
+    createNotification(database, {
+      userId: targetProduct.creator_id,
+      actorId: userId,
+      type: 'tester_enrolled',
+      title: 'New Tester Enrolled',
+      body: `A new tester enrolled to test "${targetProduct.name}".`,
+      linkUrl: `/products/${targetProduct.slug || targetProduct.id}`,
+    })
+
     return res.status(201).json({
       success: true,
       enrolled: true,
@@ -915,6 +962,7 @@ router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
       `SELECT 
          u.email,
          up.profile_data->>'$.displayName' AS display_name,
+         up.profile_data->>'$.username' AS username,
          up.profile_data->>'$.roles[0]' AS primary_role
        FROM users u
        LEFT JOIN user_profiles up ON up.user_id = u.id
@@ -923,6 +971,16 @@ router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
     )
 
     const author = userRows[0] || {}
+    const authorName = author.display_name || (author.email ? author.email.split('@')[0] : 'A tester')
+
+    createNotification(database, {
+      userId: product.creator_id,
+      actorId: userId,
+      type: 'feedback_received',
+      title: 'New Feedback Received',
+      body: `${authorName} submitted feedback on "${product.name}".`,
+      linkUrl: `/products/${product.slug || product.id}`,
+    })
 
     return res.status(201).json({
       success: true,
@@ -938,6 +996,7 @@ router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
         createdAt: new Date().toISOString(),
         userEmail: author.email || req.authUser.email || '',
         testerName: author.display_name || (author.email ? author.email.split('@')[0] : 'Community Tester'),
+        testerUsername: author.username || '',
         testerRole: author.primary_role || 'Community Tester',
       },
     })
@@ -968,6 +1027,7 @@ router.get('/:slugOrId/feedback', async (req, res, next) => {
          pf.*,
          u.email AS user_email,
          up.profile_data->>'$.displayName' AS display_name,
+         up.profile_data->>'$.username' AS username,
          up.profile_data->>'$.roles[0]' AS primary_role,
          up.profile_data->>'$.experienceLevel' AS experience_level
        FROM product_feedback pf
@@ -991,6 +1051,7 @@ router.get('/:slugOrId/feedback', async (req, res, next) => {
       updatedAt: r.updated_at,
       userEmail: r.user_email,
       testerName: r.display_name || (r.user_email ? r.user_email.split('@')[0] : 'Community Tester'),
+      testerUsername: r.username || '',
       testerRole: r.primary_role || 'Community Tester',
     }))
 

@@ -164,21 +164,40 @@ export default function SettingsMenu({ className = '' }) {
             {loading ? (
               <p className="px-3 py-2 text-sm text-[var(--text-muted)]" role="status">Session is being restored…</p>
             ) : user ? (
-              <Link
-                to="/profile/setup"
-                role="menuitem"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95]"
-              >
-                <div className="flex items-center gap-2">
-                  <svg className="h-4 w-4 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span>Profile & Preferences</span>
-                </div>
-                <span className="text-sm text-[var(--text-muted)]">Edit →</span>
-              </Link>
+              <>
+                {username && (
+                  <Link
+                    to={`/u/${username}`}
+                    role="menuitem"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95]"
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg className="h-4 w-4 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                      </svg>
+                      <span>View Public Profile</span>
+                    </div>
+                    <span className="text-xs text-[var(--text-muted)] font-mono">@{username}</span>
+                  </Link>
+                )}
+                <Link
+                  to="/profile/setup"
+                  role="menuitem"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95]"
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="h-4 w-4 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span>Profile & Preferences</span>
+                  </div>
+                  <span className="text-sm text-[var(--text-muted)]">Edit →</span>
+                </Link>
+              </>
             ) : (
               <Link
                 to="/sign-in"

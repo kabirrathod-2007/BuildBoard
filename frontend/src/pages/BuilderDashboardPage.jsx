@@ -11,6 +11,7 @@ import {
 } from '../data/targetingOptions.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
+import ExportFeedbackMenu from '../components/ExportFeedbackMenu.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 
 function isValidUrl(string) {
@@ -641,7 +642,10 @@ export default function BuilderDashboardPage() {
                   {userProducts.map((product) => {
                     const viewsCount = getProductViewCount(product.id)
                     const enrollmentsCount = getProductEnrollmentCount(product.id)
-                    const feedbackCount = getProductFeedback(product.id).length
+                    const productFeedback = getProductFeedback(product.id)
+                    const feedbackCount = productFeedback.length
+                    const enrollRate = viewsCount > 0 ? Math.min(100, Math.round((enrollmentsCount / viewsCount) * 100)) : 0
+                    const feedbackRate = enrollmentsCount > 0 ? Math.min(100, Math.round((feedbackCount / enrollmentsCount) * 100)) : 0
 
                     return (
                       <motion.article
@@ -721,7 +725,7 @@ export default function BuilderDashboardPage() {
                           </div>
                         </div>
 
-                        {/* Product Metrics Grid & Controls */}
+                        {/* Product Metrics Grid, Funnel & Controls */}
                         <div className="mt-6 border-t border-[var(--border-main)] pt-5 space-y-4">
                           <div className="grid grid-cols-3 gap-3 text-center">
                             <div className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-3">
@@ -735,6 +739,53 @@ export default function BuilderDashboardPage() {
                             <div className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-3">
                               <p className="text-sm font-bold uppercase tracking-wider text-[var(--text-subtle)]">Feedback</p>
                               <p className="mt-1 font-display text-xl sm:text-2xl font-bold text-[var(--text-main)]">{feedbackCount}</p>
+                            </div>
+                          </div>
+
+                          {/* Visual Conversion Funnel */}
+                          <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)]/70 p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)] flex items-center gap-1.5">
+                                <svg className="h-3.5 w-3.5 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                                </svg>
+                                Conversion Funnel
+                              </span>
+                              <span className="text-xs font-semibold text-[#1f3a6b] dark:text-[#dbbf95]">
+                                {enrollRate}% unlock rate
+                              </span>
+                            </div>
+
+                            <div className="space-y-2 text-xs">
+                              <div>
+                                <div className="flex justify-between text-[11px] font-semibold text-[var(--text-muted)] mb-1">
+                                  <span>1. Prototype Page Views</span>
+                                  <span className="font-mono">{viewsCount} (100%)</span>
+                                </div>
+                                <div className="h-2 w-full rounded-full bg-[var(--border-main)] overflow-hidden">
+                                  <div className="h-full rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" style={{ width: '100%' }} />
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className="flex justify-between text-[11px] font-semibold text-[var(--text-muted)] mb-1">
+                                  <span>2. Unlocked Testers (Enrolled)</span>
+                                  <span className="font-mono">{enrollmentsCount} ({enrollRate}%)</span>
+                                </div>
+                                <div className="h-2 w-full rounded-full bg-[var(--border-main)] overflow-hidden">
+                                  <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${Math.max(viewsCount > 0 ? 4 : 0, enrollRate)}%` }} />
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className="flex justify-between text-[11px] font-semibold text-[var(--text-muted)] mb-1">
+                                  <span>3. Critiques Submitted</span>
+                                  <span className="font-mono">{feedbackCount} ({feedbackRate}% of enrolled)</span>
+                                </div>
+                                <div className="h-2 w-full rounded-full bg-[var(--border-main)] overflow-hidden">
+                                  <div className="h-full rounded-full bg-amber-500 transition-all duration-500" style={{ width: `${Math.max(enrollmentsCount > 0 ? 4 : 0, feedbackRate)}%` }} />
+                                </div>
+                              </div>
                             </div>
                           </div>
 
@@ -758,6 +809,11 @@ export default function BuilderDashboardPage() {
                               >
                                 {product.enrollmentPaused ? 'Resume enrollment' : 'Pause enrollment'}
                               </button>
+                              <ExportFeedbackMenu
+                                productName={product.name}
+                                feedbackList={productFeedback}
+                                onNotice={setActionNotice}
+                              />
                               <button
                                 type="button"
                                 onClick={() => setProductToDelete(product)}
@@ -866,6 +922,13 @@ export default function BuilderDashboardPage() {
                         </option>
                       ))}
                     </select>
+
+                    <ExportFeedbackMenu
+                      productName={selectedProductId === 'all' ? 'All Products' : (userProducts.find((p) => String(p.id) === String(selectedProductId))?.name || 'Product')}
+                      feedbackList={filteredFeedback}
+                      onNotice={setActionNotice}
+                      buttonLabel="Export Inbox"
+                    />
                   </div>
                 )}
               </div>

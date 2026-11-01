@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { database } from '../config/database.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { optionalAuth } from '../middleware/optionalAuth.js'
+import { createNotification } from '../utils/notifications.js'
 
 const router = Router()
 
@@ -556,7 +557,7 @@ router.post('/:slugOrId/validate', requireAuth, async (req, res, next) => {
 
     const { slugOrId } = req.params
     const isNumeric = /^\d+$/.test(slugOrId)
-    const selectQuery = `SELECT id FROM problems WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectQuery = `SELECT id, creator_id, title, slug FROM problems WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
     const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
 
     const [rows] = await database.execute(selectQuery, selectParams)
@@ -564,7 +565,8 @@ router.post('/:slugOrId/validate', requireAuth, async (req, res, next) => {
       return res.status(404).json({ error: 'Problem hypothesis not found.' })
     }
 
-    const problemId = rows[0].id
+    const problem = rows[0]
+    const problemId = problem.id
 
     const [existing] = await database.execute(
       'SELECT id FROM problem_validations WHERE problem_id = ? AND user_id = ? LIMIT 1',
@@ -584,6 +586,15 @@ router.post('/:slugOrId/validate', requireAuth, async (req, res, next) => {
         [problemId, userId],
       )
       hasValidated = true
+
+      createNotification(database, {
+        userId: problem.creator_id,
+        actorId: userId,
+        type: 'problem_validation',
+        title: 'Problem Hypothesis Validated',
+        body: `Someone validated your problem hypothesis: "${problem.title}".`,
+        linkUrl: `/problems/${problem.slug || problem.id}`,
+      })
     }
 
     const [countRows] = await database.execute(
@@ -613,7 +624,7 @@ router.post('/:slugOrId/tester-signup', requireAuth, async (req, res, next) => {
 
     const { slugOrId } = req.params
     const isNumeric = /^\d+$/.test(slugOrId)
-    const selectQuery = `SELECT id FROM problems WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectQuery = `SELECT id, creator_id, title, slug FROM problems WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
     const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
 
     const [rows] = await database.execute(selectQuery, selectParams)
@@ -621,7 +632,8 @@ router.post('/:slugOrId/tester-signup', requireAuth, async (req, res, next) => {
       return res.status(404).json({ error: 'Problem hypothesis not found.' })
     }
 
-    const problemId = rows[0].id
+    const problem = rows[0]
+    const problemId = problem.id
 
     const [existing] = await database.execute(
       'SELECT id FROM problem_tester_signups WHERE problem_id = ? AND user_id = ? LIMIT 1',
@@ -641,6 +653,15 @@ router.post('/:slugOrId/tester-signup', requireAuth, async (req, res, next) => {
         [problemId, userId],
       )
       hasSignedUp = true
+
+      createNotification(database, {
+        userId: problem.creator_id,
+        actorId: userId,
+        type: 'problem_signup',
+        title: 'New Tester Waitlist Signup',
+        body: `A tester joined the early testing waitlist for "${problem.title}".`,
+        linkUrl: `/problems/${problem.slug || problem.id}`,
+      })
     }
 
     const [countRows] = await database.execute(
@@ -670,7 +691,7 @@ router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
 
     const { slugOrId } = req.params
     const isNumeric = /^\d+$/.test(slugOrId)
-    const selectQuery = `SELECT id, creator_id FROM problems WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectQuery = `SELECT id, creator_id, title, slug FROM problems WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
     const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
 
     const [rows] = await database.execute(selectQuery, selectParams)
@@ -687,13 +708,15 @@ router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
     }
 
     let validParentId = null
+    let parentAuthorUserId = null
     if (parentId) {
       const [parentRows] = await database.execute(
-        'SELECT id FROM problem_comments WHERE id = ? AND problem_id = ? LIMIT 1',
+        'SELECT id, user_id FROM problem_comments WHERE id = ? AND problem_id = ? LIMIT 1',
         [Number(parentId), problem.id],
       )
       if (parentRows.length > 0) {
         validParentId = parentRows[0].id
+        parentAuthorUserId = parentRows[0].user_id
       }
     }
 
@@ -714,6 +737,28 @@ router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
       [userId],
     )
     const author = userRows[0] || {}
+    const authorName = author.display_name || (author.email ? author.email.split('@')[0] : 'A contributor')
+
+    // Dispatch notifications
+    createNotification(database, {
+      userId: problem.creator_id,
+      actorId: userId,
+      type: 'problem_comment',
+      title: 'New Comment on Problem Hypothesis',
+      body: `${authorName} commented on "${problem.title}": "${trimmedText.slice(0, 80)}${trimmedText.length > 80 ? '...' : ''}"`,
+      linkUrl: `/problems/${problem.slug || problem.id}`,
+    })
+
+    if (parentAuthorUserId && Number(parentAuthorUserId) !== Number(problem.creator_id)) {
+      createNotification(database, {
+        userId: parentAuthorUserId,
+        actorId: userId,
+        type: 'comment_reply',
+        title: 'New Reply to Your Comment',
+        body: `${authorName} replied to your comment on "${problem.title}".`,
+        linkUrl: `/problems/${problem.slug || problem.id}`,
+      })
+    }
 
     return res.status(201).json({
       success: true,

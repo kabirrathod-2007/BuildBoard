@@ -184,6 +184,11 @@ export default function ProductDetailsPage() {
     makerProfile?.displayName?.trim() ||
     product?.maker ||
     (product?.creatorEmail ? product.creatorEmail.split('@')[0] : 'Independent Creator')
+  const makerUsername =
+    makerProfile?.username ||
+    product?.creatorUsername ||
+    product?.makerUsername ||
+    ''
   const isEnrolled = user && product
     ? (Boolean(product?.isEnrolled) || isEnrolledInProduct(product.id, user.email) || isEnrolledInProduct(product.slug, user.email))
     : false
@@ -838,9 +843,20 @@ export default function ProductDetailsPage() {
                   <h3 className="font-display text-base sm:text-lg font-bold text-[var(--text-main)]">
                     Product Maker
                   </h3>
-                  <p className="mt-2 text-sm sm:text-base leading-relaxed text-[var(--text-muted)] break-words break-all [overflow-wrap:anywhere]">
-                    {makerName}
-                  </p>
+                  {makerUsername ? (
+                    <Link
+                      to={`/u/${makerUsername}`}
+                      className="mt-2 inline-flex items-center gap-1.5 text-sm sm:text-base font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline"
+                    >
+                      <span>{makerName}</span>
+                      <span className="font-mono text-xs text-[var(--text-subtle)] font-normal">(@{makerUsername})</span>
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  ) : (
+                    <p className="mt-2 text-sm sm:text-base leading-relaxed text-[var(--text-muted)] break-words break-all [overflow-wrap:anywhere]">
+                      {makerName}
+                    </p>
+                  )}
                   <div className="mt-5 flex items-center gap-3 min-w-0">
                     <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1f3a6b] font-display text-sm font-bold text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]">
                       {makerName.charAt(0).toUpperCase()}

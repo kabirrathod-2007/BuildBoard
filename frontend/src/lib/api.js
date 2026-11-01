@@ -227,5 +227,49 @@ export async function attachProblemSolutionApi(slugOrId, solutionData) {
   })
 }
 
+// ----------------------------------------------------------------------
+// Public Profile & View Counter
+// ----------------------------------------------------------------------
+export async function fetchPublicProfile(username) {
+  if (!username) throw new Error('Username is required.')
+  return request(`/api/profiles/u/${encodeURIComponent(username)}`, { method: 'GET' })
+}
+
+export async function recordProductViewApi(slugOrId) {
+  if (!slugOrId) return { success: false }
+  try {
+    return await request(`/api/products/${encodeURIComponent(slugOrId)}/view`, {
+      method: 'POST',
+    })
+  } catch {
+    // Graceful view counter tracking error swallow
+    return { success: false }
+  }
+}
+
+// ----------------------------------------------------------------------
+// Notifications
+// ----------------------------------------------------------------------
+export async function fetchNotifications() {
+  if (!isFirebaseConfigured || !firebaseAuth?.currentUser) {
+    return { notifications: [], unreadCount: 0 }
+  }
+  return request('/api/notifications', { method: 'GET' })
+}
+
+export async function markNotificationRead(id) {
+  if (!id) return { success: false }
+  return request(`/api/notifications/${encodeURIComponent(id)}/read`, {
+    method: 'PATCH',
+  })
+}
+
+export async function markAllNotificationsRead() {
+  return request('/api/notifications/read-all', {
+    method: 'POST',
+  })
+}
+
+
 
 

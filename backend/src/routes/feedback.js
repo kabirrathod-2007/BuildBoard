@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { database } from '../config/database.js'
 import { requireAuth } from '../middleware/requireAuth.js'
+import { createNotification } from '../utils/notifications.js'
 
 const router = Router()
 
@@ -121,6 +122,8 @@ router.post('/:id/reply', requireAuth, async (req, res, next) => {
       `SELECT 
          pf.*,
          p.creator_id,
+         p.name AS product_name,
+         p.slug AS product_slug,
          up.profile_data->>'$.displayName' AS maker_name,
          u.email AS creator_email
        FROM product_feedback pf
@@ -155,6 +158,15 @@ router.post('/:id/reply', requireAuth, async (req, res, next) => {
       [JSON.stringify(reply), feedbackRecord.id],
     )
 
+    createNotification(database, {
+      userId: feedbackRecord.user_id,
+      actorId: userId,
+      type: 'feedback_reply',
+      title: 'Maker Replied to Your Feedback',
+      body: `${reply.repliedBy} replied on "${feedbackRecord.product_name}": "${replyText.slice(0, 100)}${replyText.length > 100 ? '...' : ''}"`,
+      linkUrl: `/tester/studio`,
+    })
+
     return res.json({
       success: true,
       feedbackId: String(feedbackRecord.id),
@@ -180,8 +192,11 @@ router.patch('/:id/helpful', requireAuth, async (req, res, next) => {
     const [rows] = await database.execute(
       `SELECT 
          pf.id, 
+         pf.user_id,
          pf.is_helpful, 
-         p.creator_id
+         p.creator_id,
+         p.name AS product_name,
+         p.slug AS product_slug
        FROM product_feedback pf
        JOIN products p ON p.id = pf.product_id
        WHERE pf.id = ? LIMIT 1`,
@@ -204,6 +219,17 @@ router.patch('/:id/helpful', requireAuth, async (req, res, next) => {
       'UPDATE product_feedback SET is_helpful = ?, helpful_marked_at = ? WHERE id = ?',
       [nextState, helpfulMarkedAt, feedbackRecord.id],
     )
+
+    if (nextState) {
+      createNotification(database, {
+        userId: feedbackRecord.user_id,
+        actorId: userId,
+        type: 'feedback_helpful',
+        title: 'Feedback Recognized (+1 Point)',
+        body: `The maker of "${feedbackRecord.product_name}" marked your critique as helpful! You earned +1 recognition point.`,
+        linkUrl: `/tester/studio`,
+      })
+    }
 
     return res.json({
       success: true,

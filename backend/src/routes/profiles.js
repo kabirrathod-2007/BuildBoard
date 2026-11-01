@@ -224,4 +224,166 @@ router.put('/me', requireAuth, async (req, res, next) => {
   }
 })
 
+// ----------------------------------------------------------------------
+// GET /api/profiles/u/:username (Public maker & tester portfolio)
+// ----------------------------------------------------------------------
+router.get('/u/:username', async (req, res, next) => {
+  try {
+    const rawUsername = (req.params.username || '').trim().toLowerCase().replace(/^@/, '')
+    if (!rawUsername) {
+      return res.status(400).json({ error: 'Username is required.' })
+    }
+
+    const [userRows] = await database.execute(
+      `SELECT u.id, u.email, u.created_at, up.profile_data, up.updated_at
+       FROM users u
+       JOIN user_profiles up ON up.user_id = u.id
+       WHERE LOWER(up.profile_data->>'$.username') = ?
+       LIMIT 1`,
+      [rawUsername],
+    )
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ error: 'User profile not found.' })
+    }
+
+    const user = userRows[0]
+    const profile = user.profile_data || {}
+
+    // 1. Calculate helpful recognition points
+    const [pointRows] = await database.execute(
+      'SELECT COUNT(*) AS points FROM product_feedback WHERE user_id = ? AND is_helpful = 1',
+      [user.id],
+    )
+    const recognitionPoints = Number(pointRows[0]?.points || 0)
+
+    // 2. Calculate feedback count
+    const [feedbackRows] = await database.execute(
+      'SELECT COUNT(*) AS count FROM product_feedback WHERE user_id = ?',
+      [user.id],
+    )
+    const feedbackCount = Number(feedbackRows[0]?.count || 0)
+
+    // 3. Fetch products launched by this user
+    let products = []
+    try {
+      const [productRows] = await database.execute(
+        `SELECT id, slug, name, tagline, stage, image_url, enrollment_paused, 
+                (SELECT COUNT(*) FROM product_enrollments WHERE product_id = p.id) AS enrollment_count,
+                (SELECT COUNT(*) FROM product_feedback WHERE product_id = p.id) AS feedback_count,
+                created_at
+         FROM products p
+         WHERE creator_id = ?
+         ORDER BY created_at DESC`,
+        [user.id],
+      )
+      products = productRows.map((p) => ({
+        id: String(p.id),
+        slug: p.slug,
+        name: p.name,
+        tagline: p.tagline,
+        stage: p.stage,
+        imageUrl: p.image_url || '',
+        enrollmentPaused: Boolean(p.enrollment_paused),
+        enrollmentCount: Number(p.enrollment_count || 0),
+        feedbackCount: Number(p.feedback_count || 0),
+        createdAt: p.created_at,
+      }))
+    } catch (prodErr) {
+      console.warn('[BuildBoard Public Profile] Error fetching user products:', prodErr.message)
+    }
+
+    // 4. Fetch problems posted by this user (if problems table exists)
+    let problems = []
+    try {
+      const [problemRows] = await database.execute(
+        `SELECT p.id, p.slug, p.title, p.statement, p.category, p.stage, p.created_at,
+           (SELECT COUNT(*) FROM problem_validations WHERE problem_id = p.id) AS validation_count,
+           (SELECT COUNT(*) FROM problem_comments WHERE problem_id = p.id) AS comment_count
+         FROM problems p
+         WHERE p.creator_id = ?
+         ORDER BY p.created_at DESC`,
+        [user.id],
+      )
+      problems = problemRows.map((pr) => ({
+        id: String(pr.id),
+        slug: pr.slug,
+        title: pr.title,
+        statement: pr.statement,
+        category: pr.category,
+        stage: pr.stage,
+        validationCount: Number(pr.validation_count || 0),
+        commentCount: Number(pr.comment_count || 0),
+        createdAt: pr.created_at,
+      }))
+    } catch (err) {
+      if (err.code !== 'ER_NO_SUCH_TABLE') {
+        console.warn('[BuildBoard Public Profile] Error fetching problems:', err.message)
+      }
+    }
+
+    // 5. Fetch recent helpful feedback notes awarded to this tester
+    let recentRecognitions = []
+    try {
+      const [reconRows] = await database.execute(
+        `SELECT pf.id, pf.category, pf.experience, pf.helpful_marked_at, pf.builder_reply,
+                p.id AS product_id, p.slug AS product_slug, p.name AS product_name
+         FROM product_feedback pf
+         JOIN products p ON p.id = pf.product_id
+         WHERE pf.user_id = ? AND pf.is_helpful = 1
+         ORDER BY pf.helpful_marked_at DESC
+         LIMIT 10`,
+        [user.id],
+      )
+      recentRecognitions = reconRows.map((r) => ({
+        id: String(r.id),
+        category: r.category,
+        experience: r.experience,
+        helpfulMarkedAt: r.helpful_marked_at,
+        builderReply: r.builder_reply,
+        product: {
+          id: String(r.product_id),
+          slug: r.product_slug,
+          name: r.product_name,
+        },
+      }))
+    } catch (reconErr) {
+      console.warn('[BuildBoard Public Profile] Error fetching recognitions:', reconErr.message)
+    }
+
+    // Assemble safe public profile
+    return res.json({
+      user: {
+        id: String(user.id),
+        displayName: profile.displayName || rawUsername,
+        username: profile.username || rawUsername,
+        bio: profile.bio || '',
+        location: profile.location || '',
+        website: profile.website || '',
+        github: profile.github || '',
+        twitter: profile.twitter || '',
+        linkedin: profile.linkedin || '',
+        roles: profile.roles || [],
+        industries: profile.industries || [],
+        technologies: profile.technologies || [],
+        testingDevices: profile.testingDevices || [],
+        experienceLevel: profile.experienceLevel || '',
+        availability: profile.availability || '',
+        memberSince: user.created_at,
+      },
+      stats: {
+        recognitionPoints,
+        feedbackCount,
+        productsLaunchedCount: products.length,
+        problemsPostedCount: problems.length,
+      },
+      products,
+      problems,
+      recentRecognitions,
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
 export default router
