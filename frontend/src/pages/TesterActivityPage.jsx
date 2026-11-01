@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -15,9 +15,19 @@ export default function TesterActivityPage() {
     getUserFeedback,
     getTesterRecognition,
     getProfile,
+    loadMyFeedback,
+    loadMyEnrollments,
   } = useDemoData()
   const navigate = useNavigate()
   const location = useLocation()
+
+  // On mount or user change, fetch fresh cloud feedback & enrollments
+  useEffect(() => {
+    if (user?.email) {
+      loadMyFeedback?.()
+      loadMyEnrollments?.()
+    }
+  }, [user?.email, loadMyFeedback, loadMyEnrollments])
 
   // Active view tab: 'enrolled' | 'recognition' | 'all-feedback'
   const [activeTab, setActiveTab] = useState('enrolled')
@@ -407,7 +417,7 @@ export default function TesterActivityPage() {
                   /* List of enrolled prototypes */
                   <div className="mt-6 grid gap-5">
                     {filteredEnrolled.map(({ productId, enrolledAt, product }) => {
-                      const submittedNotes = feedbackByProduct.get(productId) || []
+                      const submittedNotes = feedbackByProduct.get(String(productId)) || []
                       const hasFeedback = submittedNotes.length > 0
                       const latestNote = hasFeedback ? submittedNotes[0] : null
 

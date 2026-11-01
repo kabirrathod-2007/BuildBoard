@@ -276,11 +276,37 @@ export const DemoDataProvider = ({ children }) => {
   }, [user?.email, user?.emailVerified])
 
   // Synchronize authenticated user enrollments with MySQL cloud API
+  const loadMyEnrollments = useCallback(async () => {
+    if (!user?.email) return []
+    try {
+      const res = await fetchMyEnrollments()
+      if (Array.isArray(res?.enrollments)) {
+        const normalized = user.email.toLowerCase().trim()
+        const newEntries = {}
+        for (const item of res.enrollments) {
+          const enrolledAt = item.enrolledAt || new Date().toISOString()
+          if (item.product?.id) {
+            newEntries[`${normalized}:${item.product.id}`] = enrolledAt
+          }
+          if (item.product?.slug) {
+            newEntries[`${normalized}:${item.product.slug}`] = enrolledAt
+          }
+        }
+        // Reset to only THIS user's active cloud enrollments so accounts don't bleed
+        setEnrollments(newEntries)
+        return res.enrollments
+      }
+    } catch (err) {
+      console.warn('[BuildBoard] Could not load user enrollments:', err.message)
+    }
+    return []
+  }, [user])
+
   useEffect(() => {
     if (!user?.email || !user?.emailVerified) return
     let active = true
 
-    async function loadCloudEnrollments() {
+    async function syncCloudEnrollments() {
       try {
         const res = await fetchMyEnrollments()
         if (active && Array.isArray(res?.enrollments)) {
@@ -295,47 +321,78 @@ export const DemoDataProvider = ({ children }) => {
               newEntries[`${normalized}:${item.product.slug}`] = enrolledAt
             }
           }
-          // Reset to only THIS user's active cloud enrollments so accounts don't bleed
           setEnrollments(newEntries)
         }
       } catch (err) {
-        console.warn('[BuildBoard] Could not load user enrollments:', err.message)
+        if (active) {
+          console.warn('[BuildBoard] Could not load user enrollments:', err.message)
+        }
       }
     }
 
-    loadCloudEnrollments()
+    syncCloudEnrollments()
 
     return () => {
       active = false
     }
-  }, [user?.email, user?.emailVerified])
+  }, [user])
 
   // Synchronize authenticated user feedback with MySQL cloud API
+  const loadMyFeedback = useCallback(async () => {
+    if (!user?.email) return []
+    try {
+      const res = await fetchMyFeedback()
+      if (Array.isArray(res?.feedback)) {
+        const normalized = user.email.toLowerCase().trim()
+        const list = res.feedback.map((f) => ({
+          ...f,
+          userEmail: (f.userEmail || normalized).toLowerCase().trim(),
+        }))
+        setFeedbackList((prev) => {
+          const incomingIds = new Set(list.map((f) => String(f.id)))
+          const remaining = prev.filter((f) => !incomingIds.has(String(f.id)))
+          return [...list, ...remaining]
+        })
+        return list
+      }
+    } catch (err) {
+      console.warn('[BuildBoard] Could not load user feedback from cloud:', err.message)
+    }
+    return []
+  }, [user])
+
   useEffect(() => {
     if (!user?.email || !user?.emailVerified) return
     let active = true
 
-    async function loadCloudFeedback() {
+    async function syncCloudFeedback() {
       try {
         const res = await fetchMyFeedback()
         if (active && Array.isArray(res?.feedback)) {
+          const normalized = user.email.toLowerCase().trim()
+          const list = res.feedback.map((f) => ({
+            ...f,
+            userEmail: (f.userEmail || normalized).toLowerCase().trim(),
+          }))
           setFeedbackList((prev) => {
-            const incomingIds = new Set(res.feedback.map((f) => String(f.id)))
+            const incomingIds = new Set(list.map((f) => String(f.id)))
             const remaining = prev.filter((f) => !incomingIds.has(String(f.id)))
-            return [...res.feedback, ...remaining]
+            return [...list, ...remaining]
           })
         }
       } catch (err) {
-        console.warn('[BuildBoard] Could not load user feedback from cloud:', err.message)
+        if (active) {
+          console.warn('[BuildBoard] Could not load user feedback from cloud:', err.message)
+        }
       }
     }
 
-    loadCloudFeedback()
+    syncCloudFeedback()
 
     return () => {
       active = false
     }
-  }, [user?.email, user?.emailVerified])
+  }, [user])
 
   // Reminder dismissals mapping: key is "userEmail:productId", value is dismissal timestamp
   const [reminderDismissals, setReminderDismissals] = useState(() => {
@@ -652,11 +709,15 @@ export const DemoDataProvider = ({ children }) => {
       try {
         const res = await submitProductFeedback(productId, { category, experience, likes })
         if (res?.feedback) {
+          const feedbackItem = {
+            ...res.feedback,
+            userEmail: (res.feedback.userEmail || userEmail || user?.email || '').toLowerCase().trim(),
+          }
           setFeedbackList((prev) => [
-            res.feedback,
-            ...prev.filter((f) => String(f.id) !== String(res.feedback.id)),
+            feedbackItem,
+            ...prev.filter((f) => String(f.id) !== String(feedbackItem.id)),
           ])
-          return res.feedback
+          return feedbackItem
         }
       } catch (err) {
         console.error('Failed to submit feedback to server:', err)
@@ -842,7 +903,10 @@ export const DemoDataProvider = ({ children }) => {
     const normalized = userEmail.toLowerCase().trim()
     const helpfulItems = feedbackList
       .filter(
-        (fb) => fb.userEmail && fb.userEmail.toLowerCase().trim() === normalized && fb.isHelpful
+        (fb) =>
+          ((fb.userEmail && fb.userEmail.toLowerCase().trim() === normalized) ||
+            (!fb.userEmail && user?.email && user.email.toLowerCase().trim() === normalized)) &&
+          fb.isHelpful
       )
       .map((fb) => ({
         ...fb,
@@ -853,10 +917,10 @@ export const DemoDataProvider = ({ children }) => {
       helpfulCount: helpfulItems.length,
       items: helpfulItems,
     }
-  }, [feedbackList, products])
+  }, [feedbackList, products, user])
 
   // --- User-specific queries for Tester Activity ---
-  const getUserEnrolledProducts = (userEmail) => {
+  const getUserEnrolledProducts = useCallback((userEmail) => {
     if (!userEmail) return []
     const normalized = userEmail.toLowerCase().trim()
     const prefix = `${normalized}:`
@@ -866,11 +930,11 @@ export const DemoDataProvider = ({ children }) => {
     for (const [key, enrolledAt] of Object.entries(enrollments)) {
       if (key.startsWith(prefix)) {
         const productKey = key.slice(prefix.length)
-        const product = products.find((p) => p.id === productKey || p.slug === productKey)
-        if (product && !seenProductIds.has(product.id)) {
-          seenProductIds.add(product.id)
+        const product = products.find((p) => String(p.id) === String(productKey) || p.slug === productKey)
+        if (product && !seenProductIds.has(String(product.id))) {
+          seenProductIds.add(String(product.id))
           list.push({
-            productId: product.id,
+            productId: String(product.id),
             enrolledAt,
             product,
           })
@@ -878,19 +942,23 @@ export const DemoDataProvider = ({ children }) => {
       }
     }
     return list.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt))
-  }
+  }, [enrollments, products])
 
   const getUserFeedback = useCallback((userEmail) => {
     if (!userEmail) return []
     const normalized = userEmail.toLowerCase().trim()
     return feedbackList
-      .filter((fb) => fb.userEmail && fb.userEmail.toLowerCase().trim() === normalized)
+      .filter(
+        (fb) =>
+          (fb.userEmail && fb.userEmail.toLowerCase().trim() === normalized) ||
+          (!fb.userEmail && user?.email && user.email.toLowerCase().trim() === normalized)
+      )
       .map((fb) => ({
         ...fb,
         product: fb.product || products.find((p) => String(p.id) === String(fb.productId) || p.slug === fb.productId) || null,
       }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  }, [feedbackList, products])
+  }, [feedbackList, products, user])
 
   // --- User-specific queries for Builder Dashboard ---
   const getUserProducts = (userEmail) => {
@@ -1481,6 +1549,8 @@ export const DemoDataProvider = ({ children }) => {
         replyToFeedback,
         toggleFeedbackHelpful,
         getTesterRecognition,
+        loadMyFeedback,
+        loadMyEnrollments,
         getUserEnrolledProducts,
         getUserFeedback,
         profiles,

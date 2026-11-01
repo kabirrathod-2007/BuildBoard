@@ -35,12 +35,23 @@ router.get('/me', requireAuth, async (req, res, next) => {
     const [rows] = await database.execute(
       `SELECT 
          pf.*,
+         u.email AS user_email,
+         up.profile_data->>'$.displayName' AS display_name,
+         up.profile_data->>'$.roles[0]' AS primary_role,
          p.slug AS product_slug,
          p.name AS product_name,
          p.tagline AS product_tagline,
-         p.image_url AS product_image
+         p.image_url AS product_image,
+         p.stage AS product_stage,
+         p.feedback_request AS product_feedback_request,
+         maker.email AS creator_email,
+         maker_profile.profile_data->>'$.displayName' AS maker_name
        FROM product_feedback pf
        JOIN products p ON p.id = pf.product_id
+       JOIN users u ON u.id = pf.user_id
+       LEFT JOIN user_profiles up ON up.user_id = pf.user_id
+       LEFT JOIN users maker ON maker.id = p.creator_id
+       LEFT JOIN user_profiles maker_profile ON maker_profile.user_id = p.creator_id
        WHERE pf.user_id = ?
        ORDER BY pf.created_at DESC`,
       [userId],
@@ -57,12 +68,18 @@ router.get('/me', requireAuth, async (req, res, next) => {
       reply: parseReply(r.builder_reply),
       createdAt: r.created_at,
       updatedAt: r.updated_at,
+      userEmail: r.user_email || req.authUser.email || '',
+      testerName: r.display_name || (r.user_email ? r.user_email.split('@')[0] : 'Community Tester'),
+      testerRole: r.primary_role || 'Community Tester',
       product: {
         id: String(r.product_id),
         slug: r.product_slug,
         name: r.product_name,
         tagline: r.product_tagline,
         image: r.product_image || '',
+        stage: r.product_stage || 'Working prototype',
+        feedbackRequest: r.product_feedback_request || '',
+        maker: r.maker_name || (r.creator_email ? r.creator_email.split('@')[0] : 'Maker'),
       },
     }))
 
