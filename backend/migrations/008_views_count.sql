@@ -6,3 +6,4 @@ USE buildboard;
 
 ALTER TABLE products 
   ADD COLUMN IF NOT EXISTS views_count INT UNSIGNED NOT NULL DEFAULT 0;
+

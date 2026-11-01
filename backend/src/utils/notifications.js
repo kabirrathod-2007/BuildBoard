@@ -28,3 +28,4 @@ export async function createNotification(database, {
     return null
   }
 }
+
