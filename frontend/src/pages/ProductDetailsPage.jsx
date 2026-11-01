@@ -145,21 +145,24 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     if (!productId) return
     let active = true
+
     async function loadDetail() {
       try {
         const res = await fetchProduct(productId)
-        if (active && res?.product) {
-          setServerDetail(res.product)
+        if (active) {
+          setServerDetail(res?.product || null)
         }
       } catch {
-        // Fall back to context product if offline or sample
+        if (active) {
+          setServerDetail(null)
+        }
       }
     }
     loadDetail()
     return () => {
       active = false
     }
-  }, [productId, user?.email])
+  }, [productId, user?.uid, user?.email])
 
   const product = serverDetail || contextProduct
   const makerProfile = product?.creatorEmail ? getProfile(product.creatorEmail) : null

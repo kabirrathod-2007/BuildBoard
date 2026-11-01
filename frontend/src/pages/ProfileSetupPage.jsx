@@ -42,7 +42,7 @@ function ProfilePageContent({
   // Profile preferences
   const [displayName, setDisplayName] = useState(savedProfile?.displayName || '')
   const [participation, setParticipation] = useState(
-    savedProfile?.participation || ['tester']
+    savedProfile?.participation || []
   )
   const [experienceLevel, setExperienceLevel] = useState(
     savedProfile?.experienceLevel || ''
@@ -54,13 +54,13 @@ function ProfilePageContent({
     savedProfile?.technologies || []
   )
   const [testingDevices, setTestingDevices] = useState(
-    savedProfile?.testingDevices || ['Chrome / Web Browser', 'macOS (Apple Silicon / Intel)']
+    savedProfile?.testingDevices || []
   )
   const [feedbackFocus, setFeedbackFocus] = useState(
-    savedProfile?.feedbackFocus || ['UI & Visual Polish', 'UX Flows & Navigation']
+    savedProfile?.feedbackFocus || []
   )
   const [availability, setAvailability] = useState(
-    savedProfile?.availability || '3-5 hours / week'
+    savedProfile?.availability || ''
   )
 
   // Account & identity settings

@@ -243,19 +243,12 @@ export const DemoDataProvider = ({ children }) => {
             },
           }))
         } else {
-          // No profile in cloud yet: mark existing local demo profile if present
+          // No profile in cloud yet: ensure clean slate so brand new accounts start fresh
           setProfiles((prev) => {
-            const existing = prev[normalizedEmail]
-            if (existing && existing.isServerSynced !== false) {
-              return {
-                ...prev,
-                [normalizedEmail]: {
-                  ...existing,
-                  isServerSynced: false,
-                },
-              }
-            }
-            return prev
+            if (!prev[normalizedEmail]) return prev
+            const copy = { ...prev }
+            delete copy[normalizedEmail]
+            return copy
           })
         }
       } catch (err) {
@@ -297,7 +290,8 @@ export const DemoDataProvider = ({ children }) => {
               newEntries[`${normalized}:${item.product.slug}`] = enrolledAt
             }
           }
-          setEnrollments((prev) => ({ ...prev, ...newEntries }))
+          // Reset to only THIS user's active cloud enrollments so accounts don't bleed
+          setEnrollments(newEntries)
         }
       } catch (err) {
         console.warn('[BuildBoard] Could not load user enrollments:', err.message)
