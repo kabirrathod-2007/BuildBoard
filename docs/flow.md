@@ -526,7 +526,67 @@ sequenceDiagram
 
 ---
 
-## 14. End-to-End Sequence Diagram
+## 14. Journey 12: Cross-Account Cloud Feedback, Builder Reply & Recognition Loop
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Tester as Tester (Account B)
+    actor Builder as Builder (Account A)
+    participant UI as ProductDetailsPage
+    participant DemoCtx as DemoDataContext
+    participant API as Express API (:3001)
+    participant MySQL as MySQL Database
+
+    Note over Tester,MySQL: Phase 1: Feedback Submission (Enrolled Tester B on Product A)
+    Tester->>UI: Fills feedback (category, experience, delights)
+    Tester->>UI: Clicks "Submit Feedback"
+    UI->>DemoCtx: addFeedback({ productId, category, experience, likes })
+    DemoCtx->>API: POST /api/products/:slug/feedback (Bearer Token B)
+    API->>MySQL: SELECT creator_id FROM products WHERE id = ?
+    API->>MySQL: Check enrollment: SELECT id FROM product_enrollments WHERE user_id = ? AND product_id = ?
+    alt Not Enrolled or Is Product Owner
+        API-->>DemoCtx: 403 Forbidden (Enrollment required / Self-critique blocked)
+    else Enrolled & Not Owner
+        API->>MySQL: INSERT INTO product_feedback (product_id, user_id, category, experience, likes)
+        MySQL-->>API: 201 Created (insertId)
+        API-->>DemoCtx: { success: true, feedback: { id, productId, ... } }
+        DemoCtx-->>UI: Updates feedbackList state
+        UI-->>Tester: Shows "Feedback Submitted" confirmation preview
+    end
+
+    Note over Builder,MySQL: Phase 2: Builder Reviews, Replies & Awards Recognition (Account A)
+    Builder->>UI: Opens /products/:slug (or Builder Dashboard)
+    UI->>DemoCtx: loadProductFeedback(productId)
+    DemoCtx->>API: GET /api/products/:slug/feedback
+    API->>MySQL: SELECT pf.*, u.email, up.profile_data FROM product_feedback pf JOIN users u ...
+    MySQL-->>API: Feedback rows with tester display name & roles
+    API-->>DemoCtx: 200 OK { feedback: [...] }
+    DemoCtx-->>UI: Renders community feedback card with Maker Controls
+    Builder->>UI: Clicks "★ Mark Helpful (+1 Point)"
+    UI->>DemoCtx: toggleFeedbackHelpful(feedbackId, user.email)
+    DemoCtx->>API: PATCH /api/feedback/:id/helpful (Bearer Token A)
+    API->>MySQL: Verify product ownership & UPDATE product_feedback SET is_helpful = ?, helpful_marked_at = ?
+    API-->>DemoCtx: 200 OK { success: true, isHelpful: true }
+
+    Builder->>UI: Dispatches maker reply text
+    UI->>DemoCtx: replyToFeedback(feedbackId, user.email, replyDraft)
+    DemoCtx->>API: POST /api/feedback/:id/reply (Bearer Token A)
+    API->>MySQL: Verify product ownership & UPDATE product_feedback SET builder_reply = ?
+    API-->>DemoCtx: 200 OK { success: true, reply: {...} }
+
+    Note over Tester,MySQL: Phase 3: Tester Activity Recognition Sync (Account B)
+    Tester->>UI: Opens /tester/activity
+    UI->>DemoCtx: Syncs fetchMyFeedback()
+    DemoCtx->>API: GET /api/feedback/me (Bearer Token B)
+    API->>MySQL: SELECT * FROM product_feedback WHERE user_id = ?
+    API-->>DemoCtx: 200 OK { feedback: [...], recognition: { totalPoints: 1, helpfulCount: 1 } }
+    DemoCtx-->>UI: Displays +1 Recognition Point badge & published Maker Reply
+```
+
+---
+
+## 15. End-to-End Sequence Diagram
 
 ```
 +---------------+           +---------------+           +-----------------+          +-------------------+

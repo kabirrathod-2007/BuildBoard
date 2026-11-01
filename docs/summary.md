@@ -188,20 +188,15 @@ BuildBoard is currently operating in a **hybrid architecture phase**:
 - **Authentication & User Identity**: Fully migrated to production cloud infrastructure. User accounts, secure password hashing, and email verification are managed via **Firebase Authentication**. An **Express 5 API** cryptographically verifies Firebase ID tokens and maintains synchronized user records in **MySQL** keyed by the immutable `firebase_uid`.
 - **User Profile Persistence (Milestone 1 — Shipped)**: `user_profiles` table implemented in MySQL (`user_id` FK to `users`, `profile_data JSON`). Dedicated authenticated endpoints (`GET /api/profiles/me` and `PUT /api/profiles/me`) validate and persist profile data. The frontend client (`DemoDataContext.jsx` and `ProfileSetupPage.jsx`) automatically fetches cloud profiles, pre-fills from local demo profiles without overwriting server data, and persists changes directly to MySQL.
 - **Product Listings Persistence (Milestone 2 — Shipped)**: Normalized `products`, `product_target_criteria`, and `product_test_steps` tables implemented in MySQL. Full CRUD and pause/resume routes (`/api/products`) with `optionalAuth` and `requireAuth`. Strictly masks `product_url` in public catalog and unlocks it for verified product owners. Fully verified in MySQL and UI.
-- **Enrollments & Gated Prototype Access (Milestone 3 — Implementation Complete, Verification in Progress)**: `product_enrollments` table designed with unique composite keys `(user_id, product_id)`. Enrollment endpoints (`POST/DELETE /api/products/:slugOrId/enroll`, `GET /api/enrollments/me`) enforce owner exclusion, paused enrollment gating, and unmask `productUrl` strictly for verified enrolled testers. Frontend synchronizes active tester enrollments.
-- **Domain Modeling & Community Data**: Structured reviews, replies, and problem threads currently continue to execute via client-side storage (`localStorage` and `IndexedDB`) to maintain instant prototyping without database migration disruption.
+- **Enrollments & Gated Prototype Access (Milestone 3 — Shipped)**: `product_enrollments` table deployed with unique composite keys `(user_id, product_id)`. Enrollment endpoints (`POST/DELETE /api/products/:slugOrId/enroll`, `GET /api/enrollments/me`) enforce owner exclusion, paused enrollment gating, and unmask `productUrl` strictly for verified enrolled testers. Frontend synchronizes active tester enrollments and prevents cross-account state bleeding.
+- **Structured Feedback & Maker Replies (Milestone 4 — Shipped & Ready for Verification)**: `product_feedback` table authored in MySQL (`product_id`, `user_id`, `category`, `experience`, `likes`, `is_helpful`, `helpful_marked_at`, `builder_reply` JSON). Authenticated endpoints (`POST /api/products/:slugOrId/feedback`, `GET /api/products/:slugOrId/feedback`, `GET /api/feedback/me`, `POST /api/feedback/:id/reply`, `PATCH /api/feedback/:id/helpful`) enforce tester enrollment, block owner self-feedback, record structured critiques, allow makers to reply and award +1 recognition points, and sync tester activity across accounts and devices.
+- **Problem Forum (Milestone 5 — Next)**: Problems forum currently continues to execute via client-side storage (`localStorage` and `IndexedDB`) before being migrated in the next milestone.
 
 ### Next Roadmap Milestones
-1. **Milestone 3 — Enrollments and Gated Prototype Access (Verification Phase)**:
-   - Execute `004_enrollments.sql` migration in TablePlus.
-   - Run Postman / UI verification on enrollment lifecycle and gated link access.
-2. **Milestone 4 — Feedback and Builder Replies**:
-   - Persist structured feedback, builder replies, and helpful marks in MySQL.
-   - Calculate recognition points deterministically from persisted helpful marks.
-3. **Milestone 4 — Feedback and Builder Replies**:
-   - Persist structured feedback, builder replies, and helpful marks in MySQL.
-   - Calculate recognition points deterministically from persisted helpful marks.
-4. **Milestone 5 — Problem Hub**:
-   - Persist problem posts, nested comments, and validation upvotes in MySQL.
-5. **Milestone 6 — Frontend Full Data Migration & Cleanup**:
-   - Transition all remaining demo contexts to REST API operations with full loading, error, and retry states.
+1. **Milestone 4 — Feedback and Builder Replies (Verification Phase)**:
+   - Execute `005_feedback.sql` migration in TablePlus.
+   - Verify cross-account feedback flow: Account B submits feedback on Account A's prototype `DevPulse`; Account A reviews and awards helpful recognition; Account B sees +1 point in Tester Activity.
+2. **Milestone 5 — Pre-Build Validation & Problem Hub**:
+   - Persist problem listings, nested Reddit-style comments, and validation upvotes in MySQL.
+3. **Milestone 6 — Frontend Full Data Migration & Cleanup**:
+   - Decommission remaining local storage demo stores and transition fully to MySQL cloud operations.

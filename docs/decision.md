@@ -392,6 +392,36 @@ This document provides a comprehensive, chronological, and thematic log of every
 
 ---
 
+### Decision 4.9: Structured Feedback, Maker Replies & Tester Recognition in MySQL (`product_feedback`)
+
+- **What Changed:**
+  - Authored `backend/migrations/005_feedback.sql` and updated `backend/schema.sql` declaring normalized `product_feedback` table:
+    - `id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY`
+    - `product_id BIGINT UNSIGNED NOT NULL` (FK to `products(id) ON DELETE CASCADE`)
+    - `user_id BIGINT UNSIGNED NOT NULL` (FK to `users(id) ON DELETE CASCADE`)
+    - `category VARCHAR(50) NOT NULL` (Structured category tag)
+    - `experience TEXT NOT NULL` (Detailed critique)
+    - `likes TEXT DEFAULT NULL` (Delight/highlights)
+    - `is_helpful BOOLEAN NOT NULL DEFAULT FALSE` (Helpful critique toggle awarded by maker)
+    - `helpful_marked_at TIMESTAMP NULL DEFAULT NULL`
+    - `builder_reply JSON DEFAULT NULL` (Structured reply: `{ text, repliedBy, repliedAt, updatedAt }`)
+    - `created_at`, `updated_at` timestamps with indexes on `(product_id, created_at)`, `(user_id, created_at)`, and `(user_id, is_helpful)`.
+  - Implemented server-side feedback endpoints:
+    - `POST /api/products/:slugOrId/feedback`: Authenticated. Verifies product exists, blocks product creator from giving feedback on their own product (403), verifies active enrollment in `product_enrollments` (403), validates categories and text length, inserts record into MySQL, and returns created feedback item with author details.
+    - `GET /api/products/:slugOrId/feedback`: Public with joined `users` and `user_profiles` data (display name, avatar, role) and parsed builder reply.
+    - `GET /api/feedback/me`: Authenticated. Retrieves all feedback notes submitted by the current user across products along with calculated recognition metrics (`totalPoints`, `helpfulCount`).
+    - `POST /api/feedback/:id/reply`: Authenticated. Restricted strictly to verified product creator. Appends or updates `builder_reply` JSON.
+    - `PATCH /api/feedback/:id/helpful`: Authenticated. Restricted strictly to verified product creator. Toggles `is_helpful` status and `helpful_marked_at` timestamp.
+  - Connected frontend client (`api.js`, `DemoDataContext.jsx`, `ProductDetailsPage.jsx`, `BuilderDashboardPage.jsx`, `TesterActivityPage.jsx`):
+    - `loadProductFeedback`: Fetches cloud feedback for the viewed prototype and merges into context state.
+    - `addFeedback`, `replyToFeedback`, and `toggleFeedbackHelpful` asynchronously communicate with the MySQL backend when authenticated.
+    - `getUserFeedback` and `getTesterRecognition` compute tester recognition points deterministically from cloud data.
+- **Why It Was Changed:**
+  - Previously, feedback was held in browser `localStorage`, preventing cross-device persistence and preventing builders on Account A from reviewing critiques submitted by testers on Account B.
+  - Moving to MySQL enforces strict relational integrity, validates tester enrollment prior to critique submission, prevents owner self-feedback manipulation, and provides genuine cross-account collaboration between builders and testers.
+
+---
+
 ## 5. Tooling & Engineering Methodology
 
 | Category | Tool / Choice | Rationale |
