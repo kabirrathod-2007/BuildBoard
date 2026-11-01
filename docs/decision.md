@@ -30,6 +30,7 @@ This document provides a comprehensive, chronological, and thematic log of every
    - Decision 4.3: MySQL Identity Schema Keyed by Firebase UID
    - Decision 4.4: Staged Hybrid Migration Strategy (Auth/Identity in Cloud, Domain Models in Client Demo)
    - Decision 4.5: User Profile Storage via JSON in MySQL (`user_profiles`)
+   - Decision 4.6: Client Profile Synchronization & Safe Local Demo Migration
 5. [Tooling & Engineering Methodology](#5-tooling--engineering-methodology)
 6. [Summary Matrix of Code Decisions](#6-summary-matrix-of-code-decisions)
 
@@ -333,6 +334,18 @@ This document provides a comprehensive, chronological, and thematic log of every
 - **Why It Was Changed:**
   - Profile fields (targeting interests, device lists, notification preferences) evolve rapidly as matching algorithms improve; storing them in validated JSON columns in MySQL provides schema flexibility while enforcing foreign key integrity against the `users` table.
   - Strict server-side whitelist validation prevents injection of arbitrary or unbounded data into the database.
+
+---
+
+### Decision 4.6: Client Profile Synchronization & Safe Local Demo Migration
+
+- **What Changed:**
+  - Implemented authenticated API client layer in `frontend/src/lib/api.js` for profile operations.
+  - Enhanced `DemoDataContext.jsx` to query `GET /api/profiles/me` upon Firebase authentication and update the shared profile cache.
+  - Established a server-authoritative migration protocol: server data is authoritative when present; when no cloud profile exists, existing local demo data is pre-filled on `ProfileSetupPage.jsx` with an informative banner, requiring explicit user save before writing to MySQL via `PUT /api/profiles/me`.
+  - Connected `ProfileSetupPage.jsx` with save loaders (`isSaving`), error alerts (`saveError`), cloud-sync badges, and an initial cloud retrieval skeleton.
+- **Why It Was Changed:**
+  - Seamlessly bridges existing client-side demo state with MySQL cloud persistence without risking data loss or silent server overwrite.
 
 ---
 
