@@ -3,12 +3,14 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
+  confirmPasswordReset,
   onAuthStateChanged,
   sendEmailVerification,
   sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  verifyPasswordResetCode,
 } from 'firebase/auth'
 import { firebaseAuth, isFirebaseConfigured } from '../lib/firebase.js'
 
@@ -60,6 +62,8 @@ function authError(code, fallback) {
     'auth/network-request-failed': 'Could not reach Firebase. Check your internet connection and try again.',
     'auth/operation-not-allowed': 'Email and password sign-in is not enabled for this Firebase project.',
     'auth/email-not-verified': 'We sent a verification link. Verify your email, then sign in again.',
+    'auth/invalid-action-code': 'This password reset link is invalid or has expired. Please request a new one.',
+    'auth/expired-action-code': 'This password reset link has expired. Please request a new one.',
   }
 
   return messages[code] || fallback || 'Authentication failed. Please try again.'
@@ -218,7 +222,25 @@ export function AuthProvider({ children }) {
 
   const resetPassword = (email) => {
     if (!isFirebaseConfigured || !firebaseAuth) return Promise.resolve()
-    return sendPasswordResetEmail(firebaseAuth, (email || '').trim())
+    const cleanEmail = (email || '').trim()
+    return sendPasswordResetEmail(firebaseAuth, cleanEmail, {
+      url: `${window.location.origin}/reset-password`,
+      handleCodeInApp: true,
+    })
+  }
+
+  const verifyResetCode = (code) => {
+    if (!isFirebaseConfigured || !firebaseAuth) {
+      return Promise.reject(new Error('Firebase is not configured.'))
+    }
+    return verifyPasswordResetCode(firebaseAuth, (code || '').trim())
+  }
+
+  const confirmReset = (code, newPassword) => {
+    if (!isFirebaseConfigured || !firebaseAuth) {
+      return Promise.reject(new Error('Firebase is not configured.'))
+    }
+    return confirmPasswordReset(firebaseAuth, (code || '').trim(), newPassword)
   }
 
   const signOut = () => {
@@ -243,6 +265,8 @@ export function AuthProvider({ children }) {
         signUp,
         resendVerificationEmail,
         resetPassword,
+        verifyResetCode,
+        confirmReset,
         signOut,
         isFirebaseConfigured,
       }}

@@ -9,7 +9,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 
 export default function SignInPage() {
   useDocumentTitle('Sign In | BuildBoard')
-  const { signIn, resetPassword } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -19,7 +19,6 @@ export default function SignInPage() {
   const [authError, setAuthError] = useState('')
   const [authNotice, setAuthNotice] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isResettingPassword, setIsResettingPassword] = useState(false)
 
   function validate() {
     const nextErrors = {}
@@ -65,25 +64,6 @@ export default function SignInPage() {
       }
     } finally {
       setIsSubmitting(false)
-    }
-  }
-
-  async function handlePasswordReset() {
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setAuthError('Enter a valid email address first, then request a password reset.')
-      return
-    }
-
-    setAuthError('')
-    setAuthNotice('')
-    setIsResettingPassword(true)
-    try {
-      await resetPassword(email)
-      setAuthNotice('If an account exists for this email, Firebase has sent a password reset link.')
-    } catch (error) {
-      setAuthError(getAuthErrorMessage(error))
-    } finally {
-      setIsResettingPassword(false)
     }
   }
 
@@ -212,14 +192,14 @@ export default function SignInPage() {
                     {errors.password}
                   </p>
                 )}
-                <button
-                  type="button"
-                  onClick={handlePasswordReset}
-                  disabled={isResettingPassword}
-                  className="mt-2 text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline disabled:opacity-60"
-                >
-                  {isResettingPassword ? 'Sending reset link…' : 'Forgot password?'}
-                </button>
+                <div className="mt-2 flex justify-end">
+                  <Link
+                    to={email.trim() ? `/reset-password?email=${encodeURIComponent(email.trim())}` : '/reset-password'}
+                    className="text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
 
               {authError && <p role="alert" className="text-sm font-semibold text-rose-600 dark:text-rose-400">{authError}</p>}

@@ -7,6 +7,7 @@ import ScrollToTop from './components/ScrollToTop.jsx'
 
 const SignInPage = lazy(() => import('./pages/SignInPage.jsx'))
 const SignUpPage = lazy(() => import('./pages/SignUpPage.jsx'))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage.jsx'))
 const EmailVerificationPage = lazy(() => import('./pages/EmailVerificationPage.jsx'))
 const ProfileSetupPage = lazy(() => import('./pages/ProfileSetupPage.jsx'))
 const ExplorePage = lazy(() => import('./pages/ExplorePage.jsx'))
@@ -43,6 +44,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/sign-in" element={<SignInPage />} />
             <Route path="/sign-up" element={<SignUpPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/forgot-password" element={<Navigate to="/reset-password" replace />} />
             <Route path="/verify-email" element={<EmailVerificationPage />} />
             <Route path="/profile" element={<ProfileSetupPage />} />
             <Route path="/profile/setup" element={<ProfileSetupPage />} />
