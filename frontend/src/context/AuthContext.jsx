@@ -10,12 +10,13 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
 } from 'firebase/auth'
-import { firebaseAuth } from '../lib/firebase.js'
+import { firebaseAuth, isFirebaseConfigured } from '../lib/firebase.js'
 
 const AuthContext = createContext(null)
 export const useAuth = () => useContext(AuthContext)
 
 const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001').replace(/\/$/, '')
+const DEMO_STORAGE_KEY = 'buildboard_demo_auth_user'
 
 async function syncUserWithApi(firebaseUser) {
   const token = await firebaseUser.getIdToken()
@@ -69,10 +70,25 @@ export function getAuthErrorMessage(error) {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(() => {
+    if (!isFirebaseConfigured) {
+      try {
+        const saved = localStorage.getItem(DEMO_STORAGE_KEY)
+        return saved ? JSON.parse(saved) : null
+      } catch {
+        return null
+      }
+    }
+    return null
+  })
+  const [loading, setLoading] = useState(isFirebaseConfigured)
 
   useEffect(() => {
+    if (!isFirebaseConfigured || !firebaseAuth) {
+      setLoading(false)
+      return
+    }
+
     let active = true
 
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
@@ -111,6 +127,24 @@ export function AuthProvider({ children }) {
   }, [])
 
   const signIn = async (email, password) => {
+    if (!isFirebaseConfigured || !firebaseAuth) {
+      const trimmed = (email || '').trim() || 'member@example.com'
+      const appUser = {
+        uid: 'demo-' + Date.now(),
+        id: 'demo-user-1',
+        email: trimmed,
+        emailVerified: true,
+        displayName: trimmed.split('@')[0],
+      }
+      setUser(appUser)
+      try {
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(appUser))
+      } catch {
+        // ignore
+      }
+      return appUser
+    }
+
     await setPersistence(firebaseAuth, browserLocalPersistence)
     const credential = await signInWithEmailAndPassword(firebaseAuth, email.trim(), password)
     await credential.user.reload()
@@ -137,6 +171,24 @@ export function AuthProvider({ children }) {
   }
 
   const signUp = async (email, password) => {
+    if (!isFirebaseConfigured || !firebaseAuth) {
+      const trimmed = (email || '').trim() || 'member@example.com'
+      const appUser = {
+        uid: 'demo-' + Date.now(),
+        id: 'demo-user-1',
+        email: trimmed,
+        emailVerified: true,
+        displayName: trimmed.split('@')[0],
+      }
+      setUser(appUser)
+      try {
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(appUser))
+      } catch {
+        // ignore
+      }
+      return { email: trimmed }
+    }
+
     await setPersistence(firebaseAuth, browserLocalPersistence)
     const credential = await createUserWithEmailAndPassword(firebaseAuth, email.trim(), password)
 
@@ -152,6 +204,8 @@ export function AuthProvider({ children }) {
   }
 
   const resendVerificationEmail = async (email, password) => {
+    if (!isFirebaseConfigured || !firebaseAuth) return
+
     const credential = await signInWithEmailAndPassword(firebaseAuth, email.trim(), password)
     try {
       if (credential.user.emailVerified) {
@@ -165,13 +219,38 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const resetPassword = (email) => sendPasswordResetEmail(firebaseAuth, email.trim())
-  const signOut = () => firebaseSignOut(firebaseAuth)
+  const resetPassword = (email) => {
+    if (!isFirebaseConfigured || !firebaseAuth) return Promise.resolve()
+    return sendPasswordResetEmail(firebaseAuth, (email || '').trim())
+  }
+
+  const signOut = () => {
+    if (!isFirebaseConfigured || !firebaseAuth) {
+      setUser(null)
+      try {
+        localStorage.removeItem(DEMO_STORAGE_KEY)
+      } catch {
+        // ignore
+      }
+      return Promise.resolve()
+    }
+    return firebaseSignOut(firebaseAuth)
+  }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, resendVerificationEmail, resetPassword, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        signUp,
+        resendVerificationEmail,
+        resetPassword,
+        signOut,
+        isFirebaseConfigured,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
 }
-

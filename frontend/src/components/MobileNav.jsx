@@ -66,7 +66,7 @@ export default function MobileNav({
         aria-expanded={isOpen}
         aria-controls="mobile-nav-panel"
         aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
-        className={`flex h-10 w-10 items-center justify-center rounded-xl border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e07a5f] focus-visible:ring-offset-2 cursor-pointer ${
+        className={`flex h-10 w-10 items-center justify-center rounded-xl border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8b98c] focus-visible:ring-offset-2 cursor-pointer ${
           isDark
             ? 'border-white/20 bg-white/10 text-white hover:bg-white/15'
             : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm hover:bg-[var(--bg-surface-subtle)]'
@@ -115,7 +115,7 @@ export default function MobileNav({
           {/* Main Route & Section Links */}
           <nav aria-label="Mobile Navigation" className="flex flex-col space-y-1">
             {links.map((link) => {
-              const linkClasses = `flex min-h-[44px] items-center rounded-xl px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e07a5f] ${
+              const linkClasses = `flex min-h-[44px] items-center rounded-xl px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8b98c] ${
                 link.current
                   ? isDark
                     ? 'bg-white/10 text-white font-semibold'
@@ -156,7 +156,7 @@ export default function MobileNav({
             {user ? (
               <div className="flex flex-col space-y-2">
                 <div className={`rounded-xl px-3 py-2 text-sm ${isDark ? 'bg-white/5 text-white/70' : 'bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]'}`}>
-                  <span className="block text-sm font-bold uppercase tracking-wider text-[#e07a5f]">Signed in as</span>
+                  <span className="block text-sm font-bold uppercase tracking-wider text-[#d8b98c]">Signed in as</span>
                   {displayName ? (
                     <div className="mt-0.5">
                       <span className="block font-bold text-[var(--text-main)] text-sm">{displayName}</span>
@@ -197,7 +197,7 @@ export default function MobileNav({
                 <Link
                   to="/products/new"
                   onClick={() => setIsOpen(false)}
-                  className="flex min-h-[44px] items-center justify-center rounded-xl bg-[#e07a5f] px-3.5 py-2 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#eb8b72]"
+                  className="flex min-h-[44px] items-center justify-center rounded-xl bg-[#d8b98c] px-3.5 py-2 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#ecdcc2]"
                 >
                   + Submit product
                 </Link>
@@ -231,7 +231,7 @@ export default function MobileNav({
                 <Link
                   to="/sign-up"
                   onClick={() => setIsOpen(false)}
-                  className="flex min-h-[44px] items-center justify-center rounded-xl bg-[#e07a5f] px-4 py-2 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#eb8b72]"
+                  className="flex min-h-[44px] items-center justify-center rounded-xl bg-[#d8b98c] px-4 py-2 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#ecdcc2]"
                 >
                   Join BuildBoard
                 </Link>

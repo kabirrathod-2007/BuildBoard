@@ -350,13 +350,13 @@ export default function BuilderDashboardPage() {
           <Navbar />
           <div className="mx-auto flex w-full max-w-md flex-1 items-center justify-center px-5 py-16">
             <div className="w-full rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-8 text-center shadow-warm-md sm:p-10">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d96b43]/15 text-[#d96b43]">
-                <svg className="h-7 w-7 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-main)] text-[var(--text-main)] dark:border-transparent dark:bg-[#dbbf95]/20 dark:text-[#dbbf95]">
+                <svg className="h-7 w-7 text-[var(--text-main)] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               </div>
-              <p className="mt-4 text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+              <p className="mt-4 text-sm font-bold uppercase tracking-wider text-[var(--text-main)] dark:text-[#dbbf95]">
                 Builder Access Required
               </p>
               <h1 className="mt-2 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-[var(--text-main)]">
@@ -369,7 +369,7 @@ export default function BuilderDashboardPage() {
               <button
                 type="button"
                 onClick={() => navigate('/sign-in', { state: { from: location } })}
-                className="mt-6 w-full rounded-full bg-[#d96b43] py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43] focus-visible:ring-offset-2"
+                className="mt-6 w-full rounded-full bg-[#1f3a6b] py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] active:translate-y-0.5 cursor-pointer dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] focus-visible:ring-offset-2"
               >
                 Sign in to Continue
               </button>
@@ -403,7 +403,7 @@ export default function BuilderDashboardPage() {
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-2.5 max-w-2xl">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[#d96b43]/10 px-3 py-1 text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                    <span className="rounded-full bg-[#1f3a6b]/10 text-[#1f3a6b] dark:bg-[#dbbf95]/15 dark:text-[#dbbf95] px-3 py-1 text-sm font-bold uppercase tracking-wider">
                       Builder Studio
                     </span>
                     <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 text-sm text-[var(--text-subtle)]">
@@ -415,7 +415,7 @@ export default function BuilderDashboardPage() {
                     id="builder-dashboard-heading"
                     className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--text-main)]"
                   >
-                    Prototype Activity & <span className="italic font-normal text-[#d96b43] dark:text-[#e07a5f]">Feedback</span>
+                    Prototype Activity & <span className="italic font-normal text-[var(--text-main)] dark:text-[#dbbf95]">Feedback</span>
                   </h1>
 
                   <p className="text-base sm:text-lg leading-relaxed text-[var(--text-muted)]">
@@ -425,7 +425,7 @@ export default function BuilderDashboardPage() {
 
                 <Link
                   to="/products/new"
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#d96b43] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer"
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#1f3a6b] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] active:translate-y-0.5 cursor-pointer dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
                 >
                   <span>+ Submit another prototype</span>
                 </Link>
@@ -469,7 +469,7 @@ export default function BuilderDashboardPage() {
               <div className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-warm-sm">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">Conversion Funnel</p>
+                    <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">Conversion Funnel</p>
                     <p className="mt-0.5 text-sm text-[var(--text-muted)]">How testers progress through your listings</p>
                   </div>
                   <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3 py-1 text-sm font-semibold text-[var(--text-muted)]">
@@ -496,14 +496,14 @@ export default function BuilderDashboardPage() {
                       <svg className="h-5 w-5 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
-                      <span className="text-xs font-bold tabular-nums text-[#d96b43]">
+                      <span className="text-xs font-bold tabular-nums text-[#1f3a6b] dark:text-[#dbbf95]">
                         {aggregateMetrics.totalViews > 0
                           ? `${Math.round((aggregateMetrics.totalEnrollments / aggregateMetrics.totalViews) * 100)}%`
                           : '—'}
                       </span>
                     </div>
                     {/* Mobile arrow */}
-                    <div className="flex sm:hidden items-center justify-center gap-1.5 mt-2 text-xs font-bold text-[#d96b43]">
+                    <div className="flex sm:hidden items-center justify-center gap-1.5 mt-2 text-xs font-bold text-[#1f3a6b] dark:text-[#dbbf95]">
                       <svg className="h-4 w-4 rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
@@ -515,8 +515,8 @@ export default function BuilderDashboardPage() {
 
                   {/* Enrollments */}
                   <div className="relative flex flex-col items-center text-center sm:px-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d96b43]/10 border border-[#d96b43]/30">
-                      <svg className="h-7 w-7 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1f3a6b]/10 dark:bg-[#dbbf95]/15 border border-[#1f3a6b]/30 dark:border-[#dbbf95]/30">
+                      <svg className="h-7 w-7 text-[#1f3a6b] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
                         <line x1="19" y1="8" x2="19" y2="14" />
@@ -532,14 +532,14 @@ export default function BuilderDashboardPage() {
                       <svg className="h-5 w-5 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
-                      <span className="text-xs font-bold tabular-nums text-[#d96b43]">
+                      <span className="text-xs font-bold tabular-nums text-[#1f3a6b] dark:text-[#dbbf95]">
                         {aggregateMetrics.totalEnrollments > 0
                           ? `${Math.round((aggregateMetrics.totalFeedback / aggregateMetrics.totalEnrollments) * 100)}%`
                           : '—'}
                       </span>
                     </div>
                     {/* Mobile arrow */}
-                    <div className="flex sm:hidden items-center justify-center gap-1.5 mt-2 text-xs font-bold text-[#d96b43]">
+                    <div className="flex sm:hidden items-center justify-center gap-1.5 mt-2 text-xs font-bold text-[#1f3a6b] dark:text-[#dbbf95]">
                       <svg className="h-4 w-4 rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
@@ -573,7 +573,7 @@ export default function BuilderDashboardPage() {
                   </div>
                   <div className="flex items-center gap-1 h-3 mt-1.5 rounded-full overflow-hidden bg-[var(--bg-surface-subtle)]">
                     <div
-                      className="h-full rounded-full bg-[#d96b43] transition-all duration-500"
+                      className="h-full rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95] transition-all duration-500"
                       style={{ width: `${aggregateMetrics.totalViews > 0 ? Math.max((aggregateMetrics.totalEnrollments / aggregateMetrics.totalViews) * 100, 2) : 0}%` }}
                     />
                   </div>
@@ -585,7 +585,7 @@ export default function BuilderDashboardPage() {
                   </div>
                   <div className="mt-2 flex items-center justify-between text-xs font-medium text-[var(--text-subtle)]">
                     <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[var(--text-subtle)]" />Views</span>
-                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#d96b43]" />Enrollments</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" />Enrollments</span>
                     <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />Feedback</span>
                   </div>
                 </div>
@@ -603,7 +603,7 @@ export default function BuilderDashboardPage() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-main)] pb-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                  <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                     Your Listings
                   </p>
                   <h2
@@ -670,7 +670,7 @@ export default function BuilderDashboardPage() {
                             <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-main)] break-words">
                               <Link
                                 to={`/products/${product.id}`}
-                                className="hover:text-[#d96b43] transition-colors"
+                                className="hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
                               >
                                 {product.name}
                               </Link>
@@ -683,7 +683,7 @@ export default function BuilderDashboardPage() {
                           {/* Target Audience & Test Request Summary */}
                           <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-4 text-sm space-y-2">
                             <div>
-                              <span className="text-sm font-bold uppercase tracking-wider text-[#d96b43] block">
+                              <span className="text-sm font-bold uppercase tracking-wider text-[var(--text-main)] dark:text-[#dbbf95] block">
                                 Target Audience
                               </span>
                               <span className="mt-0.5 block font-medium text-[var(--text-main)] break-words">
@@ -752,7 +752,7 @@ export default function BuilderDashboardPage() {
                             <div className="flex items-center gap-3">
                               <Link
                                 to={`/products/${product.id}`}
-                                className="text-sm font-semibold text-[var(--text-main)] hover:text-[#d96b43] transition-colors"
+                                className="text-sm font-semibold text-[var(--text-main)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
                               >
                                 Listing ↗
                               </Link>
@@ -790,7 +790,7 @@ export default function BuilderDashboardPage() {
                   </p>
                   <Link
                     to="/products/new"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#d96b43] px-6 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028]"
+                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#1f3a6b] px-6 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
                   >
                     Submit your first prototype →
                   </Link>
@@ -825,7 +825,7 @@ export default function BuilderDashboardPage() {
                         value={selectedProductId}
                         onChange={(e) => setSelectedProductId(e.target.value)}
                         aria-label="Filter by product"
-                        className="min-h-[40px] rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-semibold text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 cursor-pointer"
+                        className="min-h-[40px] rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-semibold text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 cursor-pointer"
                       >
                         <option value="all">All your products</option>
                         {userProducts.map((p) => (
@@ -840,7 +840,7 @@ export default function BuilderDashboardPage() {
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
                       aria-label="Filter by feedback category"
-                      className="min-h-[40px] rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-semibold text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 cursor-pointer"
+                      className="min-h-[40px] rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm font-semibold text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 cursor-pointer"
                     >
                       {FEEDBACK_CATEGORIES.map((cat) => (
                         <option key={cat} value={cat}>
@@ -867,7 +867,7 @@ export default function BuilderDashboardPage() {
                           </span>
                           <Link
                             to={`/products/${fb.productId}`}
-                            className="rounded-full border border-[var(--border-main)] bg-[var(--bg-page)] px-3 py-1 text-sm font-medium text-[var(--text-main)] hover:text-[#d96b43] transition-colors"
+                            className="rounded-full border border-[var(--border-main)] bg-[var(--bg-page)] px-3 py-1 text-sm font-medium text-[var(--text-main)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
                           >
                             {fb.productName} ↗
                           </Link>
@@ -912,7 +912,7 @@ export default function BuilderDashboardPage() {
                         )}
 
                         <div>
-                          <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                          <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                             Tester Observation & Critique
                           </p>
                           <p className="mt-2 text-base leading-relaxed text-[var(--text-main)] break-words">
@@ -945,7 +945,7 @@ export default function BuilderDashboardPage() {
                             <div className="flex items-center justify-between">
                               <label
                                 htmlFor={`reply-${fb.id}`}
-                                className="text-sm font-bold uppercase tracking-wider text-[#d96b43]"
+                                className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]"
                               >
                                 {fb.reply ? 'Edit your reply' : 'Reply to tester'}
                               </label>
@@ -963,7 +963,7 @@ export default function BuilderDashboardPage() {
                                 if (replyError) setReplyError('')
                               }}
                               placeholder="Thank the tester, share what you're fixing, or ask a clarifying question..."
-                              className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3 text-sm font-normal text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                              className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3 text-sm font-normal text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
                             />
 
                             {replyError && (
@@ -980,7 +980,7 @@ export default function BuilderDashboardPage() {
                               </button>
                               <button
                                 type="submit"
-                                className="min-h-[38px] rounded-full bg-[#d96b43] px-5 py-1.5 text-sm font-semibold text-white shadow-warm-xs hover:bg-[#b85028] transition-colors cursor-pointer"
+                                className="min-h-[38px] rounded-full bg-[#1f3a6b] px-5 py-1.5 text-sm font-semibold text-white shadow-warm-xs hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] transition-colors cursor-pointer"
                               >
                                 Post reply
                               </button>
@@ -989,13 +989,13 @@ export default function BuilderDashboardPage() {
                         ) : fb.reply ? (
                           <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-5 space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                              <span className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                                 Your Builder Reply
                               </span>
                               <button
                                 type="button"
                                 onClick={() => handleStartReply(fb.id, fb.reply)}
-                                className="text-sm font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer"
+                                className="text-sm font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors cursor-pointer"
                               >
                                 Edit reply
                               </button>
@@ -1013,7 +1013,7 @@ export default function BuilderDashboardPage() {
                           <button
                             type="button"
                             onClick={() => handleStartReply(fb.id, '')}
-                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#d96b43] hover:underline underline-offset-4 cursor-pointer"
+                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline underline-offset-4 cursor-pointer"
                           >
                             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -1057,7 +1057,7 @@ export default function BuilderDashboardPage() {
             <div className="my-8 w-full max-w-2xl rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-8 text-[var(--text-main)] shadow-warm-xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between border-b border-[var(--border-main)] pb-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                  <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                     Listing Management
                   </p>
                   <h2 id="edit-modal-heading" className="mt-1 font-display text-2xl font-bold tracking-tight text-[var(--text-main)]">
@@ -1087,14 +1087,14 @@ export default function BuilderDashboardPage() {
                 {/* Product Name */}
                 <div>
                   <label htmlFor="edit-name" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                    Product Name <span className="text-[#d96b43]">*</span>
+                    Product Name <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <input
                     id="edit-name"
                     type="text"
                     value={editFormData.name}
                     onChange={(e) => handleEditInputChange('name', e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2.5 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2.5 text-sm text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
                   />
                   {editErrors.name && (
                     <p className="mt-1 text-sm font-semibold text-rose-500">{editErrors.name}</p>
@@ -1104,14 +1104,14 @@ export default function BuilderDashboardPage() {
                 {/* Tagline */}
                 <div>
                   <label htmlFor="edit-tagline" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                    Tagline <span className="text-[#d96b43]">*</span>
+                    Tagline <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <input
                     id="edit-tagline"
                     type="text"
                     value={editFormData.tagline}
                     onChange={(e) => handleEditInputChange('tagline', e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2.5 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2.5 text-sm text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
                   />
                   {editErrors.tagline && (
                     <p className="mt-1 text-sm font-semibold text-rose-500">{editErrors.tagline}</p>
@@ -1128,14 +1128,14 @@ export default function BuilderDashboardPage() {
                     rows={3}
                     value={editFormData.description}
                     onChange={(e) => handleEditInputChange('description', e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
                   />
                 </div>
 
                 {/* Prototype URL */}
                 <div>
                   <label htmlFor="edit-prototypeUrl" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                    Working Prototype URL <span className="text-[#d96b43]">*</span>
+                    Working Prototype URL <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <input
                     id="edit-prototypeUrl"
@@ -1143,7 +1143,7 @@ export default function BuilderDashboardPage() {
                     value={editFormData.prototypeUrl}
                     onChange={(e) => handleEditInputChange('prototypeUrl', e.target.value)}
                     placeholder="https://myproduct.example"
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2.5 text-sm font-mono text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2.5 text-sm font-mono text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
                   />
                   {editErrors.prototypeUrl && (
                     <p className="mt-1 text-sm font-semibold text-rose-500">
@@ -1155,14 +1155,14 @@ export default function BuilderDashboardPage() {
                 {/* Audience */}
                 <div>
                   <label htmlFor="edit-audience" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                    Audience (Who it’s for) <span className="text-[#d96b43]">*</span>
+                    Audience (Who it’s for) <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <textarea
                     id="edit-audience"
                     rows={2}
                     value={editFormData.audience}
                     onChange={(e) => handleEditInputChange('audience', e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
                   />
                   {editErrors.audience && (
                     <p className="mt-1 text-sm font-semibold text-rose-500">{editErrors.audience}</p>
@@ -1172,7 +1172,7 @@ export default function BuilderDashboardPage() {
                 {/* Categories */}
                 <div>
                   <span className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                    Categories <span className="text-[#d96b43]">*</span>
+                    Categories <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </span>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {AVAILABLE_CATEGORIES.map((cat) => {
@@ -1184,7 +1184,7 @@ export default function BuilderDashboardPage() {
                           onClick={() => toggleEditCategory(cat)}
                           className={`min-h-[36px] rounded-full border px-3.5 py-1 text-sm font-semibold transition cursor-pointer ${
                             isSelected
-                              ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs'
+                              ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white shadow-warm-xs dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a]'
                               : 'border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                           }`}
                         >
@@ -1208,14 +1208,14 @@ export default function BuilderDashboardPage() {
                 {/* Feedback Request */}
                 <div>
                   <label htmlFor="edit-feedbackRequest" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                    Feedback Request (What to try) <span className="text-[#d96b43]">*</span>
+                    Feedback Request (What to try) <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <textarea
                     id="edit-feedbackRequest"
                     rows={2}
                     value={editFormData.feedbackRequest}
                     onChange={(e) => handleEditInputChange('feedbackRequest', e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                    className="mt-1.5 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
                   />
                   {editErrors.feedbackRequest && (
                     <p className="mt-1 text-sm font-semibold text-rose-500">
@@ -1226,7 +1226,7 @@ export default function BuilderDashboardPage() {
 
                 {/* Optional Targeting Preferences */}
                 <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-5 space-y-4">
-                  <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                  <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                     Optional Targeting Preferences
                   </p>
 
@@ -1243,7 +1243,7 @@ export default function BuilderDashboardPage() {
                             onClick={() => toggleEditTargetRole(role)}
                             className={`min-h-[34px] rounded-full border px-3 py-1 text-sm font-medium transition cursor-pointer ${
                               isSelected
-                                ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs'
+                                ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white shadow-warm-xs dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a]'
                                 : 'border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:bg-[var(--bg-surface)]'
                             }`}
                           >
@@ -1272,7 +1272,7 @@ export default function BuilderDashboardPage() {
                             onClick={() => toggleEditTargetIndustry(ind)}
                             className={`min-h-[34px] rounded-full border px-3 py-1 text-sm font-medium transition cursor-pointer ${
                               isSelected
-                                ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs'
+                                ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white shadow-warm-xs dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a]'
                                 : 'border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:bg-[var(--bg-surface)]'
                             }`}
                           >
@@ -1301,7 +1301,7 @@ export default function BuilderDashboardPage() {
                             onClick={() => toggleEditTargetTech(tech)}
                             className={`min-h-[34px] rounded-full border px-3 py-1 text-sm font-medium transition cursor-pointer ${
                               isSelected
-                                ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs'
+                                ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white shadow-warm-xs dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a]'
                                 : 'border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:bg-[var(--bg-surface)]'
                             }`}
                           >
@@ -1329,7 +1329,7 @@ export default function BuilderDashboardPage() {
                   </button>
                   <button
                     type="submit"
-                    className="min-h-[42px] rounded-full bg-[#d96b43] px-6 py-2 text-sm font-semibold text-white shadow-warm-xs hover:bg-[#b85028] transition cursor-pointer"
+                    className="min-h-[42px] rounded-full bg-[#1f3a6b] px-6 py-2 text-sm font-semibold text-white shadow-warm-xs hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] transition cursor-pointer"
                   >
                     Save listing changes
                   </button>

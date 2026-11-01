@@ -22,7 +22,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'))
 function PageFallback() {
   return (
     <div className="min-h-screen bg-[var(--bg-page)] flex items-center justify-center">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#d96b43] border-t-transparent" aria-label="Loading page..." />
+      <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#1f3a6b] dark:border-[#dbbf95] border-t-transparent" aria-label="Loading page..." />
     </div>
   )
 }

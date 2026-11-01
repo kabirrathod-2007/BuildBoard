@@ -95,7 +95,7 @@ export default function LiveMarketRadar() {
       {/* Top Header Banner */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border-main)] pb-5">
         <div className="flex items-start gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#d96b43]/10 text-[#d96b43] dark:bg-[#d96b43]/20 shadow-warm-xs">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1f3a6b]/10 text-[#1f3a6b] dark:bg-[#dbbf95]/20 dark:text-[#dbbf95] shadow-warm-xs">
             <Radio className="h-5 w-5" aria-hidden="true" />
           </div>
           <div>
@@ -120,10 +120,10 @@ export default function LiveMarketRadar() {
             onClick={handleRefresh}
             disabled={loading || isRefreshing}
             title="Fetch latest posts from API"
-            className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2 text-xs sm:text-sm font-bold text-[var(--text-main)] transition hover:border-[#d96b43] hover:text-[#d96b43] disabled:opacity-50 cursor-pointer shadow-warm-xs"
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2 text-xs sm:text-sm font-bold text-[var(--text-main)] transition hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] disabled:opacity-50 cursor-pointer shadow-warm-xs"
           >
             <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-[#d96b43]' : ''}`}
+              className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-[#1f3a6b] dark:text-[#dbbf95]' : ''}`}
               aria-hidden="true"
             />
             <span>{isRefreshing ? 'Fetching...' : 'Refresh Feed'}</span>
@@ -155,11 +155,11 @@ export default function LiveMarketRadar() {
                 onClick={() => handleTopicChange('ask_hn')}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer ${
                   topic === 'ask_hn'
-                    ? 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
+                    ? 'bg-[#1f3a6b] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
                     : 'border border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
-                <HelpCircle className="h-4 w-4 text-[#d96b43]" aria-hidden="true" />
+                <HelpCircle className={`h-4 w-4 transition-colors ${topic === 'ask_hn' ? 'text-sky-300 dark:text-sky-700' : 'text-sky-500 dark:text-sky-400'}`} aria-hidden="true" />
                 <span>Ask HN (User Pain Points)</span>
               </button>
               <button
@@ -167,11 +167,11 @@ export default function LiveMarketRadar() {
                 onClick={() => handleTopicChange('show_hn')}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer ${
                   topic === 'show_hn'
-                    ? 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
+                    ? 'bg-[#1f3a6b] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
                     : 'border border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
-                <Rocket className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                <Rocket className={`h-4 w-4 transition-colors ${topic === 'show_hn' ? 'text-emerald-300 dark:text-emerald-700' : 'text-emerald-500'}`} aria-hidden="true" />
                 <span>Show HN (New Prototypes)</span>
               </button>
               <button
@@ -179,11 +179,11 @@ export default function LiveMarketRadar() {
                 onClick={() => handleTopicChange('front_page')}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer ${
                   topic === 'front_page'
-                    ? 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
+                    ? 'bg-[#1f3a6b] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs'
                     : 'border border-[var(--border-main)] bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
-                <TrendingUp className="h-4 w-4 text-amber-500" aria-hidden="true" />
+                <TrendingUp className={`h-4 w-4 transition-colors ${topic === 'front_page' ? 'text-amber-300 dark:text-amber-700' : 'text-amber-500'}`} aria-hidden="true" />
                 <span>Top Front Page</span>
               </button>
             </div>
@@ -247,11 +247,11 @@ export default function LiveMarketRadar() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.22, delay: index * 0.04 }}
-                    className="group relative flex flex-col justify-between rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#d96b43]/60 hover:shadow-warm-md"
+                    className="group relative flex flex-col justify-between rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#1f3a6b]/60 dark:hover:border-[#dbbf95]/60 hover:shadow-warm-md"
                   >
                     <div>
                       {/* Post Title */}
-                      <h3 className="font-display text-base sm:text-lg font-bold leading-snug tracking-tight text-[var(--text-main)] group-hover:text-[#d96b43] transition-colors line-clamp-2">
+                      <h3 className="font-display text-base sm:text-lg font-bold leading-snug tracking-tight text-[var(--text-main)] group-hover:text-[#1f3a6b] dark:group-hover:text-[#dbbf95] transition-colors line-clamp-2">
                         <a
                           href={item.url}
                           target="_blank"
@@ -289,7 +289,7 @@ export default function LiveMarketRadar() {
                         href={item.hnDiscussionUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors"
+                        className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
                         title="View conversation on Hacker News"
                       >
                         <MessageSquare className="h-4 w-4" aria-hidden="true" />

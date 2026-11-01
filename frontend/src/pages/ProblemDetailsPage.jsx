@@ -68,12 +68,12 @@ function CommentThreadNode({
           depth === 0
             ? `rounded-2xl border p-4 sm:p-5 text-sm shadow-warm-xs ${
                 comment.isMakerReply
-                  ? 'border-[#d96b43]/30 bg-[#d96b43]/5'
+                  ? 'border-[#c9a271]/30 bg-[#c9a271]/5'
                   : 'border-[var(--border-main)] bg-[var(--bg-surface)]'
               }`
             : `rounded-xl border p-3.5 sm:p-4 text-sm shadow-xs ${
                 comment.isMakerReply
-                  ? 'border-[#d96b43]/35 bg-[#d96b43]/6'
+                  ? 'border-[#c9a271]/35 bg-[#c9a271]/6'
                   : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)]/70'
               }`
         }`}
@@ -86,8 +86,8 @@ function CommentThreadNode({
                 depth === 0 ? 'h-7 w-7 text-xs' : 'h-6 w-6 text-[10px]'
               } ${
                 comment.isMakerReply
-                  ? 'bg-[#d96b43] text-white shadow-xs'
-                  : 'bg-[#141b16] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+                  ? 'bg-[#c9a271] text-white shadow-xs'
+                  : 'bg-[#1f3a6b] text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]'
               }`}
             >
               {authorName.charAt(0).toUpperCase()}
@@ -100,7 +100,7 @@ function CommentThreadNode({
               {authorName}
             </span>
             {comment.isMakerReply && (
-              <span className="shrink-0 rounded-md bg-[#d96b43]/20 px-2 py-0.5 text-[9px] font-bold text-[#b85028] dark:text-[#eb8b72]">
+              <span className="shrink-0 rounded-md bg-[#c9a271]/20 px-2 py-0.5 text-[9px] font-bold text-[#b88e5d] dark:text-[#ecdcc2]">
                 Maker
               </span>
             )}
@@ -152,7 +152,7 @@ function CommentThreadNode({
           <button
             type="button"
             onClick={() => handleStartReply(comment, authorName)}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors cursor-pointer py-0.5"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors cursor-pointer py-0.5"
           >
             <svg
               className="w-3.5 h-3.5"
@@ -187,7 +187,7 @@ function CommentThreadNode({
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[var(--text-muted)] flex items-center gap-1.5">
                 <svg
-                  className="w-3.5 h-3.5 text-[#d96b43]"
+                  className="w-3.5 h-3.5 text-[#c9a271]"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -199,7 +199,7 @@ function CommentThreadNode({
                     d="M3 10h10a5 5 0 0 1 5 5v6m0 0l-4-4m4 4l4-4"
                   />
                 </svg>
-                Replying to <span className="font-bold text-[#d96b43]">@{replyingToAuthor}</span>
+                Replying to <span className="font-bold text-[#c9a271]">@{replyingToAuthor}</span>
               </span>
               <button
                 type="button"
@@ -222,7 +222,7 @@ function CommentThreadNode({
               className={`w-full rounded-lg border bg-[var(--bg-page)] p-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder-[var(--text-subtle)] focus:outline-none focus:ring-1 transition-colors ${
                 replyError
                   ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/30'
-                  : 'border-[var(--border-main)] focus:border-[#d96b43] focus:ring-[#d96b43]'
+                  : 'border-[var(--border-main)] focus:border-[#c9a271] focus:ring-[#c9a271]'
               }`}
             />
 
@@ -243,7 +243,7 @@ function CommentThreadNode({
               <button
                 type="submit"
                 disabled={isSubmittingReply}
-                className="rounded-lg bg-[#d96b43] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#e57b54] disabled:opacity-50 shadow-warm-xs cursor-pointer"
+                className="rounded-lg bg-[#c9a271] px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#e57b54] disabled:opacity-50 shadow-warm-xs cursor-pointer"
               >
                 {isSubmittingReply ? 'Posting...' : 'Post Reply'}
               </button>
@@ -258,7 +258,7 @@ function CommentThreadNode({
           <button
             type="button"
             onClick={() => toggleExpand(comment.id)}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-[#d96b43] hover:bg-[#d96b43]/10 dark:text-[#eb8b72] transition-colors cursor-pointer w-fit"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-[#1f3a6b] hover:bg-[#1f3a6b]/10 dark:text-[#dbbf95] dark:hover:bg-[#dbbf95]/15 transition-colors cursor-pointer w-fit"
             aria-expanded={isExpanded}
           >
             <svg
@@ -282,7 +282,7 @@ function CommentThreadNode({
           </button>
 
           {isExpanded && (
-            <div className="relative mt-2.5 space-y-2.5 border-l-2 border-[#d96b43]/30 pl-3 sm:pl-4 transition-colors">
+            <div className="relative mt-2.5 space-y-2.5 border-l-2 border-[#c9a271]/30 pl-3 sm:pl-4 transition-colors">
               {comment.replies.map((childReply) => (
                 <CommentThreadNode
                   key={childReply.id}
@@ -432,7 +432,7 @@ export default function ProblemDetailsPage() {
         <Navbar />
         <main className="flex-1 flex items-center justify-center px-4 py-20">
           <div className="max-w-md w-full rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-8 text-center shadow-warm-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d96b43]/10 text-[#d96b43]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#c9a271]/10 text-[#c9a271]">
               <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
@@ -448,7 +448,7 @@ export default function ProblemDetailsPage() {
             <div className="mt-6 flex justify-center gap-3">
               <Link
                 to="/problems"
-                className="rounded-full bg-[#d96b43] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#e57b54]"
+                className="rounded-full bg-[#c9a271] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#e57b54]"
               >
                 Browse All Problems
               </Link>
@@ -658,9 +658,9 @@ export default function ProblemDetailsPage() {
         <div className="mb-6 flex items-center justify-between">
           <Link
             to="/problems"
-            className="group inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors"
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] transition group-hover:border-[#d96b43] group-hover:bg-[#d96b43]/10">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] transition group-hover:border-[#1f3a6b] group-hover:bg-[#1f3a6b]/10 dark:group-hover:border-[#dbbf95] dark:group-hover:bg-[#dbbf95]/15">
               <svg className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <line x1="19" y1="12" x2="5" y2="12" />
                 <polyline points="12 19 5 12 12 5" />
@@ -684,7 +684,7 @@ export default function ProblemDetailsPage() {
             <article className="border-b border-[var(--border-main)] pb-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-bold text-xs uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                  <span className="font-bold text-xs uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                     {problem.category}
                   </span>
                   <span className="text-[var(--text-subtle)]">&middot;</span>
@@ -705,7 +705,7 @@ export default function ProblemDetailsPage() {
                     <button
                       type="button"
                       onClick={handleOpenAttachSolution}
-                      className="rounded-xl border border-[#d96b43]/40 bg-[#d96b43]/10 px-3 py-1.5 text-xs font-semibold text-[#b85028] dark:text-[#eb8b72] hover:bg-[#d96b43]/20 transition cursor-pointer"
+                      className="rounded-xl border border-[#1f3a6b]/40 bg-[#1f3a6b]/10 px-3 py-1.5 text-xs font-semibold text-[#1f3a6b] dark:border-[#dbbf95]/40 dark:bg-[#dbbf95]/15 dark:text-[#dbbf95] hover:bg-[#1f3a6b]/20 dark:hover:bg-[#dbbf95]/20 transition cursor-pointer"
                     >
                       + Attach Solution
                     </button>
@@ -728,14 +728,14 @@ export default function ProblemDetailsPage() {
               {/* Problem Originator Byline */}
               <div className="mt-6 flex items-center justify-between gap-3 border-t border-[var(--border-main)] pt-4 text-xs sm:text-sm">
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#141b16] font-display text-sm font-bold text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1f3a6b] font-display text-sm font-bold text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs">
                     {problemMakerName?.charAt(0).toUpperCase() || 'M'}
                   </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-[var(--text-main)] truncate">{problemMakerName}</span>
                       {isMaker && (
-                        <span className="shrink-0 rounded-md bg-[#d96b43]/15 px-2 py-0.5 text-[10px] font-bold text-[#b85028] dark:text-[#eb8b72]">
+                        <span className="shrink-0 rounded-md bg-[#c9a271]/15 px-2 py-0.5 text-[10px] font-bold text-[#b88e5d] dark:text-[#ecdcc2]">
                           You (Maker)
                         </span>
                       )}
@@ -757,7 +757,7 @@ export default function ProblemDetailsPage() {
               
               {/* Section 1: The Core Friction */}
               <section>
-                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b88e5d] dark:text-[#ecdcc2]">
                   <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
@@ -781,7 +781,7 @@ export default function ProblemDetailsPage() {
                     </svg>
                     <span>How People Cope Today (Current Hacks)</span>
                   </div>
-                  <div className="mt-3 border-l-2 border-[#d96b43] pl-4 py-1 text-base sm:text-lg leading-relaxed text-[var(--text-muted)] italic break-words [overflow-wrap:anywhere]">
+                  <div className="mt-3 border-l-2 border-[#c9a271] pl-4 py-1 text-base sm:text-lg leading-relaxed text-[var(--text-muted)] italic break-words [overflow-wrap:anywhere]">
                     &ldquo;{problem.workarounds}&rdquo;
                   </div>
                 </section>
@@ -789,8 +789,8 @@ export default function ProblemDetailsPage() {
 
               {/* Section 3: Target Audience */}
               <section className="border-t border-[var(--border-main)] pt-6">
-                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#d96b43]">
-                  <svg className="h-4 w-4 shrink-0 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#c9a271]">
+                  <svg className="h-4 w-4 shrink-0 text-[#c9a271]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -828,13 +828,13 @@ export default function ProblemDetailsPage() {
               {problem.proposedConcept && (
                 <section className="border-t border-[var(--border-main)] pt-6">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b88e5d] dark:text-[#ecdcc2]">
                       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                       </svg>
                       <span>Hypothesized Solution Concept</span>
                     </div>
-                    <span className="rounded-md bg-[#d96b43]/10 px-2.5 py-0.5 text-xs font-bold text-[#b85028] dark:text-[#eb8b72]">
+                    <span className="rounded-md bg-[#c9a271]/10 px-2.5 py-0.5 text-xs font-bold text-[#b88e5d] dark:text-[#ecdcc2]">
                       Pre-Code Idea
                     </span>
                   </div>
@@ -860,7 +860,7 @@ export default function ProblemDetailsPage() {
                 <button
                   type="button"
                   onClick={handleOpenAttachSolution}
-                  className="rounded-xl bg-[#141b16] px-4 py-2 text-xs font-semibold text-[#f4ede2] hover:bg-[#202c24] transition dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs cursor-pointer"
+                  className="rounded-xl bg-[#1f3a6b] px-4 py-2 text-xs font-semibold text-[#f4ede2] hover:bg-[#182f56] transition dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs cursor-pointer"
                 >
                   + Propose a Solution
                 </button>
@@ -879,7 +879,7 @@ export default function ProblemDetailsPage() {
                     <button
                       type="button"
                       onClick={handleOpenAttachSolution}
-                      className="mt-4 rounded-xl border-2 border-[#d96b43] bg-transparent px-5 py-2.5 text-sm font-bold text-[#d96b43] hover:bg-[#d96b43]/10 transition cursor-pointer"
+                      className="mt-4 rounded-xl border-2 border-[#1f3a6b] bg-transparent px-5 py-2.5 text-sm font-bold text-[#1f3a6b] hover:bg-[#1f3a6b]/10 dark:border-[#dbbf95] dark:text-[#dbbf95] dark:hover:bg-[#dbbf95]/15 transition cursor-pointer"
                     >
                       Attach your prototype
                     </button>
@@ -888,7 +888,7 @@ export default function ProblemDetailsPage() {
                   solutions.map((sol) => (
                     <div
                       key={sol.id}
-                      className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)]/50 p-4 sm:p-5 transition hover:border-[#d96b43]"
+                      className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)]/50 p-4 sm:p-5 transition hover:border-[#1f3a6b] dark:hover:border-[#dbbf95]"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -897,7 +897,7 @@ export default function ProblemDetailsPage() {
                               {sol.title}
                             </h3>
                             {sol.isMaker && (
-                              <span className="rounded-md bg-[#d96b43]/20 px-2 py-0.5 text-[10px] font-bold text-[#b85028] dark:text-[#eb8b72]">
+                              <span className="rounded-md bg-[#1f3a6b]/15 px-2 py-0.5 text-[10px] font-bold text-[#1f3a6b] dark:bg-[#dbbf95]/20 dark:text-[#dbbf95]">
                                 Maker&apos;s Prototype
                               </span>
                             )}
@@ -915,7 +915,7 @@ export default function ProblemDetailsPage() {
                         {sol.productId ? (
                           <Link
                             to={`/products/${sol.productId}`}
-                            className="shrink-0 rounded-xl bg-[#d96b43] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#e57b54] transition shadow-warm-xs"
+                            className="shrink-0 rounded-xl bg-[#1f3a6b] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] transition shadow-warm-xs"
                           >
                             Test Prototype &rarr;
                           </Link>
@@ -924,7 +924,7 @@ export default function ProblemDetailsPage() {
                             href={sol.productUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="shrink-0 rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-3.5 py-1.5 text-xs font-bold text-[var(--text-main)] hover:border-[#d96b43] transition"
+                            className="shrink-0 rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-3.5 py-1.5 text-xs font-bold text-[var(--text-main)] hover:border-[#1f3a6b] dark:hover:border-[#dbbf95] transition"
                           >
                             Visit External &rarr;
                           </a>
@@ -980,7 +980,7 @@ export default function ProblemDetailsPage() {
                       className={`w-full rounded-xl border bg-[var(--bg-page)] p-3.5 text-sm sm:text-base text-[var(--text-main)] placeholder-[var(--text-subtle)] focus:outline-none focus:ring-1 break-words transition-colors ${
                         commentError
                           ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/30 tdev-shake'
-                          : 'border-[var(--border-main)] focus:border-[#d96b43] focus:ring-[#d96b43]'
+                          : 'border-[var(--border-main)] focus:border-[#c9a271] focus:ring-[#c9a271]'
                       }`}
                     />
                     {commentError && (
@@ -992,7 +992,7 @@ export default function ProblemDetailsPage() {
                       <button
                         type="submit"
                         disabled={isSubmittingComment}
-                        className="rounded-xl bg-[#141b16] px-5 py-2.5 text-xs font-semibold text-[#f4ede2] transition hover:bg-[#202c24] disabled:opacity-50 dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-[#ffffff] shadow-warm-xs cursor-pointer"
+                        className="rounded-xl bg-[#1f3a6b] px-5 py-2.5 text-xs font-semibold text-[#f4ede2] transition hover:bg-[#182f56] disabled:opacity-50 dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-[#ffffff] shadow-warm-xs cursor-pointer"
                       >
                         {isSubmittingComment ? 'Posting...' : 'Post Insight'}
                       </button>
@@ -1006,7 +1006,7 @@ export default function ProblemDetailsPage() {
                     <Link
                       to="/sign-in"
                       state={{ from: location }}
-                      className="mt-3 inline-block rounded-xl bg-[#d96b43] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#e57b54] shadow-warm-xs"
+                      className="mt-3 inline-block rounded-xl bg-[#c9a271] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#e57b54] shadow-warm-xs"
                     >
                       Sign in to Comment
                     </Link>
@@ -1071,8 +1071,8 @@ export default function ProblemDetailsPage() {
                   onClick={handleToggleValidation}
                   className={`w-full flex items-center justify-center gap-2 rounded-xl py-3.5 px-4 text-sm font-bold transition-all shadow-warm-sm cursor-pointer active:scale-[0.98] ${
                     hasValidated
-                      ? 'bg-[#d96b43] text-white hover:bg-[#e57b54]'
-                      : 'border-2 border-[#d96b43] text-[#d96b43] bg-[var(--bg-surface)] hover:bg-[#d96b43]/10'
+                      ? 'bg-[#1f3a6b] text-white hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]'
+                      : 'border-2 border-[#1f3a6b] text-[#1f3a6b] bg-[var(--bg-surface)] hover:bg-[#1f3a6b]/10 dark:border-[#dbbf95] dark:text-[#dbbf95] dark:hover:bg-[#dbbf95]/15'
                   }`}
                 >
                   <svg className={`h-4 w-4 transition-transform ${hasValidated ? 'scale-110' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1089,8 +1089,8 @@ export default function ProblemDetailsPage() {
                   onClick={handleToggleNotification}
                   className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 px-4 text-xs font-semibold transition-all border cursor-pointer ${
                     hasSubscribed
-                      ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#b85028] dark:text-[#eb8b72]'
-                      : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] hover:border-[#d96b43] hover:text-[var(--text-main)]'
+                      ? 'border-[#1f3a6b] bg-[#1f3a6b]/10 text-[#1f3a6b] dark:border-[#dbbf95] dark:bg-[#dbbf95]/15 dark:text-[#ecdcc2]'
+                      : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] hover:border-[#1f3a6b] hover:text-[var(--text-main)] dark:hover:border-[#dbbf95]'
                   }`}
                 >
                   <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1165,7 +1165,7 @@ export default function ProblemDetailsPage() {
                   <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-bold text-xs shadow-warm-xs ${
                     validationCount >= 3
                       ? 'bg-emerald-500 text-white'
-                      : 'bg-[#d96b43] text-white'
+                      : 'bg-[#c9a271] text-white'
                   }`}>
                     {validationCount >= 3 ? '✓' : '2'}
                   </div>
@@ -1219,7 +1219,7 @@ export default function ProblemDetailsPage() {
                 About the Originator
               </h3>
               <div className="mt-4 flex items-center gap-3 min-w-0">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#141b16] font-display text-base font-bold text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1f3a6b] font-display text-base font-bold text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c] shadow-warm-xs">
                   {problemMakerName?.charAt(0).toUpperCase() || 'M'}
                 </span>
                 <div className="min-w-0">
@@ -1322,7 +1322,7 @@ export default function ProblemDetailsPage() {
                           }
                         }
                       }}
-                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43]"
+                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#c9a271]"
                     >
                       <option value="">-- Or enter custom solution below --</option>
                       {userProducts.map((p) => (
@@ -1337,7 +1337,7 @@ export default function ProblemDetailsPage() {
                 {/* Option B: Custom Title & URL */}
                 <div>
                   <label htmlFor="solution-title-input" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-main)] mb-1">
-                    Solution / Prototype Name <span className="text-[#d96b43]">*</span>
+                    Solution / Prototype Name <span className="text-[#c9a271]">*</span>
                   </label>
                   <input
                     id="solution-title-input"
@@ -1345,7 +1345,7 @@ export default function ProblemDetailsPage() {
                     value={solutionTitle}
                     onChange={(e) => setSolutionTitle(e.target.value)}
                     placeholder="e.g. Tailwind Tokens Sync CLI"
-                    className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43]"
+                    className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#c9a271]"
                   />
                 </div>
 
@@ -1359,7 +1359,7 @@ export default function ProblemDetailsPage() {
                     value={solutionUrl}
                     onChange={(e) => setSolutionUrl(e.target.value)}
                     placeholder="e.g. https://github.com/maker/tool or https://mytool.app"
-                    className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43]"
+                    className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#c9a271]"
                   />
                 </div>
 
@@ -1373,7 +1373,7 @@ export default function ProblemDetailsPage() {
                     value={solutionNotes}
                     onChange={(e) => setSolutionNotes(e.target.value)}
                     placeholder="Explain what testers should try and how this addresses the friction..."
-                    className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#d96b43]"
+                    className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] p-3 text-sm text-[var(--text-main)] outline-none focus:border-[#c9a271]"
                   />
                 </div>
 
@@ -1393,7 +1393,7 @@ export default function ProblemDetailsPage() {
                   </button>
                   <button
                     type="submit"
-                    className="rounded-xl bg-[#d96b43] px-5 py-2 text-xs font-semibold text-white hover:bg-[#e57b54] transition shadow-warm-xs cursor-pointer"
+                    className="rounded-xl bg-[#c9a271] px-5 py-2 text-xs font-semibold text-white hover:bg-[#e57b54] transition shadow-warm-xs cursor-pointer"
                   >
                     Attach Solution
                   </button>

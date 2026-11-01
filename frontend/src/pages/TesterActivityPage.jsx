@@ -91,13 +91,13 @@ export default function TesterActivityPage() {
           <Navbar />
           <div className="mx-auto flex w-full max-w-md flex-1 items-center justify-center px-5 py-16">
             <div className="w-full rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-8 text-center shadow-warm-md sm:p-10">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d96b43]/15 text-[#d96b43]">
-                <svg className="h-7 w-7 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-main)] text-[var(--text-main)] dark:border-transparent dark:bg-[#dbbf95]/20 dark:text-[#dbbf95]">
+                <svg className="h-7 w-7 text-[var(--text-main)] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="8" r="6" />
                   <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
                 </svg>
               </div>
-              <p className="mt-4 text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+              <p className="mt-4 text-sm font-bold uppercase tracking-wider text-[var(--text-main)] dark:text-[#dbbf95]">
                 Tester Access Required
               </p>
               <h1 className="mt-2 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-[var(--text-main)]">
@@ -109,7 +109,7 @@ export default function TesterActivityPage() {
               <button
                 type="button"
                 onClick={() => navigate('/sign-in', { state: { from: location } })}
-                className="mt-6 w-full rounded-full bg-[#d96b43] py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43] focus-visible:ring-offset-2"
+                className="mt-6 w-full rounded-full bg-[#1f3a6b] py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] active:translate-y-0.5 cursor-pointer dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] focus-visible:ring-offset-2"
               >
                 Sign in to Continue
               </button>
@@ -143,13 +143,13 @@ export default function TesterActivityPage() {
               <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-sm font-semibold text-[#d96b43] shadow-warm-sm">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#d96b43]" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] shadow-warm-sm">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" />
                       Tester Studio
                     </span>
                   </div>
                   <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-display font-semibold tracking-tight text-[var(--text-main)]">
-                    Tester Activity & <span className="italic font-normal text-[#d96b43] dark:text-[#e07a5f]">Recognition</span>
+                    Tester Activity & <span className="italic font-normal text-[var(--text-main)] dark:text-[#dbbf95]">Recognition</span>
                   </h1>
                   <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
                     Review prototypes you have enrolled in, monitor your structured feedback notes, and track community recognition points awarded directly by builders.
@@ -159,7 +159,7 @@ export default function TesterActivityPage() {
                 {/* Tester Identity Pill (preserves email privacy) */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <div className="flex items-center gap-3 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2.5 shadow-warm-sm">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d96b43]/15 font-display font-bold text-sm text-[#d96b43]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1f3a6b]/15 font-display font-bold text-sm text-[#1f3a6b] dark:bg-[#dbbf95]/20 dark:text-[#dbbf95]">
                       {testerDisplayName.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -173,7 +173,7 @@ export default function TesterActivityPage() {
                   </div>
                   <Link
                     to="/profile/setup"
-                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text-main)] shadow-warm-sm transition hover:bg-[var(--bg-surface-subtle)] hover:text-[#d96b43]"
+                    className="inline-flex items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text-main)] shadow-warm-sm transition hover:bg-[var(--bg-surface-subtle)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95]"
                   >
                     Edit Preferences →
                   </Link>
@@ -183,12 +183,12 @@ export default function TesterActivityPage() {
               {/* 4 Core Summary Metrics */}
               <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
                 {/* Total Recognition Points */}
-                <div className="rounded-2xl border border-[#d96b43]/30 bg-[#d96b43]/5 p-5 shadow-warm-sm transition hover:border-[#d96b43]/60">
+                <div className="rounded-2xl border border-[#1f3a6b]/30 bg-[#1f3a6b]/5 dark:border-[#dbbf95]/30 dark:bg-[#dbbf95]/10 p-5 shadow-warm-sm transition hover:border-[#1f3a6b]/60 dark:hover:border-[#dbbf95]/60">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                    <span className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                       Recognition Points
                     </span>
-                    <svg className="h-4 w-4 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <svg className="h-4 w-4 text-[#1f3a6b] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <circle cx="12" cy="8" r="6" />
                       <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
                     </svg>
@@ -261,14 +261,14 @@ export default function TesterActivityPage() {
               {/* Concise Explanation Banner for Recognition Points */}
               <div className="mt-6 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-5 text-sm text-[var(--text-main)] shadow-warm-sm">
                 <div className="flex items-start gap-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#d96b43]/15 text-[#d96b43]">
-                    <svg className="h-4 w-4 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#1f3a6b]/15 text-[#1f3a6b] dark:bg-[#dbbf95]/20 dark:text-[#dbbf95]">
+                    <svg className="h-4 w-4 text-[#1f3a6b] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <circle cx="12" cy="8" r="6" />
                       <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                       How Recognition Points Work
                     </h2>
                     <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">
@@ -300,11 +300,11 @@ export default function TesterActivityPage() {
                     {isActive && (
                       <motion.span
                         layoutId="tester-tab-indicator"
-                        className="absolute inset-0 rounded-full bg-[#1b241e] shadow-warm-sm dark:bg-[#fbfaf7]"
+                        className="absolute inset-0 rounded-full bg-[#1f3a6b] shadow-warm-sm dark:bg-[#dbbf95]"
                         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                       />
                     )}
-                    <span className={`relative ${isActive ? 'text-white dark:text-[#0b100c]' : ''}`}>
+                    <span className={`relative ${isActive ? 'text-white dark:text-[#15203a]' : ''}`}>
                       {tab.label} ({tab.count})
                     </span>
                   </button>
@@ -391,7 +391,7 @@ export default function TesterActivityPage() {
                     <div className="mt-6">
                       <Link
                         to="/explore"
-                        className="inline-flex items-center justify-center rounded-full bg-[#d96b43] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028]"
+                        className="inline-flex items-center justify-center rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
                       >
                         Discover Prototypes on Explore →
                       </Link>
@@ -425,7 +425,7 @@ export default function TesterActivityPage() {
                                 {product.categories?.map((cat) => (
                                   <span
                                     key={cat}
-                                    className="rounded-full bg-[#d96b43]/10 px-2.5 py-0.5 text-sm font-semibold text-[#d96b43]"
+                                    className="rounded-full bg-[#1f3a6b]/10 text-[#1f3a6b] dark:bg-[#dbbf95]/15 dark:text-[#dbbf95] px-2.5 py-0.5 text-sm font-semibold"
                                   >
                                     {cat}
                                   </span>
@@ -439,7 +439,7 @@ export default function TesterActivityPage() {
                               <h3 className="mt-2.5 text-xl sm:text-2xl font-display font-semibold tracking-tight text-[var(--text-main)]">
                                 <Link
                                   to={`/products/${productId}`}
-                                  className="hover:text-[#d96b43] transition-colors"
+                                  className="hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
                                 >
                                   {product.name}
                                 </Link>
@@ -455,7 +455,7 @@ export default function TesterActivityPage() {
                               {/* Feedback Request Focus */}
                               {product.feedbackRequest && (
                                 <div className="mt-3.5 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-3.5 text-sm">
-                                  <span className="font-semibold text-[#d96b43]">Builder&apos;s feedback focus: </span>
+                                  <span className="font-semibold text-[var(--text-main)] dark:text-[#dbbf95]">Builder&apos;s feedback focus: </span>
                                   <span className="text-[var(--text-main)]">{product.feedbackRequest}</span>
                                 </div>
                               )}
@@ -490,7 +490,7 @@ export default function TesterActivityPage() {
                                 <strong className="text-[var(--text-main)]">{latestNote.category}</strong>
                                 <span className="text-[var(--text-subtle)]"> on {new Date(latestNote.createdAt).toLocaleDateString()}</span>
                                 {latestNote.isHelpful && (
-                                  <span className="ml-2 inline-flex items-center gap-1 font-semibold text-[#d96b43]">
+                                  <span className="ml-2 inline-flex items-center gap-1 font-semibold text-[#1f3a6b] dark:text-[#dbbf95]">
                                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                       <polyline points="20 6 9 17 4 12" />
                                     </svg>
@@ -510,7 +510,7 @@ export default function TesterActivityPage() {
                                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                                   hasFeedback
                                     ? 'border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
-                                    : 'bg-[#d96b43] text-white shadow-warm-sm hover:bg-[#b85028]'
+                                    : 'bg-[#1f3a6b] text-white shadow-warm-sm hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]'
                                 }`}
                               >
                                 {hasFeedback ? 'View & Add More Feedback →' : 'Test Prototype & Submit Feedback →'}
@@ -548,8 +548,8 @@ export default function TesterActivityPage() {
                 {totalHelpfulNotes === 0 ? (
                   /* Empty state for 0 recognition */
                   <div className="mt-8 rounded-3xl border border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] p-10 text-center sm:p-14">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d96b43]/15 text-[#d96b43]">
-                      <svg className="h-7 w-7 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1f3a6b]/15 text-[#1f3a6b] dark:bg-[#dbbf95]/20 dark:text-[#dbbf95]">
+                      <svg className="h-7 w-7 text-[#1f3a6b] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <circle cx="12" cy="8" r="6" />
                         <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
                       </svg>
@@ -576,7 +576,7 @@ export default function TesterActivityPage() {
                     <div className="mt-6">
                       <Link
                         to="/explore"
-                        className="inline-flex items-center justify-center rounded-full bg-[#1b241e] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#2e3b32] dark:bg-[#fbfaf7] dark:text-[#0b100c]"
+                        className="inline-flex items-center justify-center rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
                       >
                         Explore Prototypes to Test →
                       </Link>
@@ -598,11 +598,11 @@ export default function TesterActivityPage() {
                             </span>
                             <Link
                               to={`/products/${fb.productId}`}
-                              className="text-sm font-display font-bold text-[var(--text-main)] hover:text-[#d96b43] underline decoration-[#d96b43] decoration-2 underline-offset-4"
+                              className="text-sm font-display font-bold text-[var(--text-main)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] underline decoration-[#1f3a6b] dark:decoration-[#dbbf95] decoration-2 underline-offset-4"
                             >
                               {fb.product?.name || 'View Prototype'}
                             </Link>
-                            <span className="rounded-full bg-[#d96b43]/10 px-2.5 py-0.5 text-sm font-semibold text-[#d96b43]">
+                            <span className="rounded-full bg-[#1f3a6b]/10 text-[#1f3a6b] dark:bg-[#dbbf95]/15 dark:text-[#dbbf95] px-2.5 py-0.5 text-sm font-semibold">
                               {fb.category}
                             </span>
                           </div>
@@ -635,7 +635,7 @@ export default function TesterActivityPage() {
                         {fb.reply && (
                           <div className="mt-4 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-3.5">
                             <div className="flex items-center justify-between gap-2 border-b border-[var(--border-main)] pb-1.5">
-                              <span className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                              <span className="text-sm font-bold uppercase tracking-wider text-[var(--text-main)] dark:text-[#dbbf95]">
                                 Builder Reply from {fb.reply.repliedBy || fb.product?.maker || 'Maker'}
                               </span>
                               <span className="text-sm text-[var(--text-subtle)]">
@@ -652,7 +652,7 @@ export default function TesterActivityPage() {
                         <div className="mt-4 flex justify-end">
                           <Link
                             to={`/products/${fb.productId}`}
-                            className="text-sm font-semibold text-[#d96b43] hover:underline cursor-pointer"
+                            className="text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline cursor-pointer"
                           >
                             Open Product Details & Community Feed →
                           </Link>
@@ -694,7 +694,7 @@ export default function TesterActivityPage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab('enrolled')}
-                        className="rounded-full bg-[#1b241e] px-4 py-2 text-sm font-semibold text-white shadow-warm-sm hover:bg-[#2e3b32] dark:bg-[#fbfaf7] dark:text-[#0b100c] cursor-pointer"
+                        className="rounded-full bg-[#1f3a6b] px-4 py-2 text-sm font-semibold text-white shadow-warm-sm hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer"
                       >
                         View Enrolled Prototypes →
                       </button>
@@ -711,11 +711,11 @@ export default function TesterActivityPage() {
                           <div className="flex items-center gap-2">
                             <Link
                               to={`/products/${fb.productId}`}
-                              className="font-bold text-sm text-[var(--text-main)] hover:text-[#d96b43]"
+                              className="font-bold text-sm text-[var(--text-main)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95]"
                             >
                               {fb.product?.name || fb.productId}
                             </Link>
-                            <span className="rounded-full bg-[#d96b43]/10 px-2 py-0.5 text-sm font-semibold text-[#d96b43]">
+                            <span className="rounded-full bg-[#1f3a6b]/10 text-[#1f3a6b] dark:bg-[#dbbf95]/15 dark:text-[#dbbf95] px-2 py-0.5 text-sm font-semibold">
                               {fb.category}
                             </span>
                           </div>
@@ -750,7 +750,7 @@ export default function TesterActivityPage() {
 
                         {fb.reply && (
                           <div className="mt-3 rounded-lg border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-2.5 text-sm leading-relaxed">
-                            <span className="font-semibold text-[#d96b43]">
+                            <span className="font-semibold text-[var(--text-main)] dark:text-[#dbbf95]">
                               Builder reply ({fb.reply.repliedBy}):{' '}
                             </span>
                             <span className="text-[var(--text-main)]">{fb.reply.text}</span>

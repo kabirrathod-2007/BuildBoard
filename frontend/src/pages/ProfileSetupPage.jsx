@@ -279,14 +279,14 @@ function ProfilePageContent({
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4 sm:gap-5">
             <div
-              className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d96b43]/20 to-[#d96b43]/5 border border-[#d96b43]/30 font-display text-2xl sm:text-3xl font-extrabold text-[#d96b43] shadow-warm-sm"
+              className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#c9a271]/20 to-[#c9a271]/5 border border-[#c9a271]/30 font-display text-2xl sm:text-3xl font-extrabold text-[#c9a271] shadow-warm-sm"
               aria-hidden="true"
             >
               {userInitial}
             </div>
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-[#d96b43]/10 border border-[#d96b43]/20 px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-[#d96b43]">
+                <span className="rounded-full bg-[#c9a271]/10 border border-[#c9a271]/20 px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-[#c9a271]">
                   {isExistingProfile ? 'Verified Profile' : 'New Member Setup'}
                 </span>
                 <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-subtle)]">
@@ -310,7 +310,7 @@ function ProfilePageContent({
                 >
                   {effectiveDisplayName}
                 </h1>
-                <span className="font-mono text-sm font-medium text-[#d96b43]">
+                <span className="font-mono text-sm font-medium text-[#c9a271]">
                   {effectiveHandle}
                 </span>
               </div>
@@ -333,7 +333,7 @@ function ProfilePageContent({
                       href={website.startsWith('http') ? website : `https://${website}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-medium text-[#d96b43] hover:underline"
+                      className="inline-flex items-center gap-1 font-medium text-[#1f3a6b] dark:text-[#dbbf95] hover:underline"
                     >
                       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10" />
@@ -437,14 +437,14 @@ function ProfilePageContent({
         <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-4 sm:p-5 text-[var(--text-main)] shadow-warm-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#d96b43]/15 text-[#d96b43]">
-                <svg className="h-5 w-5 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#c9a271]/15 text-[#c9a271]">
+                <svg className="h-5 w-5 text-[#c9a271]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="8" r="6" />
                   <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
                 </svg>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-[#d96b43]">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                   Tester Recognition
                 </p>
                 <p className="text-base sm:text-lg font-display font-semibold tracking-tight text-[var(--text-main)]">
@@ -456,7 +456,7 @@ function ProfilePageContent({
             <div className="flex flex-wrap items-center gap-2.5">
               <Link
                 to="/tester/activity"
-                className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#d96b43] shadow-warm-xs hover:bg-[var(--bg-surface-subtle)] transition-colors"
+                className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] shadow-warm-xs hover:bg-[var(--bg-surface-subtle)] transition-colors"
               >
                 View Tester Studio & enrolled builds →
               </Link>
@@ -491,7 +491,7 @@ function ProfilePageContent({
                 }}
                 className={`flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm font-semibold transition cursor-pointer ${
                   isActive
-                    ? 'border-[#d96b43] text-[#d96b43]'
+                    ? 'border-[#c9a271] text-[#c9a271]'
                     : 'border-transparent text-[var(--text-muted)] hover:border-[var(--border-main)] hover:text-[var(--text-main)]'
                 }`}
               >
@@ -541,7 +541,7 @@ function ProfilePageContent({
                       setIsEditingPreferences(true)
                       setSavedSuccessMessage('')
                     }}
-                    className="min-h-[46px] inline-flex items-center gap-2 rounded-full bg-[#d96b43] px-6 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer"
+                    className="min-h-[46px] inline-flex items-center gap-2 rounded-full bg-[#1f3a6b] px-6 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] active:translate-y-0.5 cursor-pointer"
                   >
                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M12 20h9" />
@@ -567,7 +567,7 @@ function ProfilePageContent({
                     <h3 className="font-display text-base font-bold text-[var(--text-main)]">
                       Participation & Experience
                     </h3>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#d96b43]">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#c9a271]">
                       Role & Level
                     </span>
                   </div>
@@ -581,7 +581,7 @@ function ProfilePageContent({
                         {participation.map((part) => (
                           <span
                             key={part}
-                            className="inline-flex items-center rounded-full bg-[#d96b43]/10 border border-[#d96b43]/30 px-3 py-1 text-xs font-bold capitalize text-[#d96b43]"
+                            className="inline-flex items-center rounded-full bg-[#c9a271]/10 border border-[#c9a271]/30 px-3 py-1 text-xs font-bold capitalize text-[#c9a271]"
                           >
                             {part === 'builder' ? 'Product Builder' : 'Prototype Tester'}
                           </span>
@@ -615,7 +615,7 @@ function ProfilePageContent({
                     <h3 className="font-display text-base font-bold text-[var(--text-main)]">
                       Devices & Testing Focus
                     </h3>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#d96b43]">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#c9a271]">
                       Environment
                     </span>
                   </div>
@@ -674,7 +674,7 @@ function ProfilePageContent({
                         Prototypes in these spaces receive primary boost in your recommendation feed.
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#d96b43]/10 px-3 py-1 text-xs font-bold text-[#d96b43]">
+                    <span className="rounded-full bg-[#c9a271]/10 px-3 py-1 text-xs font-bold text-[#c9a271]">
                       {interests.length} Categories Selected
                     </span>
                   </div>
@@ -684,7 +684,7 @@ function ProfilePageContent({
                       interests.map((cat) => (
                         <span
                           key={cat}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-[#d96b43]/40 bg-[#d96b43]/10 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-[#d96b43]"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[#c9a271]/40 bg-[#c9a271]/10 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-[#c9a271]"
                         >
                           <svg className="h-3 w-3 stroke-[3]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <polyline points="20 6 9 17 4 12" />
@@ -772,9 +772,9 @@ function ProfilePageContent({
               className="space-y-10"
             >
               {/* Form Action Banner */}
-              <div className="sticky top-20 z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-[#d96b43]/30 bg-[var(--bg-surface)]/95 p-4 shadow-warm-md backdrop-blur">
+              <div className="sticky top-20 z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-[#c9a271]/30 bg-[var(--bg-surface)]/95 p-4 shadow-warm-md backdrop-blur">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-3 w-3 rounded-full bg-[#d96b43]" />
+                  <span className="flex h-3 w-3 rounded-full bg-[#c9a271]" />
                   <span className="text-sm font-bold text-[var(--text-main)]">
                     Editing Matching Preferences
                   </span>
@@ -794,7 +794,7 @@ function ProfilePageContent({
                   )}
                   <button
                     type="submit"
-                    className="min-h-[38px] rounded-full bg-[#d96b43] px-6 py-1.5 text-xs sm:text-sm font-bold text-white shadow-warm-sm transition hover:bg-[#b85028] cursor-pointer"
+                    className="min-h-[38px] rounded-full bg-[#1f3a6b] px-6 py-1.5 text-xs sm:text-sm font-bold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer"
                   >
                     Save Preferences
                   </button>
@@ -816,7 +816,7 @@ function ProfilePageContent({
                   <label
                     className={`flex items-start gap-3.5 rounded-2xl border p-4 sm:p-5 transition cursor-pointer select-none ${
                       participation.includes('builder')
-                        ? 'border-[#d96b43] bg-[#d96b43]/10 dark:bg-[#d96b43]/20 text-[var(--text-main)] shadow-warm-xs'
+                        ? 'border-[#c9a271] bg-[#c9a271]/10 dark:bg-[#c9a271]/20 text-[var(--text-main)] shadow-warm-xs'
                         : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)] hover:text-[var(--text-main)]'
                     }`}
                   >
@@ -826,7 +826,7 @@ function ProfilePageContent({
                       value="builder"
                       checked={participation.includes('builder')}
                       onChange={() => toggleArrayItem(setParticipation, 'builder')}
-                      className="mt-1 h-4 w-4 rounded accent-[#d96b43] cursor-pointer"
+                      className="mt-1 h-4 w-4 rounded accent-[#c9a271] cursor-pointer"
                     />
                     <div>
                       <span className="block font-display text-base font-bold text-[var(--text-main)]">
@@ -841,7 +841,7 @@ function ProfilePageContent({
                   <label
                     className={`flex items-start gap-3.5 rounded-2xl border p-4 sm:p-5 transition cursor-pointer select-none ${
                       participation.includes('tester')
-                        ? 'border-[#d96b43] bg-[#d96b43]/10 dark:bg-[#d96b43]/20 text-[var(--text-main)] shadow-warm-xs'
+                        ? 'border-[#c9a271] bg-[#c9a271]/10 dark:bg-[#c9a271]/20 text-[var(--text-main)] shadow-warm-xs'
                         : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)] hover:text-[var(--text-main)]'
                     }`}
                   >
@@ -851,7 +851,7 @@ function ProfilePageContent({
                       value="tester"
                       checked={participation.includes('tester')}
                       onChange={() => toggleArrayItem(setParticipation, 'tester')}
-                      className="mt-1 h-4 w-4 rounded accent-[#d96b43] cursor-pointer"
+                      className="mt-1 h-4 w-4 rounded accent-[#c9a271] cursor-pointer"
                     />
                     <div>
                       <span className="block font-display text-base font-bold text-[var(--text-main)]">
@@ -889,7 +889,7 @@ function ProfilePageContent({
                             key={level}
                             className={`flex flex-col justify-between rounded-2xl border p-4 transition cursor-pointer select-none ${
                               checked
-                                ? 'border-[#d96b43] bg-[#d96b43]/10 dark:bg-[#d96b43]/20 text-[var(--text-main)] shadow-warm-xs'
+                                ? 'border-[#c9a271] bg-[#c9a271]/10 dark:bg-[#c9a271]/20 text-[var(--text-main)] shadow-warm-xs'
                                 : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                             }`}
                           >
@@ -903,7 +903,7 @@ function ProfilePageContent({
                                 value={level}
                                 checked={checked}
                                 onChange={() => setExperienceLevel(level)}
-                                className="mt-0.5 h-4 w-4 accent-[#d96b43] cursor-pointer"
+                                className="mt-0.5 h-4 w-4 accent-[#c9a271] cursor-pointer"
                               />
                             </div>
                             <span className="mt-2 block text-xs text-[var(--text-muted)] leading-relaxed">
@@ -929,7 +929,7 @@ function ProfilePageContent({
                             onClick={() => setAvailability(hours)}
                             className={`rounded-2xl border p-3 text-left transition cursor-pointer ${
                               checked
-                                ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#d96b43] font-bold shadow-warm-xs'
+                                ? 'border-[#c9a271] bg-[#c9a271]/10 text-[#c9a271] font-bold shadow-warm-xs'
                                 : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                             }`}
                           >
@@ -954,14 +954,14 @@ function ProfilePageContent({
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-[#d96b43]/10 px-3 py-1 text-xs font-bold text-[#d96b43]">
+                    <span className="rounded-full bg-[#c9a271]/10 px-3 py-1 text-xs font-bold text-[#c9a271]">
                       {interests.length} selected
                     </span>
                     {interests.length > 0 && (
                       <button
                         type="button"
                         onClick={() => setInterests([])}
-                        className="text-xs font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition cursor-pointer"
+                        className="text-xs font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition cursor-pointer"
                       >
                         Clear
                       </button>
@@ -977,7 +977,7 @@ function ProfilePageContent({
                         key={interest}
                         className={`min-h-[46px] flex items-center justify-between rounded-2xl border px-3.5 py-2.5 transition cursor-pointer select-none ${
                           checked
-                            ? 'border-[#d96b43] bg-[#d96b43]/10 dark:bg-[#d96b43]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
+                            ? 'border-[#c9a271] bg-[#c9a271]/10 dark:bg-[#c9a271]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
                             : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)] hover:text-[var(--text-main)]'
                         }`}
                       >
@@ -990,7 +990,7 @@ function ProfilePageContent({
                           value={interest}
                           checked={checked}
                           onChange={() => toggleArrayItem(setInterests, interest)}
-                          className="h-4 w-4 rounded accent-[#d96b43] cursor-pointer"
+                          className="h-4 w-4 rounded accent-[#c9a271] cursor-pointer"
                         />
                       </label>
                     )
@@ -1022,7 +1022,7 @@ function ProfilePageContent({
                             key={device}
                             className={`flex items-center justify-between rounded-xl border px-3.5 py-2 transition cursor-pointer ${
                               checked
-                                ? 'border-[#d96b43] bg-[#d96b43]/10 font-semibold text-[var(--text-main)]'
+                                ? 'border-[#c9a271] bg-[#c9a271]/10 font-semibold text-[var(--text-main)]'
                                 : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                             }`}
                           >
@@ -1031,7 +1031,7 @@ function ProfilePageContent({
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggleArrayItem(setTestingDevices, device)}
-                              className="h-4 w-4 rounded accent-[#d96b43]"
+                              className="h-4 w-4 rounded accent-[#c9a271]"
                             />
                           </label>
                         )
@@ -1051,7 +1051,7 @@ function ProfilePageContent({
                             key={focus}
                             className={`flex items-center justify-between rounded-xl border px-3.5 py-2 transition cursor-pointer ${
                               checked
-                                ? 'border-[#d96b43] bg-[#d96b43]/10 font-semibold text-[var(--text-main)]'
+                                ? 'border-[#c9a271] bg-[#c9a271]/10 font-semibold text-[var(--text-main)]'
                                 : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                             }`}
                           >
@@ -1060,7 +1060,7 @@ function ProfilePageContent({
                               type="checkbox"
                               checked={checked}
                               onChange={() => toggleArrayItem(setFeedbackFocus, focus)}
-                              className="h-4 w-4 rounded accent-[#d96b43]"
+                              className="h-4 w-4 rounded accent-[#c9a271]"
                             />
                           </label>
                         )
@@ -1089,7 +1089,7 @@ function ProfilePageContent({
                         key={role}
                         className={`min-h-[46px] flex items-center justify-between rounded-2xl border px-3.5 py-2.5 transition cursor-pointer select-none ${
                           checked
-                            ? 'border-[#d96b43] bg-[#d96b43]/10 dark:bg-[#d96b43]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
+                            ? 'border-[#c9a271] bg-[#c9a271]/10 dark:bg-[#c9a271]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
                             : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)] hover:text-[var(--text-main)]'
                         }`}
                       >
@@ -1098,7 +1098,7 @@ function ProfilePageContent({
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleArrayItem(setRoles, role)}
-                          className="h-4 w-4 rounded accent-[#d96b43] cursor-pointer"
+                          className="h-4 w-4 rounded accent-[#c9a271] cursor-pointer"
                         />
                       </label>
                     )
@@ -1125,7 +1125,7 @@ function ProfilePageContent({
                         key={ind}
                         className={`min-h-[46px] flex items-center justify-between rounded-2xl border px-3.5 py-2.5 transition cursor-pointer select-none ${
                           checked
-                            ? 'border-[#d96b43] bg-[#d96b43]/10 dark:bg-[#d96b43]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
+                            ? 'border-[#c9a271] bg-[#c9a271]/10 dark:bg-[#c9a271]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
                             : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)] hover:text-[var(--text-main)]'
                         }`}
                       >
@@ -1134,7 +1134,7 @@ function ProfilePageContent({
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleArrayItem(setIndustries, ind)}
-                          className="h-4 w-4 rounded accent-[#d96b43] cursor-pointer"
+                          className="h-4 w-4 rounded accent-[#c9a271] cursor-pointer"
                         />
                       </label>
                     )
@@ -1161,7 +1161,7 @@ function ProfilePageContent({
                         key={tech}
                         className={`min-h-[46px] flex items-center justify-between rounded-2xl border px-3.5 py-2.5 transition cursor-pointer select-none ${
                           checked
-                            ? 'border-[#d96b43] bg-[#d96b43]/10 dark:bg-[#d96b43]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
+                            ? 'border-[#c9a271] bg-[#c9a271]/10 dark:bg-[#c9a271]/20 text-[var(--text-main)] font-bold shadow-warm-xs'
                             : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)] hover:text-[var(--text-main)]'
                         }`}
                       >
@@ -1170,7 +1170,7 @@ function ProfilePageContent({
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleArrayItem(setTechnologies, tech)}
-                          className="h-4 w-4 rounded accent-[#d96b43] cursor-pointer"
+                          className="h-4 w-4 rounded accent-[#c9a271] cursor-pointer"
                         />
                       </label>
                     )
@@ -1183,7 +1183,7 @@ function ProfilePageContent({
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <button
                     type="submit"
-                    className="min-h-[48px] rounded-full bg-[#d96b43] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer"
+                    className="min-h-[48px] rounded-full bg-[#1f3a6b] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] active:translate-y-0.5 cursor-pointer"
                   >
                     Save profile preferences
                   </button>
@@ -1201,7 +1201,7 @@ function ProfilePageContent({
                 <button
                   type="button"
                   onClick={onNavigateExplore}
-                  className="text-sm font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition cursor-pointer"
+                  className="text-sm font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition cursor-pointer"
                 >
                   Return to Explore
                 </button>
@@ -1235,7 +1235,7 @@ function ProfilePageContent({
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
                 <label htmlFor="account-display-name" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-main)]">
-                  Display Name <span className="text-[#d96b43]">*</span>
+                  Display Name <span className="text-[#c9a271]">*</span>
                 </label>
                 <input
                   id="account-display-name"
@@ -1244,7 +1244,7 @@ function ProfilePageContent({
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="e.g. Alex Rivera"
                   required
-                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                 />
               </div>
 
@@ -1262,7 +1262,7 @@ function ProfilePageContent({
                     value={handle.replace(/^@/, '')}
                     onChange={(e) => setHandle(e.target.value)}
                     placeholder="alexrivera"
-                    className="w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] pl-8 pr-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                    className="w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] pl-8 pr-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                   />
                 </div>
               </div>
@@ -1277,7 +1277,7 @@ function ProfilePageContent({
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="e.g. Full-stack engineer & indie hacker. Love testing dev tools & productivity prototypes."
-                  className="mt-2 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                  className="mt-2 w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                 />
               </div>
 
@@ -1291,7 +1291,7 @@ function ProfilePageContent({
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="San Francisco, CA or Remote"
-                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                 />
               </div>
 
@@ -1332,7 +1332,7 @@ function ProfilePageContent({
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   placeholder="https://myportfolio.example"
-                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                 />
               </div>
 
@@ -1346,7 +1346,7 @@ function ProfilePageContent({
                   value={github}
                   onChange={(e) => setGithub(e.target.value)}
                   placeholder="e.g. octocat or https://github.com/..."
-                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                 />
               </div>
 
@@ -1360,7 +1360,7 @@ function ProfilePageContent({
                   value={twitter}
                   onChange={(e) => setTwitter(e.target.value)}
                   placeholder="e.g. alex_builds"
-                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                 />
               </div>
 
@@ -1374,7 +1374,7 @@ function ProfilePageContent({
                   value={linkedin}
                   onChange={(e) => setLinkedin(e.target.value)}
                   placeholder="e.g. https://linkedin.com/in/alex"
-                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                  className="mt-2 w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
                 />
               </div>
             </div>
@@ -1399,7 +1399,7 @@ function ProfilePageContent({
                     onClick={() => setDefaultLandingView(opt.value)}
                     className={`rounded-2xl border p-4 text-left transition cursor-pointer ${
                       checked
-                        ? 'border-[#d96b43] bg-[#d96b43]/10 font-bold text-[var(--text-main)] shadow-warm-xs'
+                        ? 'border-[#c9a271] bg-[#c9a271]/10 font-bold text-[var(--text-main)] shadow-warm-xs'
                         : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                     }`}
                   >
@@ -1418,7 +1418,7 @@ function ProfilePageContent({
           <div className="pt-2">
             <button
               type="submit"
-              className="min-h-[48px] rounded-full bg-[#d96b43] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] cursor-pointer"
+              className="min-h-[48px] rounded-full bg-[#1f3a6b] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer"
             >
               Save Account Settings
             </button>
@@ -1452,7 +1452,7 @@ function ProfilePageContent({
                 onClick={() => handleSaveAppearance('light', null)}
                 className={`flex flex-col items-start rounded-2xl border p-5 text-left transition cursor-pointer ${
                   theme === 'light'
-                    ? 'border-[#d96b43] bg-[#d96b43]/10 shadow-warm-sm ring-2 ring-[#d96b43]'
+                    ? 'border-[#c9a271] bg-[#c9a271]/10 shadow-warm-sm ring-2 ring-[#c9a271]'
                     : 'border-[var(--border-main)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
@@ -1476,7 +1476,7 @@ function ProfilePageContent({
                     </span>
                   </div>
                   {theme === 'light' && (
-                    <span className="rounded-full bg-[#d96b43] px-2.5 py-0.5 text-xs font-bold text-white">
+                    <span className="rounded-full bg-[#c9a271] px-2.5 py-0.5 text-xs font-bold text-white">
                       Active
                     </span>
                   )}
@@ -1491,7 +1491,7 @@ function ProfilePageContent({
                 onClick={() => handleSaveAppearance('dark', null)}
                 className={`flex flex-col items-start rounded-2xl border p-5 text-left transition cursor-pointer ${
                   theme === 'dark'
-                    ? 'border-[#d96b43] bg-[#d96b43]/10 shadow-warm-sm ring-2 ring-[#d96b43]'
+                    ? 'border-[#c9a271] bg-[#c9a271]/10 shadow-warm-sm ring-2 ring-[#c9a271]'
                     : 'border-[var(--border-main)] bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
@@ -1507,7 +1507,7 @@ function ProfilePageContent({
                     </span>
                   </div>
                   {theme === 'dark' && (
-                    <span className="rounded-full bg-[#d96b43] px-2.5 py-0.5 text-xs font-bold text-white">
+                    <span className="rounded-full bg-[#c9a271] px-2.5 py-0.5 text-xs font-bold text-white">
                       Active
                     </span>
                   )}
@@ -1534,7 +1534,7 @@ function ProfilePageContent({
                 onClick={() => handleSaveAppearance(null, 'comfortable')}
                 className={`rounded-2xl border p-4 text-left transition cursor-pointer ${
                   cardDensity === 'comfortable'
-                    ? 'border-[#d96b43] bg-[#d96b43]/10 text-[var(--text-main)] font-bold shadow-warm-xs'
+                    ? 'border-[#c9a271] bg-[#c9a271]/10 text-[var(--text-main)] font-bold shadow-warm-xs'
                     : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
@@ -1549,7 +1549,7 @@ function ProfilePageContent({
                 onClick={() => handleSaveAppearance(null, 'compact')}
                 className={`rounded-2xl border p-4 text-left transition cursor-pointer ${
                   cardDensity === 'compact'
-                    ? 'border-[#d96b43] bg-[#d96b43]/10 text-[var(--text-main)] font-bold shadow-warm-xs'
+                    ? 'border-[#c9a271] bg-[#c9a271]/10 text-[var(--text-main)] font-bold shadow-warm-xs'
                     : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
@@ -1597,7 +1597,7 @@ function ProfilePageContent({
                 onClick={handleExportData}
                 className="min-h-[42px] inline-flex items-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-2 text-sm font-semibold text-[var(--text-main)] shadow-warm-xs hover:bg-[var(--bg-surface-subtle)] transition cursor-pointer"
               >
-                <svg className="h-4 w-4 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="h-4 w-4 text-[#c9a271]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
@@ -1698,13 +1698,13 @@ export default function ProfileSetupPage() {
           <Navbar />
           <div className="mx-auto flex w-full max-w-md flex-1 items-center justify-center px-5 py-16">
             <div className="w-full rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-8 text-center shadow-warm-md sm:p-10">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d96b43]/15 text-[#d96b43]">
-                <svg className="h-7 w-7 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--bg-surface-subtle)] border border-[var(--border-main)] text-[var(--text-main)] dark:border-transparent dark:bg-[#dbbf95]/20 dark:text-[#dbbf95]">
+                <svg className="h-7 w-7 text-[var(--text-main)] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </div>
-              <p className="mt-4 text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+              <p className="mt-4 text-sm font-bold uppercase tracking-wider text-[var(--text-main)] dark:text-[#dbbf95]">
                 Profile Access Required
               </p>
               <h1 className="mt-2 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-[var(--text-main)]">
@@ -1716,7 +1716,7 @@ export default function ProfileSetupPage() {
               <button
                 type="button"
                 onClick={() => navigate('/sign-in', { state: { from: location } })}
-                className="mt-6 w-full rounded-full bg-[#d96b43] py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43] focus-visible:ring-offset-2"
+                className="mt-6 w-full rounded-full bg-[#1f3a6b] py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] active:translate-y-0.5 cursor-pointer dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] focus-visible:ring-offset-2"
               >
                 Sign in to Continue
               </button>
