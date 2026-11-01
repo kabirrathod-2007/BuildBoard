@@ -1,6 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
-import { products as initialSeedProducts } from '../data/products'
 import { deleteMediaFile } from '../utils/indexedDB'
 import { useAuth } from './AuthContext.jsx'
 import {
@@ -338,17 +337,14 @@ export const DemoDataProvider = ({ children }) => {
   // Deleted product IDs tracking (in memory)
   const [deletedProductIds, setDeletedProductIds] = useState([])
 
-  // Combined product list (server products take precedence, then local custom products, then sample seed products)
+  // Combined product list (server products from MySQL are authoritative)
   const products = useMemo(() => {
     const deletedSet = new Set(deletedProductIds)
     const activeServer = serverProducts.filter((p) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
     const serverKeys = new Set(activeServer.flatMap((p) => [p.id, p.slug].filter(Boolean)))
 
     const activeCustom = customProducts.filter((p) => !deletedSet.has(p.id) && !serverKeys.has(p.id))
-    const customKeys = new Set([...serverKeys, ...activeCustom.map((p) => p.id)])
-
-    const remainingSeed = initialSeedProducts.filter((p) => !customKeys.has(p.id) && !deletedSet.has(p.id))
-    const all = [...activeServer, ...activeCustom, ...remainingSeed]
+    const all = [...activeServer, ...activeCustom]
     return all.map((p) => {
       const email = (p.creatorEmail || '').toLowerCase().trim()
       if (email && profiles[email]?.displayName?.trim()) {

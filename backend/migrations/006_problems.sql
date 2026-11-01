@@ -122,3 +122,4 @@ CREATE TABLE IF NOT EXISTS problem_solutions (
     FOREIGN KEY (product_id) REFERENCES products(id)
     ON DELETE SET NULL
 ) ENGINE=InnoDB;
+
