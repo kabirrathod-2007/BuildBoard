@@ -155,10 +155,10 @@ export default function InteractiveBentoShowcase() {
                           type="button"
                           onClick={() => toggleSkill(criterion.id)}
                           aria-pressed={isMatched}
-                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer active:scale-95 border ${
+                          className={`rounded-lg px-3 py-1.5 font-mono text-xs font-semibold transition cursor-pointer active:scale-95 border ${
                             isMatched
-                              ? 'bg-[#d96b43] text-white border-[#b85028] shadow-xs'
-                              : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] hover:border-[#d96b43]'
+                              ? 'bg-[#1f3a6b] text-white border-black/10 dark:bg-[#f4ede2] dark:text-[#15203a] shadow-xs'
+                              : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] hover:border-[#1f3a6b] dark:hover:border-[#dbbf95]'
                           }`}
                         >
                           <span>{isMatched ? '✓ ' : '+ '}</span>
@@ -173,17 +173,17 @@ export default function InteractiveBentoShowcase() {
                 <div className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-[var(--text-subtle)]">Compatibility Score</p>
+                      <p className="font-mono text-xs text-[var(--text-subtle)] uppercase tracking-wider">Compatibility Score</p>
                       <p className="font-display text-2xl font-bold text-[var(--text-main)]">
                         {matchedCount} of {requiredCriteria.length} Matched ({matchPercentage}%)
                       </p>
                     </div>
                     <span
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-md ${
+                      className={`font-mono text-xs font-semibold px-2.5 py-1 rounded-md ${
                         matchPercentage === 100
                           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
                           : matchPercentage > 0
-                          ? 'bg-[#d96b43]/10 text-[#d96b43] border border-[#d96b43]/20'
+                          ? 'bg-[#c9a271]/15 text-[#c9a271] dark:text-[#d8b98c] border border-[#c9a271]/30'
                           : 'bg-zinc-500/10 text-[var(--text-muted)]'
                       }`}
                     >
@@ -194,7 +194,7 @@ export default function InteractiveBentoShowcase() {
                   <div className="h-2 w-full rounded-full bg-[var(--border-main)] overflow-hidden" aria-hidden="true">
                     <motion.div
                       className={`h-full rounded-full transition-colors ${
-                        matchPercentage === 100 ? 'bg-emerald-600' : 'bg-[#d96b43]'
+                        matchPercentage === 100 ? 'bg-emerald-600' : 'bg-[#c9a271] dark:bg-[#d8b98c]'
                       }`}
                       initial={false}
                       animate={{ width: `${matchPercentage}%` }}
@@ -238,7 +238,7 @@ export default function InteractiveBentoShowcase() {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveCategory(tab.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer border ${
+                      className={`px-3 py-1.5 rounded-lg font-mono text-xs font-semibold transition cursor-pointer border ${
                         activeCategory === tab.id
                           ? 'bg-[var(--bg-surface)] text-[var(--text-main)] border-[var(--border-main)] shadow-xs'
                           : 'bg-transparent text-[var(--text-muted)] border-transparent hover:bg-[var(--bg-surface)]/60'
@@ -252,10 +252,10 @@ export default function InteractiveBentoShowcase() {
                 {/* Critique Card */}
                 <div className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded border ${currentSnippet.color}`}>
+                    <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${currentSnippet.color}`}>
                       {currentSnippet.type}
                     </span>
-                    <span className="text-xs text-[var(--text-subtle)]">{currentSnippet.severity}</span>
+                    <span className="font-mono text-xs text-[var(--text-subtle)]">{currentSnippet.severity}</span>
                   </div>
 
                   <div>
@@ -266,7 +266,7 @@ export default function InteractiveBentoShowcase() {
                   </div>
 
                   <div className="pt-2 border-t border-[var(--border-main)] flex items-center justify-between text-xs text-[var(--text-subtle)]">
-                    <span>Submitted by <strong>Elena Rostova</strong> (Frontend Tester)</span>
+                    <span>Submitted by <strong className="text-[var(--text-main)]">Elena Rostova</strong> (Frontend Tester)</span>
                     <span className="text-emerald-700 dark:text-emerald-400 font-medium">✓ Tested via Gated Access</span>
                   </div>
                 </div>
@@ -294,13 +294,13 @@ export default function InteractiveBentoShowcase() {
                 {/* Maker Action Card */}
                 <div className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 space-y-3">
                   <div className="flex items-start gap-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#d96b43]/20 text-xs font-bold text-[#d96b43]">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1f3a6b]/15 text-[#1f3a6b] dark:bg-[#dbbf95]/20 dark:text-[#dbbf95] font-mono text-xs font-bold">
                       YG
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-[var(--text-main)]">Yash Garg</span>
-                        <span className="text-[10px] text-[#d96b43] font-semibold bg-[#d96b43]/10 px-1.5 py-0.2 rounded">
+                        <span className="font-mono text-[10px] text-[#1f3a6b] dark:text-[#dbbf95] font-semibold bg-[#1f3a6b]/10 dark:bg-[#dbbf95]/15 px-1.5 py-0.5 rounded border border-[#1f3a6b]/20 dark:border-[#dbbf95]/30">
                           Product Maker
                         </span>
                       </div>
@@ -312,7 +312,7 @@ export default function InteractiveBentoShowcase() {
 
                   <div className="pt-3 border-t border-[var(--border-main)] flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-[var(--text-subtle)]">Elena&apos;s Reputation</p>
+                      <p className="font-mono text-xs text-[var(--text-subtle)]">Elena&apos;s Reputation</p>
                       <p className="font-display text-xl font-bold text-[var(--text-main)]">
                         {testerPoints} Points
                       </p>
@@ -325,7 +325,7 @@ export default function InteractiveBentoShowcase() {
                       className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer active:scale-95 border ${
                         awarded
                           ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-[var(--bg-surface)] border-[var(--border-main)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
+                          : 'bg-[var(--bg-surface)] border-[var(--border-main)] text-[var(--text-main)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95]'
                       }`}
                     >
                       {awarded ? '✓ Marked Helpful (+1)' : '★ Mark as Helpful (+1)'}
@@ -347,13 +347,13 @@ export default function InteractiveBentoShowcase() {
               disabled={activeStep === 0}
               onClick={() => setActiveStep((prev) => Math.max(prev - 1, 0))}
               className={`text-xs font-semibold transition cursor-pointer ${
-                activeStep === 0 ? 'text-[var(--text-subtle)] opacity-40 cursor-not-allowed' : 'text-[var(--text-main)] hover:text-[#d96b43]'
+                activeStep === 0 ? 'text-[var(--text-subtle)] opacity-40 cursor-not-allowed' : 'text-[var(--text-main)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95]'
               }`}
             >
               ← Previous
             </button>
 
-            <span className="text-xs text-[var(--text-subtle)] font-medium">
+            <span className="font-mono text-xs text-[var(--text-subtle)] font-medium">
               Step {activeStep + 1} of {steps.length}
             </span>
 
@@ -362,7 +362,7 @@ export default function InteractiveBentoShowcase() {
               disabled={activeStep === steps.length - 1}
               onClick={() => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1))}
               className={`text-xs font-semibold transition cursor-pointer ${
-                activeStep === steps.length - 1 ? 'text-[var(--text-subtle)] opacity-40 cursor-not-allowed' : 'text-[#d96b43] hover:underline'
+                activeStep === steps.length - 1 ? 'text-[var(--text-subtle)] opacity-40 cursor-not-allowed' : 'text-[#1f3a6b] dark:text-[#dbbf95] hover:underline'
               }`}
             >
               Next Step →

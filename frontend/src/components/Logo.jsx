@@ -27,26 +27,34 @@ export default function Logo({
     >
       {/* Wordmark Text + Version Badge */}
       <div className="inline-flex items-center gap-2">
-        <span className={`inline-flex items-baseline tracking-tight ${textSizes}`}>
+        <span className={`inline-flex items-baseline font-display font-bold leading-none tracking-[-0.02em] ${textSizes}`}>
           <span
-            className={`font-extrabold ${
+            className={`${
               theme === 'dark'
                 ? 'text-white'
                 : theme === 'light'
-                  ? 'text-[#141a15]'
-                  : 'text-[var(--text-main)] transition-colors'
+                  ? 'text-[#1f3a6b]'
+                  : 'text-[#1f3a6b] dark:text-white transition-colors'
             }`}
           >
             Build
           </span>
-          <span className="font-sans font-bold text-[#d96b43] dark:text-[#e07a5f] ml-[1.5px]">
+          <span
+            className={`ml-[1px] transition-colors ${
+              theme === 'dark'
+                ? 'text-[#dbbf95]'
+                : theme === 'light'
+                  ? 'text-[#c9a271]'
+                  : 'text-[#c9a271] dark:text-[#dbbf95]'
+            }`}
+          >
             Board
           </span>
         </span>
 
         {showBadge && (
           <span
-            className={`inline-flex items-center rounded-md border border-[#d96b43]/30 bg-[#fbf3ee] dark:bg-[#e07a5f]/15 font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72] whitespace-nowrap shadow-xs ${badgeSizes}`}
+            className={`inline-flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] font-mono font-medium uppercase tracking-[0.12em] text-[var(--text-muted)] whitespace-nowrap shadow-2xs ${badgeSizes}`}
           >
             {versionText}
           </span>
