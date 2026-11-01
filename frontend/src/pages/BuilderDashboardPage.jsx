@@ -64,7 +64,10 @@ export default function BuilderDashboardPage() {
 
   const handleStartReply = (feedbackId, existingReply = '') => {
     setReplyingToId(feedbackId)
-    setReplyDraft(existingReply || '')
+    const text = typeof existingReply === 'object' && existingReply !== null
+      ? (existingReply.text || '')
+      : (existingReply || '')
+    setReplyDraft(text)
     setReplyError('')
   }
 
@@ -339,6 +342,7 @@ export default function BuilderDashboardPage() {
         ...note,
         productName: product.name,
         productId: product.id,
+        productSlug: product.slug,
       }))
     })
   }, [userProducts, getProductFeedback])
@@ -346,7 +350,7 @@ export default function BuilderDashboardPage() {
   // Filter feedback by selected product and category
   const filteredFeedback = useMemo(() => {
     return allUserFeedback.filter((fb) => {
-      const matchesProduct = selectedProductId === 'all' || fb.productId === selectedProductId
+      const matchesProduct = selectedProductId === 'all' || String(fb.productId) === String(selectedProductId)
       const matchesCategory = selectedCategory === 'All categories' || fb.category === selectedCategory
       return matchesProduct && matchesCategory
     })
@@ -880,14 +884,14 @@ export default function BuilderDashboardPage() {
                             {fb.category}
                           </span>
                           <Link
-                            to={`/products/${fb.productId}`}
+                            to={`/products/${fb.productSlug || fb.productId}`}
                             className="rounded-full border border-[var(--border-main)] bg-[var(--bg-page)] px-3 py-1 text-sm font-medium text-[var(--text-main)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
                           >
                             {fb.productName} ↗
                           </Link>
                           {(() => {
                             const testerProfile = fb.userEmail ? getProfile(fb.userEmail) : null
-                            const testerName = testerProfile?.displayName?.trim() || fb.userEmail
+                            const testerName = testerProfile?.displayName?.trim() || fb.testerName || (fb.userEmail ? fb.userEmail.split('@')[0] : 'Community Tester')
                             return (
                               <span className="text-sm font-medium text-[var(--text-muted)]">
                                 {testerName}
@@ -1003,9 +1007,17 @@ export default function BuilderDashboardPage() {
                         ) : fb.reply ? (
                           <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-5 space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
-                                Your Builder Reply
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
+                                  Your Builder Reply {fb.reply?.repliedBy ? `(${fb.reply.repliedBy})` : ''}
+                                </span>
+                                {(fb.reply?.repliedAt || fb.replyCreatedAt) && (
+                                  <span className="text-xs text-[var(--text-subtle)]">
+                                    {new Date(fb.reply?.repliedAt || fb.replyCreatedAt).toLocaleDateString()}
+                                    {fb.reply?.updatedAt && ' (edited)'}
+                                  </span>
+                                )}
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => handleStartReply(fb.id, fb.reply)}
@@ -1015,13 +1027,8 @@ export default function BuilderDashboardPage() {
                               </button>
                             </div>
                             <p className="text-sm sm:text-base leading-relaxed text-[var(--text-main)] break-words">
-                              {fb.reply}
+                              {typeof fb.reply === 'object' && fb.reply !== null ? fb.reply.text : fb.reply}
                             </p>
-                            {fb.replyCreatedAt && (
-                              <p className="text-sm text-[var(--text-subtle)]">
-                                Sent {new Date(fb.replyCreatedAt).toLocaleDateString()}
-                              </p>
-                            )}
                           </div>
                         ) : (
                           <button

@@ -1494,11 +1494,11 @@ export default function ProductDetailsPage() {
                           <div className="flex items-center justify-between gap-2 border-b border-[var(--border-main)] pb-2.5">
                             <div className="flex items-center gap-2">
                               <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
-                                Maker Reply ({item.reply.repliedBy || makerName})
+                                Maker Reply ({item.reply?.repliedBy || makerName})
                               </span>
                               <span className="text-xs text-[var(--text-subtle)]">
-                                {new Date(item.reply.repliedAt).toLocaleDateString()}
-                                {item.reply.updatedAt && ' (edited)'}
+                                {item.reply?.repliedAt && new Date(item.reply.repliedAt).toLocaleDateString()}
+                                {item.reply?.updatedAt && ' (edited)'}
                               </span>
                             </div>
                             {isOwner && (
@@ -1506,7 +1506,7 @@ export default function ProductDetailsPage() {
                                 type="button"
                                 onClick={() => {
                                   setReplyingToFeedbackId(item.id)
-                                  setReplyDraft(item.reply.text)
+                                  setReplyDraft(typeof item.reply === 'object' && item.reply !== null ? item.reply.text : item.reply)
                                   setReplyError('')
                                 }}
                                 className="text-xs sm:text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline cursor-pointer"
@@ -1516,7 +1516,7 @@ export default function ProductDetailsPage() {
                             )}
                           </div>
                           <p className="mt-2.5 text-sm sm:text-base leading-relaxed text-[var(--text-main)] break-words">
-                            {item.reply.text}
+                            {typeof item.reply === 'object' && item.reply !== null ? item.reply.text : item.reply}
                           </p>
                         </div>
                       ) : isOwner ? (
