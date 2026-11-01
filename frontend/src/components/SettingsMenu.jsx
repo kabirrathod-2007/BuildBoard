@@ -17,7 +17,7 @@ export default function SettingsMenu({ className = '' }) {
   const menuRef = useRef(null)
   const location = useLocation()
 
-  const { user, signOut } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const { getProfile } = useDemoData()
   const { theme, toggleTheme } = useTheme()
 
@@ -113,7 +113,13 @@ export default function SettingsMenu({ className = '' }) {
           className="absolute right-0 top-full mt-2 w-72 origin-top-right rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 text-[var(--text-main)] shadow-warm-xl focus:outline-none z-50 tdev-dropdown"
         >
           {/* User Account / Profile Summary */}
-          {user ? (
+          {loading ? (
+            <div className="flex items-center gap-3 pb-3.5 border-b border-[var(--border-main)]" role="status">
+              <span className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-[var(--bg-surface-subtle)]" />
+              <span className="h-4 w-36 animate-pulse rounded bg-[var(--bg-surface-subtle)]" />
+              <span className="sr-only">Restoring your session…</span>
+            </div>
+          ) : user ? (
             <div className="flex items-center gap-3 pb-3.5 border-b border-[var(--border-main)]">
               <div
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d96b43]/15 font-bold text-sm text-[#d96b43]"
@@ -149,7 +155,9 @@ export default function SettingsMenu({ className = '' }) {
 
           {/* Navigation & Profile Actions */}
           <div className="py-2.5 space-y-1">
-            {user ? (
+            {loading ? (
+              <p className="px-3 py-2 text-sm text-[var(--text-muted)]" role="status">Session is being restored…</p>
+            ) : user ? (
               <Link
                 to="/profile/setup"
                 role="menuitem"
@@ -228,7 +236,7 @@ export default function SettingsMenu({ className = '' }) {
           </div>
 
           {/* Session Sign Out Action */}
-          {user && signOut && (
+          {!loading && user && signOut && (
             <div className="border-t border-[var(--border-main)] pt-2 mt-1">
               <button
                 type="button"

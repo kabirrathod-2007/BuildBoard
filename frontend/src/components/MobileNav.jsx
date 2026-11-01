@@ -5,6 +5,7 @@ import { useDemoData } from '../context/DemoDataContext.jsx'
 export default function MobileNav({
   links = [],
   user = null,
+  loading = false,
   signOut = null,
   variant = 'default', // 'default' or 'dark'
 }) {
@@ -153,7 +154,11 @@ export default function MobileNav({
 
           {/* Account & Builder Actions */}
           <div className={`mt-4 border-t pt-4 ${isDark ? 'border-white/10' : 'border-[var(--border-main)]'}`}>
-            {user ? (
+            {loading ? (
+              <p className={`px-3 py-2 text-sm ${isDark ? 'text-white/70' : 'text-[var(--text-muted)]'}`} role="status">
+                Restoring your session…
+              </p>
+            ) : user ? (
               <div className="flex flex-col space-y-2">
                 <div className={`rounded-xl px-3 py-2 text-sm ${isDark ? 'bg-white/5 text-white/70' : 'bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]'}`}>
                   <span className="block text-sm font-bold uppercase tracking-wider text-[#e07a5f]">Signed in as</span>

@@ -10,7 +10,7 @@ import MobileNav from './MobileNav.jsx'
  * warm terracotta accents, active indicators, and accessible Settings menu.
  */
 export default function Navbar({ className = '' }) {
-  const { user, signOut } = useAuth()
+  const { user, loading, signOut } = useAuth()
   const location = useLocation()
 
   const isExplore = location.pathname === '/explore'
@@ -83,7 +83,13 @@ export default function Navbar({ className = '' }) {
 
         {/* Actions & Settings Menu */}
         <div className="hidden md:flex items-center gap-2.5">
-          {user ? (
+          {loading ? (
+            <div className="flex h-9 min-w-52 items-center justify-end gap-2.5" aria-label="Restoring your session" aria-live="polite">
+              <span className="h-9 w-28 animate-pulse rounded-xl bg-[var(--bg-surface-subtle)]" />
+              <span className="h-9 w-32 animate-pulse rounded-xl bg-[var(--bg-surface-subtle)]" />
+              <span className="sr-only">Restoring your session…</span>
+            </div>
+          ) : user ? (
             <div className="flex items-center gap-2.5">
               <Link
                 to="/problems/new"
@@ -134,6 +140,7 @@ export default function Navbar({ className = '' }) {
           <SettingsMenu />
           <MobileNav
             user={user}
+            loading={loading}
             signOut={signOut}
             links={[
               { label: 'Home', to: '/' },
