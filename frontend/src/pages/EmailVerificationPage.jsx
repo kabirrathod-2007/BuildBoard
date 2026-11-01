@@ -19,40 +19,32 @@ export default function EmailVerificationPage() {
         tabIndex={-1}
         className="grid min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] transition-colors lg:grid-cols-2 focus:outline-none"
       >
-        {/* Left Column: Adaptive Brand Column */}
-        <section className="relative overflow-hidden flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[var(--border-main)] bg-[var(--bg-surface-subtle)] dark:bg-[#151413] p-7 text-[var(--text-main)] sm:p-10 lg:p-14 transition-colors">
-          <div className="absolute inset-0 bg-hero-washes opacity-40 pointer-events-none" aria-hidden="true" />
-
-          <div className="relative z-10 flex items-center justify-between">
-            <Link className="no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] rounded-lg" to="/">
-              <Logo theme="auto" />
+        {/* Left Column: Forest-Ink Brand Pitch */}
+        <section className="flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[var(--border-main)] bg-[#0b100c] p-7 text-white sm:p-10 lg:p-14">
+          <div className="flex items-center justify-between">
+            <Link className="no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43] rounded-lg" to="/">
+              <Logo theme="dark" />
             </Link>
             <div className="lg:hidden">
               <SettingsMenu />
             </div>
           </div>
 
-          <div className="relative z-10 my-14 max-w-xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 py-1 text-xs sm:text-sm font-mono uppercase tracking-[0.14em] font-semibold text-[#1f3a6b] dark:text-[#dbbf95] shadow-2xs">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" aria-hidden="true" />
+          <div className="my-14 max-w-xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1 text-sm font-semibold text-[#ffa36b]">
               <span>Email verification</span>
             </div>
-
-            <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-display font-extrabold leading-[1.08] tracking-tight text-[var(--text-main)]">
-              Confirm <br className="hidden sm:inline" />
-              <span className="italic font-normal text-[var(--text-main)] dark:text-[#dbbf95]">
-                your email.
-              </span>
+            <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-display font-semibold leading-[1.08] tracking-tight !text-white text-white">
+              Confirm your email.
             </h1>
-
-            <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-[var(--text-muted)]">
+            <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-[#c5cdc7]">
               Verify your email address to activate your BuildBoard account and continue to the feature you were trying to use.
             </p>
           </div>
 
-          <div className="relative z-10 flex items-center justify-between font-mono text-xs text-[var(--text-subtle)]">
+          <div className="flex items-center justify-between text-sm text-[#828f85]">
             <span>Early products · Real people</span>
-            <span className="font-semibold tracking-wider text-[var(--text-muted)]">SECURITY</span>
+            <span className="text-sm font-semibold tracking-wider text-[#828f85]">SECURITY</span>
           </div>
         </section>
 
@@ -68,8 +60,8 @@ export default function EmailVerificationPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
           >
-            <p className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[#1f3a6b] dark:text-[#dbbf95]">
-              Account Security
+            <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+              Account setup
             </p>
             <h2 className="mt-2 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-[var(--text-main)]">
               Check your inbox
@@ -79,14 +71,14 @@ export default function EmailVerificationPage() {
             </p>
             {email && <p className="mt-0.5 break-all font-mono font-semibold text-sm text-[var(--text-main)]">{email}</p>}
 
-            <div className="mt-5 border-l-2 border-[#1f3a6b] dark:border-[#dbbf95] bg-[var(--bg-surface-subtle)] p-3.5 text-sm leading-relaxed text-[var(--text-muted)] rounded-r-xl">
+            <div className="mt-5 border-l-2 border-[#d96b43] bg-[var(--bg-surface-subtle)] p-3.5 text-sm leading-relaxed text-[var(--text-muted)] rounded-r-xl">
               Open the email and follow its verification link. If you don&apos;t see it, check your spam folder. After verification, return here and sign in.
             </div>
 
             <Link
               to="/sign-in"
               state={signInState}
-              className="mt-6 flex w-full items-center justify-center rounded-full bg-[#1f3a6b] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] active:translate-y-0.5 dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
+              className="mt-6 flex w-full items-center justify-center rounded-full bg-[#d96b43] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5"
             >
               Continue to sign in →
             </Link>

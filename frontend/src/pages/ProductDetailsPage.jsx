@@ -20,7 +20,7 @@ function GalleryThumbnailItem({ mediaId, fallbackUrl, activeImage, onClick, labe
       onClick={() => onClick(src)}
       className={`relative overflow-hidden rounded-xl border transition-all cursor-pointer shrink-0 ${
         isSelected
-          ? 'border-[#c9a271] ring-2 ring-[#c9a271]/30'
+          ? 'border-[#d96b43] ring-2 ring-[#d96b43]/30'
           : 'border-[var(--border-main)] opacity-70 hover:opacity-100'
       }`}
     >
@@ -37,7 +37,7 @@ const FEEDBACK_CATEGORIES = [
     label: 'What worked well',
     description: 'Strengths, clear flows, or delight',
     color: 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]',
-    activeColor: 'border-[#c9a271] bg-[#c9a271] text-white shadow-warm-xs',
+    activeColor: 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs',
     icon: (
       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
@@ -49,7 +49,7 @@ const FEEDBACK_CATEGORIES = [
     label: 'Bug or issue',
     description: 'Broken behaviors or unexpected errors',
     color: 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]',
-    activeColor: 'border-[#c9a271] bg-[#c9a271] text-white shadow-warm-xs',
+    activeColor: 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs',
     icon: (
       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="10" />
@@ -63,7 +63,7 @@ const FEEDBACK_CATEGORIES = [
     label: 'Usability & Flow',
     description: 'Confusion, friction, or mental overhead',
     color: 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]',
-    activeColor: 'border-[#c9a271] bg-[#c9a271] text-white shadow-warm-xs',
+    activeColor: 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs',
     icon: (
       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="10" />
@@ -76,7 +76,7 @@ const FEEDBACK_CATEGORIES = [
     label: 'UI & Visuals',
     description: 'Layout, contrast, hierarchy, or typography',
     color: 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]',
-    activeColor: 'border-[#c9a271] bg-[#c9a271] text-white shadow-warm-xs',
+    activeColor: 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs',
     icon: (
       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -90,7 +90,7 @@ const FEEDBACK_CATEGORIES = [
     label: 'Feature idea',
     description: 'Missing workflow or natural next step',
     color: 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]',
-    activeColor: 'border-[#c9a271] bg-[#c9a271] text-white shadow-warm-xs',
+    activeColor: 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs',
     icon: (
       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
@@ -104,7 +104,7 @@ const FEEDBACK_CATEGORIES = [
     label: 'Other critique',
     description: 'General engineering observation',
     color: 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-muted)]',
-    activeColor: 'border-[#c9a271] bg-[#c9a271] text-white shadow-warm-xs',
+    activeColor: 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs',
     icon: (
       <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="1" />
@@ -381,7 +381,7 @@ export default function ProductDetailsPage() {
       >
         <Navbar />
         <div className="mx-auto max-w-2xl px-6 py-20 text-center">
-          <span className="inline-block rounded-full border border-[#c9a271]/30 bg-[#c9a271]/10 px-3 py-1 text-sm font-bold text-[#b88e5d] dark:text-[#ecdcc2] mb-3">
+          <span className="inline-block rounded-full border border-[#d96b43]/30 bg-[#d96b43]/10 px-3 py-1 text-sm font-bold text-[#b85028] dark:text-[#eb8b72] mb-3">
             Product Not Found
           </span>
           <h1 className="text-3xl font-extrabold text-[var(--text-main)] sm:text-4xl">
@@ -393,7 +393,7 @@ export default function ProductDetailsPage() {
           <div className="mt-6">
             <Link
               to="/explore"
-              className="inline-flex items-center justify-center rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
+              className="inline-flex items-center justify-center rounded-full bg-[#d96b43] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028]"
             >
               ← Back to Explore Catalog
             </Link>
@@ -428,7 +428,7 @@ export default function ProductDetailsPage() {
           <div className="flex items-center justify-between gap-4 mb-6">
             <Link
               to="/explore"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors"
             >
               <span aria-hidden="true">←</span>
               Back to Explore Catalog
@@ -438,7 +438,7 @@ export default function ProductDetailsPage() {
               <div className="flex items-center gap-2">
                 <Link
                   to="/builder/dashboard"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 py-1 text-xs font-semibold text-[var(--text-main)] shadow-xs hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 py-1 text-xs font-semibold text-[var(--text-main)] shadow-xs hover:border-[#d96b43] hover:text-[#d96b43] transition-colors"
                 >
                   <span>Owner Dashboard</span>
                   <span aria-hidden="true">→</span>
@@ -490,11 +490,11 @@ export default function ProductDetailsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0, marginTop: 0, marginBottom: 0 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="mb-6 rounded-2xl border border-[#c9a271]/40 bg-gradient-to-r from-[#c9a271]/10 via-[var(--bg-surface)] to-[var(--bg-surface)] p-4 sm:p-5 text-[var(--text-main)] shadow-warm-xs"
+                className="mb-6 rounded-2xl border border-[#d96b43]/40 bg-gradient-to-r from-[#d96b43]/10 via-[var(--bg-surface)] to-[var(--bg-surface)] p-4 sm:p-5 text-[var(--text-main)] shadow-warm-xs"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex items-start gap-3.5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#c9a271]/15 text-[#b88e5d] dark:text-[#ecdcc2] shadow-xs">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d96b43]/15 text-[#b85028] dark:text-[#eb8b72] shadow-xs">
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M12 20h9" />
                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
@@ -502,7 +502,7 @@ export default function ProductDetailsPage() {
                     </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-[#c9a271]/30 bg-[#f5f4f0] dark:bg-[#d8b98c]/20 px-2.5 py-0.5 text-xs font-semibold tracking-wide uppercase text-[#b88e5d] dark:text-[#ecdcc2]">
+                        <span className="rounded-full border border-[#d96b43]/30 bg-[#fbf3ee] dark:bg-[#e07a5f]/20 px-2.5 py-0.5 text-xs font-semibold tracking-wide uppercase text-[#b85028] dark:text-[#eb8b72]">
                           {reminderInfo.badge}
                         </span>
                         <span className="text-xs font-medium text-[var(--text-subtle)]">
@@ -523,7 +523,7 @@ export default function ProductDetailsPage() {
                     <button
                       type="button"
                       onClick={handleScrollToFeedback}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-[#1f3a6b] px-4 py-2 text-sm font-semibold text-white shadow-warm-xs transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] active:translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95]"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[#d96b43] px-4 py-2 text-sm font-semibold text-white shadow-warm-xs transition hover:bg-[#c25832] active:translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43]"
                     >
                       <span>Share feedback</span>
                       <span aria-hidden="true">↓</span>
@@ -610,7 +610,7 @@ export default function ProductDetailsPage() {
                     onClick={() => setMediaTab('screenshots')}
                     className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer ${
                       mediaTab === 'screenshots'
-                        ? 'bg-[#1f3a6b] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+                        ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                     }`}
                   >
@@ -621,8 +621,8 @@ export default function ProductDetailsPage() {
                     onClick={() => setMediaTab('video')}
                     className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer ${
                       mediaTab === 'video'
-                        ? 'bg-[#1f3a6b] text-white shadow-warm-xs dark:bg-[#dbbf95] dark:text-[#15203a]'
-                        : 'text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95]'
+                        ? 'bg-[#d96b43] text-white shadow-warm-xs'
+                        : 'text-[var(--text-muted)] hover:text-[#d96b43]'
                     }`}
                   >
                     <span className="h-2 w-2 rounded-full bg-current animate-pulse" />
@@ -660,7 +660,7 @@ export default function ProductDetailsPage() {
                   </AnimatePresence>
                 ) : (
                   <div className="flex h-56 sm:h-72 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#c9a271]/10 text-[#c9a271] dark:bg-[#c9a271]/20 border border-[#c9a271]/20 mb-3 shadow-warm-xs">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d96b43]/10 text-[#d96b43] dark:bg-[#d96b43]/20 border border-[#d96b43]/20 mb-3 shadow-warm-xs">
                       <span className="font-display text-3xl font-extrabold">{product.name?.charAt(0)?.toUpperCase() || 'P'}</span>
                     </div>
                     <p className="font-display text-lg sm:text-xl font-bold text-[var(--text-main)]">
@@ -683,7 +683,7 @@ export default function ProductDetailsPage() {
                       onClick={() => setSelectedImage(effectiveCover)}
                       className={`relative overflow-hidden rounded-xl border transition-all cursor-pointer shrink-0 ${
                         activeImage === effectiveCover
-                          ? 'border-[#c9a271] ring-2 ring-[#c9a271]/30'
+                          ? 'border-[#d96b43] ring-2 ring-[#d96b43]/30'
                           : 'border-[var(--border-main)] opacity-70 hover:opacity-100'
                       }`}
                     >
@@ -703,7 +703,7 @@ export default function ProductDetailsPage() {
                       onClick={() => setSelectedImage(image)}
                       className={`relative overflow-hidden rounded-xl border transition-all cursor-pointer shrink-0 ${
                         activeImage === image
-                          ? 'border-[#c9a271] ring-2 ring-[#c9a271]/30'
+                          ? 'border-[#d96b43] ring-2 ring-[#d96b43]/30'
                           : 'border-[var(--border-main)] opacity-70 hover:opacity-100'
                       }`}
                     >
@@ -731,7 +731,7 @@ export default function ProductDetailsPage() {
 
               {/* Overview & What it does */}
               <section className="mt-10">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#c9a271]">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#d96b43]">
                   Overview
                 </p>
                 <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-[var(--text-main)]">
@@ -758,19 +758,19 @@ export default function ProductDetailsPage() {
                     <div className="mt-3.5 space-y-1.5 border-t border-[var(--border-main)] pt-3 text-sm sm:text-base min-w-0">
                       {product.targetRoles?.length > 0 && (
                         <div className="break-words [overflow-wrap:anywhere]">
-                          <span className="font-bold text-[#c9a271]">Roles: </span>
+                          <span className="font-bold text-[#d96b43]">Roles: </span>
                           <span className="text-[var(--text-main)]">{product.targetRoles.join(', ')}</span>
                         </div>
                       )}
                       {product.targetIndustries?.length > 0 && (
                         <div className="break-words [overflow-wrap:anywhere]">
-                          <span className="font-bold text-[#c9a271]">Industries: </span>
+                          <span className="font-bold text-[#d96b43]">Industries: </span>
                           <span className="text-[var(--text-main)]">{product.targetIndustries.join(', ')}</span>
                         </div>
                       )}
                       {product.targetTechnologies?.length > 0 && (
                         <div className="break-words [overflow-wrap:anywhere]">
-                          <span className="font-bold text-[#c9a271]">Tech: </span>
+                          <span className="font-bold text-[#d96b43]">Tech: </span>
                           <span className="text-[var(--text-main)]">{product.targetTechnologies.join(', ')}</span>
                         </div>
                       )}
@@ -786,7 +786,7 @@ export default function ProductDetailsPage() {
                     {makerName}
                   </p>
                   <div className="mt-5 flex items-center gap-3 min-w-0">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1f3a6b] font-display text-sm font-bold text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#141b16] font-display text-sm font-bold text-[#f4ede2] dark:bg-[#f3f4f0] dark:text-[#0b100c]">
                       {makerName.charAt(0).toUpperCase()}
                     </span>
                     <span className="text-xs sm:text-sm font-semibold text-[var(--text-subtle)] truncate">
@@ -805,12 +805,12 @@ export default function ProductDetailsPage() {
                 
                 {/* Vault Terminal Status Header */}
                 <div className="flex items-center justify-between border-b border-[var(--border-main)] pb-3">
-                  <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
+                  <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#d96b43]">
                     Prototype Terminal
                   </span>
                   {isOwner ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1f3a6b]/30 bg-[#1f3a6b]/10 px-3 py-1 text-xs font-bold text-[#1f3a6b] dark:border-[#dbbf95]/30 dark:bg-[#dbbf95]/15 dark:text-[#ecdcc2]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95] animate-pulse" aria-hidden="true" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d96b43]/30 bg-[#d96b43]/10 px-3 py-1 text-xs font-bold text-[#b85028] dark:text-[#eb8b72]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#d96b43] animate-pulse" aria-hidden="true" />
                       Creator View
                     </span>
                   ) : isEnrolled ? (
@@ -841,13 +841,13 @@ export default function ProductDetailsPage() {
 
                 {/* Suggested Scenarios */}
                 <div className="mt-5 border-t border-[var(--border-main)] pt-4">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b88e5d] dark:text-[#ecdcc2]">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
                     What to test in this build:
                   </h3>
                   <ul className="mt-3 space-y-2">
                     {product.whatToTry.map((item, index) => (
                       <li key={item} className="flex gap-3 text-sm sm:text-base leading-relaxed text-[var(--text-main)] font-medium">
-                        <span className="font-bold text-[#c9a271] shrink-0 text-sm sm:text-base">
+                        <span className="font-bold text-[#d96b43] shrink-0 text-sm sm:text-base">
                           0{index + 1}
                         </span>
                         <span>{item}</span>
@@ -861,8 +861,8 @@ export default function ProductDetailsPage() {
                   {isOwner ? (
                     <div className="space-y-4">
                       {product.productUrl ? (
-                        <div className="rounded-2xl border border-[#c9a271]/30 bg-[#c9a271]/5 p-5 text-center">
-                          <span className="inline-block rounded-md bg-[#c9a271]/20 px-2.5 py-0.5 text-xs font-bold text-[#b88e5d] dark:text-[#ecdcc2] mb-2">
+                        <div className="rounded-2xl border border-[#d96b43]/30 bg-[#d96b43]/5 p-5 text-center">
+                          <span className="inline-block rounded-md bg-[#d96b43]/20 px-2.5 py-0.5 text-xs font-bold text-[#b85028] dark:text-[#eb8b72] mb-2">
                             Creator Access Active
                           </span>
                           <p className="text-sm font-semibold text-[var(--text-main)]">
@@ -873,7 +873,7 @@ export default function ProductDetailsPage() {
                               href={product.productUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1f3a6b] px-5 py-3 text-sm font-bold text-white shadow-warm-xs transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] min-h-[44px]"
+                              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d96b43] px-5 py-3 text-sm font-bold text-white shadow-warm-xs transition hover:bg-[#b85028] min-h-[44px]"
                             >
                               <span>Open Live Prototype</span>
                               <span aria-hidden="true">↗</span>
@@ -897,7 +897,7 @@ export default function ProductDetailsPage() {
 
                       <Link
                         to="/builder/dashboard"
-                        className="w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] flex items-center justify-center gap-2"
+                        className="w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition hover:border-[#d96b43] hover:text-[#d96b43] flex items-center justify-center gap-2"
                       >
                         <span>Manage in Builder Dashboard</span>
                         <span aria-hidden="true">→</span>
@@ -925,7 +925,7 @@ export default function ProductDetailsPage() {
                         <button
                           type="button"
                           onClick={handleEnroll}
-                          className="w-full rounded-2xl bg-[#1f3a6b] px-6 py-4 text-base font-bold text-white shadow-warm-md transition duration-200 hover:bg-[#182f56] hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center gap-2.5 min-h-[48px] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
+                          className="w-full rounded-2xl bg-[#d96b43] px-6 py-4 text-base font-bold text-white shadow-warm-md transition duration-200 hover:bg-[#b85028] hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center gap-2.5 min-h-[48px]"
                         >
                           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -980,7 +980,7 @@ export default function ProductDetailsPage() {
                       <button
                         type="button"
                         onClick={handleScrollToFeedback}
-                        className="w-full text-center text-xs sm:text-sm font-semibold text-[#c9a271] hover:underline cursor-pointer py-1"
+                        className="w-full text-center text-xs sm:text-sm font-semibold text-[#d96b43] hover:underline cursor-pointer py-1"
                       >
                         Jump down to Feedback Composer ↓
                       </button>
@@ -1002,7 +1002,7 @@ export default function ProductDetailsPage() {
                         href={product.githubUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="font-semibold text-[#c9a271] hover:underline inline-flex items-center gap-1"
+                        className="font-semibold text-[#d96b43] hover:underline inline-flex items-center gap-1"
                       >
                         <span>View GitHub Repository</span>
                         <span aria-hidden="true">↗</span>
@@ -1033,10 +1033,10 @@ export default function ProductDetailsPage() {
                 <section
                   id="feedback-form-section"
                   aria-label="Maker Feedback Overview"
-                  className="rounded-3xl border border-[#c9a271]/30 bg-[#c9a271]/5 p-6 sm:p-7 shadow-warm-sm scroll-mt-24"
+                  className="rounded-3xl border border-[#d96b43]/30 bg-[#d96b43]/5 p-6 sm:p-7 shadow-warm-sm scroll-mt-24"
                 >
-                  <div className="border-b border-[#c9a271]/20 pb-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#c9a271]">
+                  <div className="border-b border-[#d96b43]/20 pb-3">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#d96b43]">
                       Maker Hub
                     </span>
                     <h3 className="font-display text-lg sm:text-xl font-bold text-[var(--text-main)]">
@@ -1053,13 +1053,13 @@ export default function ProductDetailsPage() {
                         const el = document.getElementById('community-feedback-archive')
                         if (el) el.scrollIntoView({ behavior: 'smooth' })
                       }}
-                      className="w-full rounded-xl bg-[#1f3a6b] px-4 py-2.5 text-xs font-semibold text-[#f4ede2] transition hover:bg-[#182f56] dark:bg-[#f3f4f0] dark:text-[#0b100c] text-center cursor-pointer shadow-warm-xs"
+                      className="w-full rounded-xl bg-[#141b16] px-4 py-2.5 text-xs font-semibold text-[#f4ede2] transition hover:bg-[#202c24] dark:bg-[#f3f4f0] dark:text-[#0b100c] text-center cursor-pointer shadow-warm-xs"
                     >
                       Review Tester Critiques ({productFeedback.length}) ↓
                     </button>
                     <Link
                       to="/builder/dashboard"
-                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-semibold text-[var(--text-main)] transition hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] text-center"
+                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-xs font-semibold text-[var(--text-main)] transition hover:border-[#d96b43] hover:text-[#d96b43] text-center"
                     >
                       Open Builder Dashboard →
                     </Link>
@@ -1075,7 +1075,7 @@ export default function ProductDetailsPage() {
                   className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-warm-lg scroll-mt-24"
                 >
                   <div className="border-b border-[var(--border-main)] pb-3.5">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#c9a271]">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#d96b43]">
                       Feedback Studio
                     </span>
                     <h3 className="font-display text-xl font-bold text-[var(--text-main)]">
@@ -1139,7 +1139,7 @@ export default function ProductDetailsPage() {
                           id="feedback-category-pills-label"
                           className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--text-main)]"
                         >
-                          Select Category <span className="text-[#c9a271]">*</span>
+                          Select Category <span className="text-[#d96b43]">*</span>
                         </label>
                         <div
                           id="feedback-category-pills"
@@ -1187,7 +1187,7 @@ export default function ProductDetailsPage() {
                             htmlFor="feedback-experience"
                             className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--text-main)]"
                           >
-                            What happened? <span className="text-[#c9a271]">*</span>
+                            What happened? <span className="text-[#d96b43]">*</span>
                           </label>
                           <span className="text-xs font-medium text-[var(--text-subtle)]">
                             {feedbackExperience.length} chars
@@ -1210,7 +1210,7 @@ export default function ProductDetailsPage() {
                               ? 'Which step felt confusing or caused friction? What mental model did you expect?'
                               : 'Describe the steps you took, where friction occurred, or what was unexpected...'
                           }
-                          className={`mt-2 w-full rounded-2xl border bg-[var(--bg-page)] p-4 text-sm sm:text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20 ${
+                          className={`mt-2 w-full rounded-2xl border bg-[var(--bg-page)] p-4 text-sm sm:text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
                             feedbackErrors.experience
                               ? 'border-rose-500 bg-rose-50/20'
                               : 'border-[var(--border-main)]'
@@ -1237,13 +1237,13 @@ export default function ProductDetailsPage() {
                           value={feedbackLikes}
                           onChange={(e) => setFeedbackLikes(e.target.value)}
                           placeholder="e.g. Fast response times, clean shortcuts..."
-                          className="mt-2 w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-3 text-sm sm:text-base text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
+                          className="mt-2 w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-3 text-sm sm:text-base text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
                         />
                       </div>
 
                       <button
                         type="submit"
-                        className="w-full rounded-2xl bg-[#1f3a6b] px-6 py-4 text-sm sm:text-base font-bold uppercase tracking-wider text-white shadow-warm-xs transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer min-h-[48px]"
+                        className="w-full rounded-2xl bg-[#d96b43] px-6 py-4 text-sm sm:text-base font-bold uppercase tracking-wider text-white shadow-warm-xs transition hover:bg-[#b85028] cursor-pointer min-h-[48px]"
                       >
                         Submit Structured Critique
                       </button>
@@ -1258,7 +1258,7 @@ export default function ProductDetailsPage() {
           <section id="community-feedback-archive" className="mt-16 border-t border-[var(--border-main)] pt-12">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#d96b43]">
                   Critique Archive
                 </p>
                 <h2 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-main)]">
@@ -1288,7 +1288,7 @@ export default function ProductDetailsPage() {
                     onClick={() => setFeedbackFilter('helpful')}
                     className={`rounded-xl px-3.5 py-2 font-semibold transition cursor-pointer ${
                       feedbackFilter === 'helpful'
-                        ? 'bg-[var(--bg-surface-subtle)] text-[#c9a271] shadow-xs'
+                        ? 'bg-[var(--bg-surface-subtle)] text-[#d96b43] shadow-xs'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                     }`}
                   >
@@ -1322,7 +1322,7 @@ export default function ProductDetailsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className={`rounded-3xl border p-6 sm:p-7 text-[var(--text-main)] shadow-warm-sm transition ${
                       item.isHelpful
-                        ? 'border-[#c9a271]/30 bg-[var(--bg-surface)] shadow-warm-md'
+                        ? 'border-[#d96b43]/30 bg-[var(--bg-surface)] shadow-warm-md'
                         : 'border-[var(--border-main)] bg-[var(--bg-surface)]'
                     }`}
                   >
@@ -1342,7 +1342,7 @@ export default function ProductDetailsPage() {
                           )
                         })()}
                         {item.isHelpful && (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-[#c9a271]/30 bg-[#c9a271]/10 px-2.5 py-0.5 text-xs font-bold text-[#b88e5d] dark:text-[#ecdcc2]">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-[#d96b43]/30 bg-[#d96b43]/10 px-2.5 py-0.5 text-xs font-bold text-[#b85028] dark:text-[#eb8b72]">
                             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <circle cx="12" cy="8" r="6" />
                               <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
@@ -1359,8 +1359,8 @@ export default function ProductDetailsPage() {
                             onClick={() => toggleFeedbackHelpful(item.id, user.email)}
                             className={`rounded-full border px-3.5 py-1 text-xs font-semibold transition cursor-pointer ${
                               item.isHelpful
-                                ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a] shadow-xs'
-                                : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-main)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95]'
+                                ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-xs'
+                                : 'border-[var(--border-main)] bg-[var(--bg-surface-subtle)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
                             }`}
                           >
                             <span key={item.isHelpful ? 'helpful-active' : 'helpful-idle'} className="tdev-text-swap">
@@ -1397,7 +1397,7 @@ export default function ProductDetailsPage() {
                           <div className="flex items-center justify-between">
                             <label
                               htmlFor={`public-reply-${item.id}`}
-                              className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]"
+                              className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#d96b43]"
                             >
                               {item.reply ? 'Edit Maker Reply' : 'Dispatch Reply as Maker'}
                             </label>
@@ -1415,7 +1415,7 @@ export default function ProductDetailsPage() {
                               if (replyError) setReplyError('')
                             }}
                             placeholder="Thank the tester, clarify steps, or share upcoming patch fixes..."
-                            className="w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 text-sm sm:text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
+                            className="w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 text-sm sm:text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
                           />
 
                           {replyError && (
@@ -1425,7 +1425,7 @@ export default function ProductDetailsPage() {
                           <div className="flex items-center gap-2.5">
                             <button
                               type="submit"
-                              className="rounded-full bg-[#1f3a6b] px-5 py-2.5 text-xs sm:text-sm font-semibold text-[#f4ede2] shadow-xs transition hover:bg-[#182f56] dark:bg-[#f3f4f0] dark:text-[#0b100c] cursor-pointer"
+                              className="rounded-full bg-[#141b16] px-5 py-2.5 text-xs sm:text-sm font-semibold text-[#f4ede2] shadow-xs transition hover:bg-[#202c24] dark:bg-[#f3f4f0] dark:text-[#0b100c] cursor-pointer"
                             >
                               {item.reply ? 'Save Updated Reply' : 'Publish Reply'}
                             </button>
@@ -1446,7 +1446,7 @@ export default function ProductDetailsPage() {
                         <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-4 sm:p-5">
                           <div className="flex items-center justify-between gap-2 border-b border-[var(--border-main)] pb-2.5">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
+                              <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#d96b43]">
                                 Maker Reply ({item.reply.repliedBy || makerName})
                               </span>
                               <span className="text-xs text-[var(--text-subtle)]">
@@ -1462,7 +1462,7 @@ export default function ProductDetailsPage() {
                                   setReplyDraft(item.reply.text)
                                   setReplyError('')
                                 }}
-                                className="text-xs sm:text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline cursor-pointer"
+                                className="text-xs sm:text-sm font-semibold text-[#d96b43] hover:underline cursor-pointer"
                               >
                                 Edit reply
                               </button>
@@ -1480,7 +1480,7 @@ export default function ProductDetailsPage() {
                             setReplyDraft('')
                             setReplyError('')
                           }}
-                          className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] cursor-pointer"
+                          className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition hover:border-[#d96b43] hover:text-[#d96b43] cursor-pointer"
                         >
                           + Reply as Maker
                         </button>
