@@ -338,33 +338,37 @@ $$E(P, U) = \begin{cases}
 
 ## 7. Production Backend Migration Blueprint (MySQL + REST API)
 
-> **Implementation Status**: Step 1 (Users Table & Token Authentication) is **Shipped** in `backend/schema.sql` and `backend/src/routes/auth.js`. Steps 2–9 below represent the migration target for domain models.
+> **Implementation Status**:
+> - **Step 1 (Users Table & Token Authentication)**: **Shipped** in `backend/schema.sql` and `backend/src/routes/auth.js`.
+> - **Step 2 (User Profiles Persistence)**: **Shipped** in `backend/schema.sql`, `backend/migrations/002_user_profiles.sql`, and `backend/src/routes/profiles.js`.
+> - Steps 3–9 below represent the migration target for domain models (products, feedback, enrollments, problems).
 
 ### MySQL Relational Database Schema DDL
 
 ```sql
--- 1. Users Table
-CREATE TABLE users (
-    id VARCHAR(36) PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NULL,
-    name VARCHAR(100) NOT NULL,
-    role ENUM('builder', 'tester', 'both') DEFAULT 'both',
-    bio TEXT,
-    experience_level ENUM('Beginner', 'Intermediate', 'Advanced', 'Expert'),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- 1. Users Table (Shipped)
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  firebase_uid VARCHAR(128) NOT NULL,
+  email VARCHAR(320) NOT NULL,
+  email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_users_firebase_uid (firebase_uid),
+  UNIQUE KEY uq_users_email (email)
+) ENGINE=InnoDB;
 
--- 2. User Profiles Targeting Tags
-CREATE TABLE user_target_tags (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
-    tag_type ENUM('role', 'industry', 'technology', 'interest') NOT NULL,
-    tag_value VARCHAR(100) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_user_tag (user_id, tag_type, tag_value)
-);
+-- 2. User Profiles Table (Shipped)
+CREATE TABLE IF NOT EXISTS user_profiles (
+  user_id BIGINT UNSIGNED NOT NULL,
+  profile_data JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id),
+  CONSTRAINT fk_user_profiles_user
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- 3. Products Table
 CREATE TABLE products (
@@ -452,20 +456,22 @@ CREATE TABLE product_views (
 
 ### REST API Endpoint Specification
 
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/auth/sign-in` | Public | Authenticates credentials, returns secure cookie |
-| `POST` | `/api/v1/auth/sign-up` | Public | Registers user profile |
-| `GET` | `/api/v1/products` | Public | Returns product catalog (without `product_url`) |
-| `GET` | `/api/v1/products/:id` | Public | Returns product details (masks `product_url` if not enrolled) |
-| `POST` | `/api/v1/products` | Builder | Creates new product listing |
-| `PATCH` | `/api/v1/products/:id/pause` | Owner | Toggles enrollment pause state |
-| `POST` | `/api/v1/products/:id/enroll` | Tester | Enrolls tester and reveals `product_url` |
-| `POST` | `/api/v1/products/:id/feedback`| Enrolled | Submits structured feedback |
-| `POST` | `/api/v1/feedback/:id/reply` | Owner | Adds builder response to feedback |
-| `PATCH` | `/api/v1/feedback/:id/helpful`| Owner | Toggles helpful mark (updates recognition) |
-| `GET` | `/api/v1/tester/activity` | Tester | Retrieves enrollments, reminders, and feedback history |
-| `GET` | `/api/v1/builder/dashboard` | Builder | Returns aggregate metrics (views, conversion rate) |
+| Method | Endpoint | Access | Description | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/health` | Public | Database ping verification (`SELECT 1`) | **Shipped** |
+| `POST` | `/api/auth/me` | Bearer (Verified Email) | Idempotent user identity upsert by Firebase UID | **Shipped** |
+| `GET` | `/api/profiles/me` | Bearer (Verified Email) | Retrieves authenticated user profile & timestamp | **Shipped** |
+| `PUT` | `/api/profiles/me` | Bearer (Verified Email) | Validates & upserts user profile JSON in MySQL | **Shipped** |
+| `GET` | `/api/v1/products` | Public | Returns product catalog (without `product_url`) | Planned |
+| `GET` | `/api/v1/products/:id` | Public | Returns product details (masks `product_url` if not enrolled) | Planned |
+| `POST` | `/api/v1/products` | Builder | Creates new product listing | Planned |
+| `PATCH` | `/api/v1/products/:id/pause` | Owner | Toggles enrollment pause state | Planned |
+| `POST` | `/api/v1/products/:id/enroll` | Tester | Enrolls tester and reveals `product_url` | Planned |
+| `POST` | `/api/v1/products/:id/feedback`| Enrolled | Submits structured feedback | Planned |
+| `POST` | `/api/v1/feedback/:id/reply` | Owner | Adds builder response to feedback | Planned |
+| `PATCH` | `/api/v1/feedback/:id/helpful`| Owner | Toggles helpful mark (updates recognition) | Planned |
+| `GET` | `/api/v1/tester/activity` | Tester | Retrieves enrollments, reminders, and feedback history | Planned |
+| `GET` | `/api/v1/builder/dashboard` | Builder | Returns aggregate metrics (views, conversion rate) | Planned |
 
 ---
 

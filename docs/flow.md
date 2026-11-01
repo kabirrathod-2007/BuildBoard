@@ -413,7 +413,42 @@ sequenceDiagram
 
 ---
 
-## 11. End-to-End Sequence Diagram
+## 11. Journey 9: User Profile Retrieval & Persistence (`/api/profiles/me`)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Frontend as ProfileSetupPage.jsx
+    participant AuthCtx as AuthContext.jsx
+    participant API as Express API (/api/profiles)
+    participant AuthMiddleware as requireAuth.js
+    participant MySQL as MySQL Database (buildboard)
+
+    User->>Frontend: Loads profile setup / settings
+    Frontend->>AuthCtx: Checks authenticated user
+    Frontend->>API: GET /api/profiles/me (Header: Authorization Bearer token)
+    API->>AuthMiddleware: verifyIdToken(token, true)
+    AuthMiddleware-->>API: Validated claims { uid, email, emailVerified }
+    API->>MySQL: SELECT id FROM users WHERE firebase_uid = ?
+    MySQL-->>API: Returns user.id
+    API->>MySQL: SELECT profile_data, updated_at FROM user_profiles WHERE user_id = ?
+    MySQL-->>API: Returns { profile_data, updated_at }
+    API-->>Frontend: 200 OK { profile, updatedAt }
+
+    User->>Frontend: Edits profile & clicks Save
+    Frontend->>API: PUT /api/profiles/me (Header: Bearer token, Body: { profile: { ... } })
+    API->>AuthMiddleware: verifyIdToken(token, true)
+    API->>API: validateProfile(req.body.profile) against PROFILE_FIELDS whitelist
+    API->>MySQL: INSERT INTO user_profiles (user_id, profile_data) VALUES (?, ?)<br/>ON DUPLICATE KEY UPDATE profile_data = VALUES(profile_data)
+    MySQL-->>API: 1 row affected
+    API-->>Frontend: 200 OK { profile, updatedAt }
+    Frontend-->>User: Displays "Profile saved successfully" toast
+```
+
+---
+
+## 12. End-to-End Sequence Diagram
 
 ```
 +---------------+           +---------------+           +-----------------+          +-------------------+

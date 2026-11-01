@@ -29,6 +29,7 @@ This document provides a comprehensive, chronological, and thematic log of every
    - Decision 4.2: Express 5 API Service with Firebase Admin Token Verification
    - Decision 4.3: MySQL Identity Schema Keyed by Firebase UID
    - Decision 4.4: Staged Hybrid Migration Strategy (Auth/Identity in Cloud, Domain Models in Client Demo)
+   - Decision 4.5: User Profile Storage via JSON in MySQL (`user_profiles`)
 5. [Tooling & Engineering Methodology](#5-tooling--engineering-methodology)
 6. [Summary Matrix of Code Decisions](#6-summary-matrix-of-code-decisions)
 
@@ -316,6 +317,22 @@ This document provides a comprehensive, chronological, and thematic log of every
 - **Why It Was Changed:**
   - Avoided "big bang" rewrite risks: breaking existing rich demo data (checklists, nested comments, IndexedDB videos) during authentication overhaul.
   - Allows team members to test production authentication independently while backend engineers finalize schema migrations for products and feedback.
+
+---
+
+### Decision 4.5: User Profile Storage via JSON in MySQL (`user_profiles`)
+
+- **What Changed:**
+  - Authored `backend/migrations/002_user_profiles.sql` and updated `backend/schema.sql` declaring `user_profiles` table:
+    - Primary key: `user_id BIGINT UNSIGNED` referencing `users(id) ON DELETE CASCADE`.
+    - Content: `profile_data JSON NOT NULL`.
+    - Timestamps: `created_at` and `updated_at`.
+  - Implemented `GET /api/profiles/me` and `PUT /api/profiles/me` in `backend/src/routes/profiles.js`.
+  - Added strict payload validator enforcing allowed profile fields (`displayName`, `experienceLevel`, `roles`, `technologies`, `availability`, etc.), array length boundaries, and text string constraints.
+  - Protected API routes with `requireAuth` ensuring only authenticated, email-verified sessions can read or update their own profile.
+- **Why It Was Changed:**
+  - Profile fields (targeting interests, device lists, notification preferences) evolve rapidly as matching algorithms improve; storing them in validated JSON columns in MySQL provides schema flexibility while enforcing foreign key integrity against the `users` table.
+  - Strict server-side whitelist validation prevents injection of arbitrary or unbounded data into the database.
 
 ---
 

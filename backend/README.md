@@ -6,8 +6,10 @@ This service verifies Firebase Authentication ID tokens and keeps a MySQL user r
 
 - `GET /api/health` checks that the API can reach MySQL.
 - `POST /api/auth/me` requires `Authorization: Bearer <Firebase ID token>`, verifies the token and revocation status with Firebase Admin, requires a verified email, and creates or updates the user's MySQL row.
+- `GET /api/profiles/me` requires `Authorization: Bearer <Firebase ID token>`, verifies authentication, maps to the user record, and retrieves `profile` JSON and `updatedAt`.
+- `PUT /api/profiles/me` requires `Authorization: Bearer <Firebase ID token>`, validates profile fields (string/array length constraints against allowed keys), and upserts `user_profiles` in MySQL.
 
-The frontend sign-up, sign-in, and email verification pages are wired to Firebase Authentication and connect to `POST /api/auth/me` upon successful authentication. Existing product, enrollment, feedback, and problem data continue to use the local demo context; full data migration for domain models is slated for future milestones.
+The frontend sign-up, sign-in, and email verification pages are wired to Firebase Authentication and connect to `POST /api/auth/me` upon successful authentication. User profile setup is wired to `/api/profiles/me`. Existing product, enrollment, feedback, and problem data continue to use the local demo context; full data migration for domain models is slated for future milestones.
 
 ## Local setup
 

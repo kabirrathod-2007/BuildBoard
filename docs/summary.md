@@ -186,6 +186,7 @@ The previous iteration (`BuildBoard-Landing-Full`) was a single-page marketing c
 ### Current State
 BuildBoard is currently operating in a **hybrid architecture phase**:
 - **Authentication & User Identity**: Fully migrated to production cloud infrastructure. User accounts, secure password hashing, and email verification are managed via **Firebase Authentication**. An **Express 5 API** cryptographically verifies Firebase ID tokens and maintains synchronized user records in **MySQL** keyed by the immutable `firebase_uid`.
+- **User Profile Persistence**: `user_profiles` table implemented in MySQL (`user_id` FK to `users`, `profile_data JSON`). Dedicated authenticated endpoints (`GET /api/profiles/me` and `PUT /api/profiles/me`) validate and persist targeting proficiencies, availability, and notification settings.
 - **Domain Modeling & Community Data**: Product listings, testing checklists, enrollment states, reviews, replies, and problem threads currently continue to execute via client-side storage (`localStorage` and `IndexedDB`) to maintain instant prototyping without database migration disruption.
 
 ### Next Roadmap Milestones
