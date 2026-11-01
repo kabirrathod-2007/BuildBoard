@@ -43,7 +43,7 @@ export default function ShowcaseCarousel({ className = '' }) {
               <Link
                 to={`/products/${id}`}
                 key={`${id}-${idx}`}
-                className="group relative flex w-[410px] min-w-[410px] flex-col overflow-hidden rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 shadow-warm-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#d96b43] hover:shadow-warm-md no-underline"
+                className="group relative flex w-[410px] min-w-[410px] flex-col overflow-hidden rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-4 shadow-warm-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#1f3a6b] dark:hover:border-[#dbbf95] hover:shadow-warm-md no-underline"
               >
                 {/* Interface Thumbnail Preview */}
                 <div className="mb-4 aspect-[16/10] w-full overflow-hidden rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)]">
@@ -68,16 +68,16 @@ export default function ShowcaseCarousel({ className = '' }) {
                       {category}
                     </span>
                     {isSample && (
-                      <span className="rounded-full border border-[#d96b43]/25 bg-[#d96b43]/8 px-3 py-1 text-sm font-medium text-[#b85028] dark:text-[#eb8b72]">
+                      <span className="rounded-full border border-[#1f3a6b]/25 bg-[#1f3a6b]/8 px-3 py-1 text-sm font-medium text-[#1f3a6b] dark:border-[#dbbf95]/25 dark:bg-[#dbbf95]/10 dark:text-[#dbbf95]">
                         Sample prototype
                       </span>
                     )}
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-display text-lg font-bold text-[var(--text-main)] group-hover:text-[#d96b43] dark:group-hover:text-[#e07a5f] transition-colors truncate">
+                    <h4 className="font-display text-lg font-bold text-[var(--text-main)] group-hover:text-[#1f3a6b] dark:group-hover:text-[#dbbf95] transition-colors truncate">
                       {prod.name}
                     </h4>
-                    <span className="shrink-0 text-sm font-semibold text-[#d96b43] dark:text-[#e07a5f] group-hover:translate-x-0.5 transition-transform" aria-hidden="true">
+                    <span className="shrink-0 text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] group-hover:translate-x-0.5 transition-transform" aria-hidden="true">
                       ↗
                     </span>
                   </div>

@@ -18,7 +18,7 @@ export default function NotFoundPage() {
         {/* 404 Hero Card */}
         <div className="mx-auto my-16 max-w-xl px-5 text-center sm:my-24">
           <div className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-8 shadow-warm-md sm:p-12">
-            <span className="inline-block rounded-full border border-[#d96b43]/30 bg-[#d96b43]/10 px-3.5 py-1 text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+            <span className="inline-block rounded-full border border-[#c9a271]/30 bg-[#c9a271]/10 px-3.5 py-1 text-sm font-bold uppercase tracking-wider text-[#c9a271]">
               404 • Page Not Found
             </span>
 
@@ -33,7 +33,7 @@ export default function NotFoundPage() {
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:items-center">
               <Link
                 to="/explore"
-                className="inline-flex items-center justify-center rounded-full bg-[#d96b43] px-6 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#b85028] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43] focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-full bg-[#1f3a6b] px-6 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] focus-visible:ring-offset-2"
               >
                 Explore early products →
               </Link>

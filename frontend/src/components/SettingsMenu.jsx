@@ -78,14 +78,14 @@ export default function SettingsMenu({ className = '' }) {
         aria-controls={`${menuId}-menu`}
         aria-label="Settings and preferences"
         title="Settings and preferences"
-        className={`h-9 inline-flex items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition-all hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43] focus-visible:ring-offset-2 cursor-pointer active:scale-[0.98] ${
-          isOpen ? 'ring-2 ring-[#d96b43]/30 border-[#d96b43]' : ''
+        className={`h-9 inline-flex items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition-all hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] focus-visible:ring-offset-2 cursor-pointer active:scale-[0.98] ${
+          isOpen ? 'ring-2 ring-[#1f3a6b]/30 border-[#1f3a6b] dark:ring-[#dbbf95]/30 dark:border-[#dbbf95]' : ''
         }`}
       >
         {/* Recognizable Gear Icon */}
         <svg
           className={`h-4 w-4 text-[var(--text-muted)] transition-transform duration-200 ${
-            isOpen ? 'rotate-45 text-[#d96b43]' : ''
+            isOpen ? 'rotate-45 text-[#1f3a6b] dark:text-[#dbbf95]' : ''
           }`}
           viewBox="0 0 24 24"
           fill="none"
@@ -116,7 +116,7 @@ export default function SettingsMenu({ className = '' }) {
           {user ? (
             <div className="flex items-center gap-3 pb-3.5 border-b border-[var(--border-main)]">
               <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d96b43]/15 font-bold text-sm text-[#d96b43]"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#c9a271]/15 font-bold text-sm text-[#c9a271]"
                 aria-hidden="true"
               >
                 {userInitial}
@@ -154,7 +154,7 @@ export default function SettingsMenu({ className = '' }) {
                 to="/profile/setup"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43]"
+                className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95]"
               >
                 <div className="flex items-center gap-2">
                   <svg className="h-4 w-4 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -170,7 +170,7 @@ export default function SettingsMenu({ className = '' }) {
                 to="/sign-in"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43]"
+                className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95]"
               >
                 <div className="flex items-center gap-2">
                   <svg className="h-4 w-4 text-[var(--text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

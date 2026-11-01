@@ -34,7 +34,7 @@ export default function PasswordInput({
         required={required}
         aria-invalid={hasError}
         aria-describedby={ariaDescribedBy}
-        className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-3 pr-12 text-sm sm:text-base text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#e07a5f] focus:ring-2 focus:ring-[#e07a5f]/40 ${
+        className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-3 pr-12 text-sm sm:text-base text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#d8b98c] focus:ring-2 focus:ring-[#d8b98c]/40 ${
           hasError
             ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
             : 'border-[var(--border-main)]'
@@ -46,7 +46,7 @@ export default function PasswordInput({
         onMouseDown={(e) => e.preventDefault()}
         aria-label={showPassword ? 'Hide password' : 'Show password'}
         aria-controls={id}
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-subtle)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e07a5f] cursor-pointer transition"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-subtle)] hover:text-[var(--text-main)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] cursor-pointer transition"
       >
         {showPassword ? (
           <svg

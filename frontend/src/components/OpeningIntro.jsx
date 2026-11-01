@@ -95,26 +95,14 @@ export default function OpeningIntro({ onDone }) {
 
             {/* Accent line (static when reduced motion, animated sweep otherwise) */}
             <div
-              style={{
-                width: '140px',
-                height: '2px',
-                backgroundColor: prefersReduced ? 'var(--accent-coral)' : 'rgba(224, 122, 95, 0.2)',
-                borderRadius: '9999px',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
+              className="w-[140px] h-[2px] rounded-full overflow-hidden relative bg-[#1f3a6b]/20 dark:bg-[#dbbf95]/20"
             >
               {!prefersReduced && (
                 <motion.div
                   initial={{ x: '-100%' }}
                   animate={{ x: '100%' }}
                   transition={{ duration: 0.22, ease: 'easeInOut', delay: 0.04 }}
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background:
-                      'linear-gradient(90deg, transparent, var(--accent-coral), #ff8a65, transparent)',
-                  }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1f3a6b] to-transparent dark:via-[#dbbf95]"
                 />
               )}
             </div>

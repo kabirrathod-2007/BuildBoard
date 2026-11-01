@@ -3,91 +3,99 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --font-display: 'DM Sans', Arial, sans-serif;
-  --font-sans: 'DM Sans', Arial, Helvetica, sans-serif;
-  --font-mono: 'JetBrains Mono', Courier, monospace;
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* BuildBoard Warm Paper/Ivory Light Studio Palette */
-  --bg-page: #fbfaf7;
+  /* DevHunt Warm Stone/Paper Ivory Light Palette */
+  --bg-page: #f5f4f0;
   --bg-surface: #ffffff;
-  --bg-surface-subtle: #f4f1ea;
+  --bg-surface-subtle: #eeece5;
   --bg-card: #ffffff;
   
-  /* Deep Ink & Forest-Green Text */
-  --text-main: #141a15;
-  --text-muted: #434f45;
-  --text-subtle: #68766a;
+  /* DevHunt Bluish Deep Navy & Slate Text */
+  --text-main: #15203a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
   
-  /* Tactile Warm Craft Borders */
-  --border-main: #e2ded4;
-  --border-subtle: #ebe8e0;
-  --border-strong: #cfc9bd;
+  /* DevHunt Fine Engineering Borders */
+  --border-main: #e5e2da;
+  --border-subtle: #eeece5;
+  --border-strong: #d5d1c7;
 
-  /* Controlled Artisanal Terracotta Accent */
-  --accent-coral: #d96b43;
-  --accent-coral-hover: #e57b54;
-  --accent-coral-badge: rgba(217, 107, 67, 0.08);
-  --accent-amber: #c26e00;
+  /* DevHunt Primary Bluish Navy & Secondary Accent */
+  --ui-primary: #1f3a6b;
+  --ui-secondary: #1f3a6b;
+  --accent-tan: #1f3a6b;
+  --accent-tan-hover: #182f56;
+  --accent-coral: #1f3a6b;
+  --accent-coral-hover: #182f56;
+  --accent-coral-badge: rgba(31, 58, 107, 0.12);
+  --accent-amber: #1f3a6b;
   --accent-lime: #2e7d32;
-  --shadow-main: rgba(20, 26, 21, 0.06);
+  --shadow-main: rgba(21, 32, 58, 0.06);
 
-  /* Deep Forest Surface (for high-impact editorial blocks) */
-  --surface-forest: #141b16;
-  --text-forest-ivory: #f4ede2;
-  --text-forest-muted: #a4b2a6;
+  /* DevHunt Deep Navy Surface */
+  --surface-forest: #15203a;
+  --text-forest-ivory: #ffffff;
+  --text-forest-muted: #94a3b8;
 
-  /* Warm Elevation Shadows (Light Mode) */
-  --shadow-warm-sm: 0 1px 3px rgba(20, 26, 21, 0.04), 0 1px 2px rgba(20, 26, 21, 0.02);
-  --shadow-warm-md: 0 4px 12px rgba(20, 26, 21, 0.06), 0 2px 4px rgba(20, 26, 21, 0.02);
-  --shadow-warm-lg: 0 10px 24px rgba(20, 26, 21, 0.08), 0 4px 8px rgba(20, 26, 21, 0.02);
-  --shadow-warm-xl: 0 20px 36px rgba(20, 26, 21, 0.09), 0 8px 16px rgba(20, 26, 21, 0.03);
+  /* Elevation Shadows (Light Mode) */
+  --shadow-warm-sm: 0 1px 3px rgba(15, 23, 40, 0.03), 0 1px 2px rgba(15, 23, 40, 0.02);
+  --shadow-warm-md: 0 4px 14px rgba(15, 23, 40, 0.05), 0 2px 4px rgba(15, 23, 40, 0.02);
+  --shadow-warm-lg: 0 10px 24px rgba(15, 23, 40, 0.06), 0 4px 8px rgba(15, 23, 40, 0.02);
+  --shadow-warm-xl: 0 20px 36px rgba(15, 23, 40, 0.08), 0 8px 16px rgba(15, 23, 40, 0.02);
 
   color-scheme: light;
 }
 
 .dark {
-  /* BuildBoard Deep Obsidian & Forest-Ink Dark Palette */
-  --bg-page: #0b100c;
-  --bg-surface: #131914;
-  --bg-surface-subtle: #19221b;
-  --bg-card: #131914;
+  /* DevHunt Deep Obsidian Carbon Dark Palette */
+  --bg-page: #121110;
+  --bg-surface: #181716;
+  --bg-surface-subtle: #22201d;
+  --bg-card: #181716;
 
-  /* Warm Linen & Celadon/Muted Green Text */
-  --text-main: #f3f4f0;
-  --text-muted: #b0baa9;
-  --text-subtle: #828e7d;
+  /* DevHunt Crisp Warm Linen & Stone Text */
+  --text-main: #f0ece7;
+  --text-muted: #a8a29e;
+  --text-subtle: #78716c;
 
-  /* Deep Tactile Borders */
-  --border-main: #242f26;
-  --border-subtle: #1b241d;
-  --border-strong: #324235;
+  /* DevHunt Dark Tactile Grid Borders */
+  --border-main: #2b2926;
+  --border-subtle: #22201d;
+  --border-strong: #3d3a36;
 
-  /* Dark Mode Terracotta Accents */
-  --accent-coral: #e07a5f;
-  --accent-coral-hover: #eb8b72;
-  --accent-coral-badge: rgba(224, 122, 95, 0.15);
-  --accent-amber: #e07a5f;
+  /* DevHunt Dark Mode Tan/Champagne Sand Gold Accents */
+  --ui-primary: #ffffff;
+  --ui-secondary: #dbbf95;
+  --accent-tan: #dbbf95;
+  --accent-tan-hover: #ecdcc2;
+  --accent-coral: #dbbf95;
+  --accent-coral-hover: #ecdcc2;
+  --accent-coral-badge: rgba(219, 191, 149, 0.16);
+  --accent-amber: #dbbf95;
   --accent-lime: #4ade80;
-  --shadow-main: rgba(0, 0, 0, 0.55);
+  --shadow-main: rgba(0, 0, 0, 0.6);
 
-  /* Deep Forest Surface (unified in dark mode) */
-  --surface-forest: #0e140f;
-  --text-forest-ivory: #f3f4f0;
-  --text-forest-muted: #b0baa9;
+  /* Deep Dark Surface */
+  --surface-forest: #1c1b18;
+  --text-forest-ivory: #ffffff;
+  --text-forest-muted: #a8a29e;
 
-  /* Warm Elevation Shadows (Dark Mode) */
+  /* Elevation Shadows (Dark Mode) */
   --shadow-warm-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
   --shadow-warm-md: 0 4px 14px rgba(0, 0, 0, 0.5);
-  --shadow-warm-lg: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 20px rgba(224, 122, 95, 0.06);
-  --shadow-warm-xl: 0 24px 48px rgba(0, 0, 0, 0.7), 0 0 32px rgba(224, 122, 95, 0.1);
+  --shadow-warm-lg: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 20px rgba(216, 185, 140, 0.06);
+  --shadow-warm-xl: 0 24px 48px rgba(0, 0, 0, 0.7), 0 0 32px rgba(216, 185, 140, 0.1);
 
   color-scheme: dark;
 }
 
 @theme {
-  --font-display: 'DM Sans', Arial, sans-serif;
-  --font-sans: 'DM Sans', Arial, Helvetica, sans-serif;
-  --font-mono: 'JetBrains Mono', Courier, monospace;
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
   --color-theme-page: var(--bg-page);
   --color-theme-surface: var(--bg-surface);
@@ -107,8 +115,8 @@
   
   --color-terracotta: var(--accent-coral);
   --color-terracotta-hover: var(--accent-coral-hover);
-  --color-terracotta-dark: #b85028;
-  --color-terracotta-light: #fbeee8;
+  --color-terracotta-dark: #b88e5d;
+  --color-terracotta-light: #fbf7f1;
 
   --color-forest-surface: var(--surface-forest);
   --color-forest-text: var(--text-forest-ivory);
@@ -122,7 +130,7 @@
 }
 
 html {
-  font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   background-color: var(--bg-page);
@@ -138,7 +146,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
@@ -149,8 +157,59 @@ body {
 }
 
 button, input, select, textarea {
-  font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   font-size: inherit;
+}
+
+/* DevHunt Engineering Blueprint Grid & Radial Washes */
+.bg-hero-grid {
+  display: none;
+}
+
+.bg-hero-washes {
+  background: radial-gradient(90% 160% at 15% 0, rgba(15, 23, 40, 0.08), transparent 58%),
+              radial-gradient(70% 140% at 88% 100%, rgba(201, 162, 113, 0.12), transparent 58%);
+  pointer-events: none;
+}
+
+.dark .bg-hero-washes {
+  background: radial-gradient(90% 160% at 15% 0, rgba(95, 124, 174, 0.12), transparent 58%),
+              radial-gradient(70% 140% at 88% 100%, rgba(216, 185, 140, 0.16), transparent 58%);
+}
+
+.devhunt-gradient-text {
+  background: linear-gradient(120deg, var(--ui-primary), var(--ui-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.dark .devhunt-gradient-text {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  color: #dbbf95;
+}
+
+.devhunt-card {
+  background: linear-gradient(180deg, var(--bg-surface), var(--bg-surface-subtle));
+  border: 1px solid var(--border-main);
+  border-radius: 1rem;
+}
+
+.devhunt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-main);
+  background: var(--bg-surface);
+  padding: 0.375rem 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
 }
 
 /* Continuous Fast-Paced Marquee Animation for ShowcaseCarousel */

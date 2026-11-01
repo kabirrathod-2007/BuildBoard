@@ -71,7 +71,7 @@ export default function SubmitProblemPage() {
           <div className="mb-6">
             <Link
               to="/problems"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-muted)] hover:text-[#d96b43] transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-muted)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
             >
               <span aria-hidden="true">&larr;</span>
               Back to Problem Board
@@ -83,11 +83,11 @@ export default function SubmitProblemPage() {
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 rounded-3xl border border-[#d96b43]/30 bg-[#d96b43]/10 p-6 sm:p-7 text-[var(--text-main)] shadow-warm-xs"
+              className="mb-8 rounded-3xl border border-[#1f3a6b]/30 bg-[#1f3a6b]/10 dark:border-[#dbbf95]/30 dark:bg-[#dbbf95]/10 p-6 sm:p-7 text-[var(--text-main)] shadow-warm-xs"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="font-display text-lg font-bold text-[#b85028] dark:text-[#eb8b72]">
+                  <h2 className="font-display text-lg font-bold text-[#1f3a6b] dark:text-[#dbbf95]">
                     Sign in to publish your hypothesis
                   </h2>
                   <p className="mt-1 text-sm text-[var(--text-muted)]">
@@ -97,7 +97,7 @@ export default function SubmitProblemPage() {
                 <Link
                   to="/sign-in"
                   state={{ from: location }}
-                  className="rounded-full bg-[#d96b43] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-xs hover:bg-[#b85028] whitespace-nowrap text-center"
+                  className="rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-warm-xs hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] whitespace-nowrap text-center"
                 >
                   Sign in &rarr;
                 </Link>
@@ -121,7 +121,7 @@ export default function SubmitProblemPage() {
             {/* 1. Problem Title */}
             <div className="pt-8 first:pt-0 space-y-3">
               <label htmlFor="problem-title" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                Problem Title / Core Friction <span className="text-[#d96b43]">*</span>
+                Problem Title / Core Friction <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
               </label>
               <p className="text-xs text-[var(--text-muted)]">
                 Summarize the pain in one crisp sentence (e.g. &ldquo;Figma variable modes break when exported to Tailwind themes&rdquo;).
@@ -135,7 +135,7 @@ export default function SubmitProblemPage() {
                   if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }))
                 }}
                 placeholder="e.g. Debugging service-worker terminations in Manifest V3 is nearly impossible"
-                className={`w-full rounded-xl border bg-[var(--bg-surface)] p-3.5 text-base text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                className={`w-full rounded-xl border bg-[var(--bg-surface)] p-3.5 text-base text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                   errors.title ? 'border-rose-500 bg-rose-50/10' : 'border-[var(--border-main)]'
                 }`}
               />
@@ -145,7 +145,7 @@ export default function SubmitProblemPage() {
             {/* 2. Category */}
             <div className="pt-8 space-y-3">
               <label className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                Category <span className="text-[#d96b43]">*</span>
+                Category <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
               </label>
               <p className="text-xs text-[var(--text-muted)]">
                 Select the domain this problem belongs to.
@@ -158,7 +158,7 @@ export default function SubmitProblemPage() {
                     onClick={() => setCategory(cat)}
                     className={`rounded-full px-4 py-2 text-xs font-semibold transition cursor-pointer select-none ${
                       category === cat
-                        ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+                        ? 'bg-[#1f3a6b] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
                         : 'border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-strong)]'
                     }`}
                   >
@@ -171,7 +171,7 @@ export default function SubmitProblemPage() {
             {/* 3. The Detailed Problem Statement */}
             <div className="pt-8 space-y-3">
               <label htmlFor="problem-statement" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                What is frustrating, and when does it happen? <span className="text-[#d96b43]">*</span>
+                What is frustrating, and when does it happen? <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
               </label>
               <p className="text-xs text-[var(--text-muted)]">
                 Walk through the painful moment. What workflow triggers it? Why does it waste time, cause errors, or break focus?
@@ -185,7 +185,7 @@ export default function SubmitProblemPage() {
                   if (errors.statement) setErrors((prev) => ({ ...prev, statement: undefined }))
                 }}
                 placeholder="Describe the steps leading up to the friction and the negative consequences..."
-                className={`w-full rounded-xl border bg-[var(--bg-surface)] p-3.5 text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                className={`w-full rounded-xl border bg-[var(--bg-surface)] p-3.5 text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                   errors.statement ? 'border-rose-500 bg-rose-50/10' : 'border-[var(--border-main)]'
                 }`}
               />
@@ -206,14 +206,14 @@ export default function SubmitProblemPage() {
                 value={workarounds}
                 onChange={(e) => setWorkarounds(e.target.value)}
                 placeholder="e.g. Pasting code into ChatGPT, keeping dummy ports open, manual spreadsheets..."
-                className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
               />
             </div>
 
             {/* 5. Target Audience */}
             <div className="pt-8 space-y-3">
               <label htmlFor="problem-audience" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
-                Who suffers from this problem? <span className="text-[#d96b43]">*</span>
+                Who suffers from this problem? <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
               </label>
               <p className="text-xs text-[var(--text-muted)]">
                 Define the roles or groups that encounter this (e.g. &ldquo;Solo founders doing user interviews&rdquo;).
@@ -227,7 +227,7 @@ export default function SubmitProblemPage() {
                   if (errors.targetAudience) setErrors((prev) => ({ ...prev, targetAudience: undefined }))
                 }}
                 placeholder="e.g. Frontend developers, design system leads, college CS students"
-                className={`w-full rounded-xl border bg-[var(--bg-surface)] p-3.5 text-base text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                className={`w-full rounded-xl border bg-[var(--bg-surface)] p-3.5 text-base text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                   errors.targetAudience ? 'border-rose-500 bg-rose-50/10' : 'border-[var(--border-main)]'
                 }`}
               />
@@ -248,7 +248,7 @@ export default function SubmitProblemPage() {
                 value={proposedConcept}
                 onChange={(e) => setProposedConcept(e.target.value)}
                 placeholder="e.g. A CLI that translates Figma tokens into Tailwind v4 configs without breaking modes..."
-                className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20"
+                className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-3.5 text-base leading-relaxed text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
               />
             </div>
 
@@ -256,7 +256,7 @@ export default function SubmitProblemPage() {
             <div className="pt-8">
               <button
                 type="submit"
-                className="w-full rounded-full bg-[#d96b43] px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-warm-md transition hover:bg-[#b85028] hover:-translate-y-0.5 active:translate-y-0 cursor-pointer min-h-[48px]"
+                className="w-full rounded-full bg-[#1f3a6b] px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-warm-md transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] hover:-translate-y-0.5 active:translate-y-0 cursor-pointer min-h-[48px]"
               >
                 Publish Problem Hypothesis
               </button>

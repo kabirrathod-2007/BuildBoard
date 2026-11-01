@@ -94,32 +94,40 @@ export default function SignInPage() {
         tabIndex={-1}
         className="grid min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] transition-colors lg:grid-cols-2 focus:outline-none"
       >
-        {/* Left Column: Deep Forest-Ink Editorial Pitch */}
-        <section className="flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[var(--border-main)] bg-[#0b100c] p-7 text-white sm:p-10 lg:p-14">
-          <div className="flex items-center justify-between">
-            <Link className="no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d96b43] rounded-lg" to="/">
-              <Logo theme="dark" />
+        {/* Left Column: Adaptive Brand Column */}
+        <section className="relative overflow-hidden flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[var(--border-main)] bg-[var(--bg-surface-subtle)] dark:bg-[#151413] p-7 text-[var(--text-main)] sm:p-10 lg:p-14 transition-colors">
+          <div className="absolute inset-0 bg-hero-washes opacity-40 pointer-events-none" aria-hidden="true" />
+
+          <div className="relative z-10 flex items-center justify-between">
+            <Link className="no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f3a6b] dark:focus-visible:ring-[#dbbf95] rounded-lg" to="/">
+              <Logo theme="auto" />
             </Link>
             <div className="lg:hidden">
               <SettingsMenu />
             </div>
           </div>
 
-          <div className="my-14 max-w-xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1 text-sm font-semibold text-[#ffa36b]">
+          <div className="relative z-10 my-14 max-w-xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 py-1 text-xs sm:text-sm font-mono uppercase tracking-[0.14em] font-semibold text-[#1f3a6b] dark:text-[#dbbf95] shadow-2xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" aria-hidden="true" />
               <span>Early products · Real people</span>
             </div>
-            <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-display font-semibold leading-[1.08] tracking-tight !text-white text-white">
-              Pick up where you left off.
+
+            <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-display font-extrabold leading-[1.08] tracking-tight text-[var(--text-main)]">
+              Pick up <br className="hidden sm:inline" />
+              <span className="italic font-normal text-[var(--text-main)] dark:text-[#dbbf95]">
+                where you left off.
+              </span>
             </h1>
-            <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-[#c5cdc7]">
+
+            <p className="mt-4 max-w-md text-base sm:text-lg leading-relaxed text-[var(--text-muted)]">
               Meet prototypes in progress, share what you learn, and help indie builders make their next version better.
             </p>
           </div>
 
-          <div className="flex items-center justify-between text-sm text-[#828f85]">
+          <div className="relative z-10 flex items-center justify-between font-mono text-xs text-[var(--text-subtle)]">
             <span>A maker community for prototypes that actually work.</span>
-            <span className="text-sm font-semibold tracking-wider text-[#828f85]">MEMBERS</span>
+            <span className="font-semibold tracking-wider text-[var(--text-muted)]">MEMBERS</span>
           </div>
         </section>
 
@@ -135,7 +143,7 @@ export default function SignInPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
           >
-            <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+            <p className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[#1f3a6b] dark:text-[#dbbf95]">
               Welcome back
             </p>
             <h2 className="mt-2 text-2xl sm:text-3xl font-display font-semibold tracking-tight text-[var(--text-main)]">
@@ -154,7 +162,7 @@ export default function SignInPage() {
                   Email
                 </label>
                 <input
-                  className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                  className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                     errors.email
                       ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
                       : 'border-[var(--border-main)]'
@@ -208,7 +216,7 @@ export default function SignInPage() {
                   type="button"
                   onClick={handlePasswordReset}
                   disabled={isResettingPassword}
-                  className="mt-2 text-sm font-semibold text-[#d96b43] hover:underline disabled:opacity-60"
+                  className="mt-2 text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline disabled:opacity-60"
                 >
                   {isResettingPassword ? 'Sending reset link…' : 'Forgot password?'}
                 </button>
@@ -218,7 +226,7 @@ export default function SignInPage() {
               {authNotice && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{authNotice}</p>}
 
               <button
-                className="mt-2 w-full rounded-full bg-[#d96b43] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition duration-150 hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer"
+                className="mt-2 w-full rounded-full bg-[#1f3a6b] px-5 py-3 text-sm font-semibold text-white shadow-warm-sm transition duration-150 hover:bg-[#182f56] active:translate-y-0.5 dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer"
                 type="submit"
                 disabled={isSubmitting}
               >
@@ -229,7 +237,7 @@ export default function SignInPage() {
             <p className="mt-6 text-sm text-[var(--text-muted)]">
               Need an account?{' '}
               <Link
-                className="font-semibold text-[#d96b43] hover:underline"
+                className="font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline"
                 to="/sign-up"
                 state={location.state}
               >

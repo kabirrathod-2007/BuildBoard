@@ -1,13 +1,12 @@
 import { Link, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext.jsx'
 import Logo from './Logo.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 import SettingsMenu from './SettingsMenu.jsx'
 import MobileNav from './MobileNav.jsx'
 
 /**
- * BuildBoard Unified Navbar Component
- * Editorial maker studio navigation bar with subtle backdrop blur,
- * warm terracotta accents, active indicators, and accessible Settings menu.
+ * BuildBoard Unified Navbar Component — DevHunt Architectural Theme
  */
 export default function Navbar({ className = '' }) {
   const { user, signOut } = useAuth()
@@ -22,22 +21,22 @@ export default function Navbar({ className = '' }) {
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full border-b border-[var(--border-main)] bg-[var(--bg-surface)]/90 backdrop-blur-md transition-colors ${className}`}
+      className={`sticky top-0 z-50 w-full border-b border-[var(--border-main)] bg-[var(--bg-page)]/80 backdrop-blur-md transition-colors ${className}`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-        {/* Brand Hallmark Logo */}
-        <Link to="/" className="no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d96b43] rounded-lg" aria-label="BuildBoard Home">
+        {/* Brand Logo */}
+        <Link to="/" className="no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1f3a6b] dark:focus-visible:outline-[#dbbf95] rounded-lg" aria-label="BuildBoard Home">
           <Logo size="md" showBadge={true} />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-7">
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1.5">
           <Link
             to="/explore"
-            className={`text-sm font-semibold transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               isExplore
-                ? 'text-[var(--text-main)] font-bold'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                ? 'text-[var(--text-main)] font-semibold bg-[var(--bg-surface-subtle)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
             }`}
           >
             Explore Feed
@@ -45,10 +44,10 @@ export default function Navbar({ className = '' }) {
 
           <Link
             to="/problems"
-            className={`text-sm font-semibold transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               isProblems
-                ? 'text-[var(--text-main)] font-bold'
-                : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                ? 'text-[var(--text-main)] font-semibold bg-[var(--bg-surface-subtle)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
             }`}
           >
             Problem Hub
@@ -58,10 +57,10 @@ export default function Navbar({ className = '' }) {
             <>
               <Link
                 to="/tester/activity"
-                className={`text-sm font-semibold transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   isTesterActivity
-                    ? 'text-[var(--text-main)] font-bold'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                    ? 'text-[var(--text-main)] font-semibold bg-[var(--bg-surface-subtle)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
                 Tester Studio
@@ -69,10 +68,10 @@ export default function Navbar({ className = '' }) {
 
               <Link
                 to="/builder/dashboard"
-                className={`text-sm font-semibold transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   isDashboard
-                    ? 'text-[var(--text-main)] font-bold'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                    ? 'text-[var(--text-main)] font-semibold bg-[var(--bg-surface-subtle)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                 }`}
               >
                 Builder Dashboard
@@ -82,29 +81,27 @@ export default function Navbar({ className = '' }) {
         </nav>
 
         {/* Actions & Settings Menu */}
-        <div className="hidden md:flex items-center gap-2.5">
+        <div className="hidden md:flex items-center gap-3">
+          {/* Subtle DevHunt Vertical Divider */}
+          <div className="h-5 w-px bg-[var(--border-main)] shrink-0" aria-hidden="true" />
+
+          {/* Quick Theme Toggle */}
+          <ThemeToggle />
+
           {user ? (
             <div className="flex items-center gap-2.5">
               <Link
                 to="/problems/new"
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition-all hover:bg-[var(--bg-surface-subtle)] hover:border-[#d96b43] active:scale-[0.98]"
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 text-xs sm:text-sm font-medium text-[var(--text-main)] shadow-2xs transition hover:bg-[var(--bg-surface-subtle)]"
               >
-                <svg className="h-3.5 w-3.5 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
                 <span>Share Problem</span>
               </Link>
 
               <Link
                 to="/products/new"
-                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#d96b43] px-3.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition-all hover:bg-[#e57b54] hover:shadow-warm-xs active:scale-[0.98]"
+                className="h-9 inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#1f3a6b] dark:bg-[#f4ede2] px-4 text-xs sm:text-sm font-semibold text-white dark:text-[#15203a] shadow-xs transition hover:bg-[#182f56]"
               >
-                <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Launch Product</span>
+                <span>+ Submit Prototype</span>
               </Link>
 
               <SettingsMenu />
@@ -113,15 +110,15 @@ export default function Navbar({ className = '' }) {
             <div className="flex items-center gap-2.5">
               <Link
                 to="/sign-in"
-                className="h-9 inline-flex items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-3.5 text-xs sm:text-sm font-semibold text-[var(--text-main)] shadow-xs transition-all hover:bg-[var(--bg-surface-subtle)] hover:border-[var(--border-strong)] active:scale-[0.98]"
+                className="px-3 py-1.5 text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
               >
-                Sign in
+                Log in
               </Link>
               <Link
                 to="/sign-up"
-                className="h-9 inline-flex items-center justify-center rounded-xl bg-[#141b16] px-4 text-xs sm:text-sm font-semibold text-[#f4ede2] shadow-xs transition-all hover:bg-[#202c24] active:scale-[0.98] dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-[#ffffff]"
+                className="h-9 inline-flex items-center justify-center rounded-lg bg-[#1f3a6b] dark:bg-[#f4ede2] px-4 text-sm font-semibold text-white dark:text-[#15203a] shadow-xs transition hover:bg-[#182f56]"
               >
-                Join BuildBoard
+                Sign Up
               </Link>
 
               <SettingsMenu />

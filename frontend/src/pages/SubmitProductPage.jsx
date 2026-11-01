@@ -449,7 +449,7 @@ export default function SubmitProductPage() {
                       />
                     ) : (
                       <div className="flex h-44 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] text-center p-4">
-                        <span className="font-display text-4xl font-extrabold text-[#d96b43]">
+                        <span className="font-display text-4xl font-extrabold text-[#1f3a6b] dark:text-[#dbbf95]">
                           {submittedData.name?.charAt(0)?.toUpperCase() || 'P'}
                         </span>
                         <span className="mt-2 text-xs font-semibold text-[var(--text-subtle)]">
@@ -458,7 +458,7 @@ export default function SubmitProductPage() {
                       </div>
                     )}
                     <div className="p-4 border-t border-[var(--border-main)] text-center">
-                      <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                      <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                         Verified Prototype
                       </p>
                       <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
@@ -470,7 +470,7 @@ export default function SubmitProductPage() {
                   {/* Audience Card */}
                   <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-5 shadow-warm-sm text-[var(--text-main)] space-y-3">
                     <div>
-                      <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                      <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                         Target Audience
                       </p>
                       <h3 className="mt-1 text-base font-display font-semibold text-[var(--text-main)]">Who it&apos;s built for</h3>
@@ -485,7 +485,7 @@ export default function SubmitProductPage() {
                       <div className="border-t border-[var(--border-main)] pt-3 space-y-2 text-sm">
                         {submittedData.targetRoles?.length > 0 && (
                           <div>
-                            <span className="font-semibold text-[#d96b43]">Target Roles: </span>
+                            <span className="font-semibold text-[#1f3a6b] dark:text-[#dbbf95]">Target Roles: </span>
                             <span className="text-[var(--text-main)]">
                               {submittedData.targetRoles.join(', ')}
                             </span>
@@ -493,7 +493,7 @@ export default function SubmitProductPage() {
                         )}
                         {submittedData.targetIndustries?.length > 0 && (
                           <div>
-                            <span className="font-semibold text-[#d96b43]">Target Industries: </span>
+                            <span className="font-semibold text-[#1f3a6b] dark:text-[#dbbf95]">Target Industries: </span>
                             <span className="text-[var(--text-main)]">
                               {submittedData.targetIndustries.join(', ')}
                             </span>
@@ -501,7 +501,7 @@ export default function SubmitProductPage() {
                         )}
                         {submittedData.targetTechnologies?.length > 0 && (
                           <div>
-                            <span className="font-semibold text-[#d96b43]">Relevant Technologies: </span>
+                            <span className="font-semibold text-[#1f3a6b] dark:text-[#dbbf95]">Relevant Technologies: </span>
                             <span className="text-[var(--text-main)]">
                               {submittedData.targetTechnologies.join(', ')}
                             </span>
@@ -515,7 +515,7 @@ export default function SubmitProductPage() {
                 {/* Aside / Action Panel */}
                 <aside className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 shadow-warm-md sm:p-7 space-y-5">
                   <div>
-                    <p className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                    <p className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                       Tester Request
                     </p>
                     <h3 className="mt-1 text-xl font-display font-semibold tracking-tight text-[var(--text-main)]">What to try</h3>
@@ -586,7 +586,7 @@ export default function SubmitProductPage() {
                     htmlFor="product-name"
                     className="block text-sm font-semibold text-[var(--text-main)]"
                   >
-                    Product name <span className="text-[#d96b43]">*</span>
+                    Product name <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
                     The working name of your application, tool, or prototype.
@@ -599,7 +599,7 @@ export default function SubmitProductPage() {
                     placeholder="e.g. Planwell, Weeknote, TaskSpark"
                     aria-invalid={Boolean(errors.name)}
                     aria-describedby={errors.name ? 'name-error' : undefined}
-                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                       errors.name
                         ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
                         : 'border-[var(--border-main)]'
@@ -618,7 +618,7 @@ export default function SubmitProductPage() {
                     htmlFor="product-tagline"
                     className="block text-sm font-semibold text-[var(--text-main)]"
                   >
-                    Short description / tagline <span className="text-[#d96b43]">*</span>
+                    Short description / tagline <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
                     A concise one-line summary of what it does.
@@ -631,7 +631,7 @@ export default function SubmitProductPage() {
                     placeholder="e.g. Collaborative task planning for remote engineers"
                     aria-invalid={Boolean(errors.tagline)}
                     aria-describedby={errors.tagline ? 'tagline-error' : undefined}
-                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                       errors.tagline
                         ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
                         : 'border-[var(--border-main)]'
@@ -650,7 +650,7 @@ export default function SubmitProductPage() {
                     htmlFor="product-url"
                     className="block text-sm font-semibold text-[var(--text-main)]"
                   >
-                    Working prototype URL <span className="text-[#d96b43]">*</span>
+                    Working prototype URL <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
                     A working web app, test deployment, or live prototype link.
@@ -663,7 +663,7 @@ export default function SubmitProductPage() {
                     placeholder="https://myproduct.example"
                     aria-invalid={Boolean(errors.prototypeUrl)}
                     aria-describedby={errors.prototypeUrl ? 'prototypeUrl-error' : undefined}
-                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                       errors.prototypeUrl
                         ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
                         : 'border-[var(--border-main)]'
@@ -695,7 +695,7 @@ export default function SubmitProductPage() {
                     placeholder="https://github.com/owner/repository"
                     aria-invalid={Boolean(errors.githubUrl)}
                     aria-describedby={errors.githubUrl ? 'githubUrl-error' : undefined}
-                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                       errors.githubUrl
                         ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
                         : 'border-[var(--border-main)]'
@@ -726,7 +726,7 @@ export default function SubmitProductPage() {
                   {/* 1. Cover Image */}
                   <div className="space-y-3">
                     <label htmlFor="cover-file-upload" className="block text-sm font-semibold text-[var(--text-main)]">
-                      Primary Cover Photo <span className="text-[#d96b43]">*</span>{' '}
+                      Primary Cover Photo <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>{' '}
                       <span className="text-xs font-normal text-[var(--text-subtle)]">(Required: upload photo or provide image link)</span>
                     </label>
 
@@ -738,10 +738,10 @@ export default function SubmitProductPage() {
                           className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center cursor-pointer transition ${
                             errors.cover
                               ? 'border-rose-500 bg-rose-50/20 dark:bg-rose-950/20'
-                              : 'border-[var(--border-main)] bg-[var(--bg-surface)] hover:border-[#d96b43] hover:bg-[var(--bg-surface-subtle)]'
+                              : 'border-[var(--border-main)] bg-[var(--bg-surface)] hover:border-[#1f3a6b] dark:hover:border-[#dbbf95] hover:bg-[var(--bg-surface-subtle)]'
                           }`}
                         >
-                          <svg className={`h-8 w-8 mb-1.5 ${errors.cover ? 'text-rose-500' : 'text-[#d96b43]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <svg className={`h-8 w-8 mb-1.5 ${errors.cover ? 'text-rose-500' : 'text-[#1f3a6b] dark:text-[#dbbf95]'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                             <circle cx="9" cy="9" r="2" />
                             <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
@@ -775,7 +775,7 @@ export default function SubmitProductPage() {
                             }
                           }}
                           placeholder="Or paste image URL (https://...)"
-                          className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#d96b43] ${
+                          className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none transition focus:border-[#1f3a6b] dark:focus:border-[#dbbf95] ${
                             errors.cover && !coverFile
                               ? 'border-rose-500'
                               : 'border-[var(--border-main)]'
@@ -822,7 +822,7 @@ export default function SubmitProductPage() {
                         Additional Screenshots Gallery <span className="text-xs font-normal text-[var(--text-subtle)]">(Up to 8 screenshots)</span>
                       </label>
                       {galleryFiles.length > 0 && (
-                        <span className="text-xs font-semibold text-[#d96b43]">
+                        <span className="text-xs font-semibold text-[#1f3a6b] dark:text-[#dbbf95]">
                           {galleryFiles.length} uploaded
                         </span>
                       )}
@@ -830,9 +830,9 @@ export default function SubmitProductPage() {
 
                     <label
                       htmlFor="gallery-files-upload"
-                      className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] p-3 text-xs sm:text-sm font-semibold text-[var(--text-main)] cursor-pointer hover:border-[#d96b43] hover:bg-[var(--bg-surface-subtle)] transition"
+                      className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] p-3 text-xs sm:text-sm font-semibold text-[var(--text-main)] cursor-pointer hover:border-[#1f3a6b] dark:hover:border-[#dbbf95] hover:bg-[var(--bg-surface-subtle)] transition"
                     >
-                      <svg className="h-4 w-4 text-[#d96b43]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="h-4 w-4 text-[#1f3a6b] dark:text-[#dbbf95]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
@@ -880,9 +880,9 @@ export default function SubmitProductPage() {
                       <div>
                         <label
                           htmlFor="video-file-upload"
-                          className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] p-4 text-center cursor-pointer transition hover:border-[#d96b43] hover:bg-[var(--bg-surface-subtle)]"
+                          className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] p-4 text-center cursor-pointer transition hover:border-[#1f3a6b] dark:hover:border-[#dbbf95] hover:bg-[var(--bg-surface-subtle)]"
                         >
-                          <svg className="h-8 w-8 text-[#d96b43] mb-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <svg className="h-8 w-8 text-[#1f3a6b] dark:text-[#dbbf95] mb-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <polygon points="23 7 16 12 23 17 23 7" />
                             <rect width="15" height="14" x="1" y="5" rx="2" ry="2" />
                           </svg>
@@ -909,7 +909,7 @@ export default function SubmitProductPage() {
                           value={videoUrl}
                           onChange={(e) => setVideoUrl(e.target.value)}
                           placeholder="Or paste video URL (Loom, YouTube, MP4)"
-                          className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none focus:border-[#d96b43]"
+                          className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-4 py-2.5 text-xs sm:text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] outline-none focus:border-[#1f3a6b] dark:focus:border-[#dbbf95]"
                         />
                         <p className="mt-1 text-[11px] text-[var(--text-subtle)]">
                           Supports Loom shares, YouTube previews, or direct MP4 links.
@@ -950,18 +950,18 @@ export default function SubmitProductPage() {
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="block text-sm font-semibold text-[var(--text-main)]">
-                      Categories <span className="text-[#d96b43]">*</span>
+                      Categories <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                     </span>
                     <div className="flex items-center gap-2">
                       {formData.categories.length > 0 && (
                         <>
-                          <span className="rounded-full bg-[#d96b43]/10 px-2.5 py-0.5 text-xs font-bold text-[#d96b43]">
+                          <span className="rounded-full bg-[#1f3a6b]/10 dark:bg-[#dbbf95]/10 px-2.5 py-0.5 text-xs font-bold text-[#1f3a6b] dark:text-[#dbbf95]">
                             {formData.categories.length} selected
                           </span>
                           <button
                             type="button"
                             onClick={() => setFormData((prev) => ({ ...prev, categories: [] }))}
-                            className="text-xs font-semibold text-[var(--text-subtle)] hover:text-[#d96b43] transition-colors cursor-pointer"
+                            className="text-xs font-semibold text-[var(--text-subtle)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors cursor-pointer"
                           >
                             Clear
                           </button>
@@ -983,7 +983,7 @@ export default function SubmitProductPage() {
                           onClick={() => toggleCategory(category)}
                           className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition cursor-pointer ${
                             isSelected
-                              ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-sm'
+                              ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a] shadow-warm-sm'
                               : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)] hover:text-[var(--text-main)]'
                           }`}
                         >
@@ -1010,7 +1010,7 @@ export default function SubmitProductPage() {
                     htmlFor="product-audience"
                     className="block text-sm font-semibold text-[var(--text-main)]"
                   >
-                    Target audience <span className="text-[#d96b43]">*</span>
+                    Target audience <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
                     Describe who this product is built for (e.g. Remote design leads, high school tutors).
@@ -1023,7 +1023,7 @@ export default function SubmitProductPage() {
                     placeholder="e.g. Independent developers shipping React and Node apps"
                     aria-invalid={Boolean(errors.audience)}
                     aria-describedby={errors.audience ? 'audience-error' : undefined}
-                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                       errors.audience
                         ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
                         : 'border-[var(--border-main)]'
@@ -1039,7 +1039,7 @@ export default function SubmitProductPage() {
                 {/* Multi-Dimensional Targeting Criteria */}
                 <div className="pt-8 border-t border-[var(--border-main)] space-y-5">
                   <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-[#d96b43]">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                       Detailed Tester Matching Criteria
                     </h3>
                     <p className="mt-0.5 text-sm text-[var(--text-muted)]">
@@ -1063,7 +1063,7 @@ export default function SubmitProductPage() {
                             onClick={() => toggleTargetRole(role)}
                             className={`rounded-full border px-3 py-1 text-sm font-medium transition cursor-pointer ${
                               isSelected
-                                ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-sm'
+                                ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a] shadow-warm-sm'
                                 : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                             }`}
                           >
@@ -1095,7 +1095,7 @@ export default function SubmitProductPage() {
                             onClick={() => toggleTargetIndustry(industry)}
                             className={`rounded-full border px-3 py-1 text-sm font-medium transition cursor-pointer ${
                               isSelected
-                                ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-sm'
+                                ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a] shadow-warm-sm'
                                 : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                             }`}
                           >
@@ -1127,7 +1127,7 @@ export default function SubmitProductPage() {
                             onClick={() => toggleTargetTechnology(tech)}
                             className={`rounded-full border px-3 py-1 text-sm font-medium transition cursor-pointer ${
                               isSelected
-                                ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-sm'
+                                ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a] shadow-warm-sm'
                                 : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-subtle)]'
                             }`}
                           >
@@ -1150,7 +1150,7 @@ export default function SubmitProductPage() {
                     htmlFor="product-feedback-request"
                     className="block text-sm font-semibold text-[var(--text-main)]"
                   >
-                    What should testers try or comment on? <span className="text-[#d96b43]">*</span>
+                    What should testers try or comment on? <span className="text-[#1f3a6b] dark:text-[#dbbf95]">*</span>
                   </label>
                   <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
                     Provide concrete instructions or questions to guide tester exploration.
@@ -1163,7 +1163,7 @@ export default function SubmitProductPage() {
                     placeholder="e.g. Try onboarding and setting up a new project. Tell us if any steps felt confusing or if loading was slow."
                     aria-invalid={Boolean(errors.feedbackRequest)}
                     aria-describedby={errors.feedbackRequest ? 'feedbackRequest-error' : undefined}
-                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] p-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 ${
+                    className={`mt-1.5 w-full rounded-xl border bg-[var(--bg-surface)] p-3 text-sm text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
                       errors.feedbackRequest
                         ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
                         : 'border-[var(--border-main)]'
@@ -1181,7 +1181,7 @@ export default function SubmitProductPage() {
                   <button
                     type="submit"
                     disabled={isSavingMedia}
-                    className="w-full sm:w-auto rounded-full bg-[#d96b43] px-8 py-3.5 text-sm font-semibold text-white shadow-warm-sm transition duration-150 hover:bg-[#b85028] active:translate-y-0.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto rounded-full bg-[#1f3a6b] px-8 py-3.5 text-sm font-semibold text-white shadow-warm-sm transition duration-150 hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] active:translate-y-0.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isSavingMedia ? 'Saving media...' : 'Submit prototype & view listing →'}
                   </button>
