@@ -1,25 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <defs>
-    <linearGradient id="bbTerracotta" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#eb8b72" />
-      <stop offset="100%" stop-color="#d96b43" />
+    <linearGradient id="bbBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a5298" />
+      <stop offset="100%" stop-color="#162c54" />
     </linearGradient>
   </defs>
 
-  <!-- Tactile Studio Obsidian Frame -->
-  <rect width="32" height="32" rx="8" fill="#141a15" />
-  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="7.25" stroke="#d96b43" stroke-width="1.5" stroke-opacity="0.3" fill="none" />
+  <!-- DevHunt Blue Icon Tile -->
+  <rect width="32" height="32" rx="7.5" fill="url(#bbBg)" />
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="6.75" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5" fill="none" />
 
-  <!-- BuildBoard Monogram 'B' (Artisanal Studio Craft) -->
-  <!-- Left Ivory Spine -->
-  <rect x="7" y="7" width="3.5" height="18" rx="1.25" fill="#f4ede2" />
+  <!-- High-Contrast Crisp White Monogram 'B' -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M7 6.5C7 5.67157 7.67157 5 8.5 5H17C20.0376 5 22.5 7.46243 22.5 10.5C22.5 12.4414 21.4939 14.1481 19.9679 15.1278C21.803 16.1432 23 18.0645 23 20.25C23 23.4256 20.4256 26 17.25 26H8.5C7.67157 26 7 25.3284 7 24.5V6.5ZM10.5 8.5V13.5H16.5C18.1569 13.5 19.5 12.1569 19.5 10.5C19.5 8.84315 18.1569 8.5 16.5 8.5H10.5ZM10.5 16.5V22.5H17C18.6569 22.5 20 21.1569 20 19.5C20 17.8431 18.6569 16.5 17 16.5H10.5Z" fill="#ffffff" />
 
-  <!-- Top Segment (Terracotta) -->
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 7H17C19.4853 7 21.5 8.90294 21.5 11.25C21.5 13.5971 19.4853 15.5 17 15.5H10.5V7ZM13.5 9.75H16.5C17.6046 9.75 18.5 10.4216 18.5 11.25C18.5 12.0784 17.6046 12.75 16.5 12.75H13.5V9.75Z" fill="url(#bbTerracotta)" />
-
-  <!-- Bottom Segment (Terracotta) -->
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 14.5H17.8C20.451 14.5 22.6 16.4029 22.6 18.75C22.6 21.0971 20.451 23 17.8 23H10.5V14.5ZM13.5 17.25H17.2C18.415 17.25 19.4 17.9216 19.4 18.75C19.4 19.5784 18.415 20.25 17.2 20.25H13.5V17.25Z" fill="url(#bbTerracotta)" />
-
-  <!-- Builder Accent Spark / Node -->
-  <circle cx="24.5" cy="8" r="1.75" fill="#eb8b72" />
+  <!-- Builder Accent Spark (Champagne Gold) -->
+  <circle cx="24.5" cy="7.5" r="2.25" fill="#dbbf95" />
+  <circle cx="24.5" cy="7.5" r="1.2" fill="#ffffff" />
 </svg>

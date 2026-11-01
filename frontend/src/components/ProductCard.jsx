@@ -38,7 +38,7 @@ export default function ProductCard({
   if (variant === 'feed') {
     return (
       <article
-        className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-5 rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-6 sm:p-7 transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--border-strong)] hover:shadow-warm-md ${className}`}
+        className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-5 rounded-2xl border border-[var(--border-main)] devhunt-card p-6 sm:p-7 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#1f3a6b]/80 dark:hover:border-[#dbbf95]/80 hover:shadow-warm-md ${className}`}
       >
         <div className="flex items-start gap-5 flex-1 min-w-0">
           {/* Product Icon / Initial Box */}
@@ -46,12 +46,12 @@ export default function ProductCard({
             <img
               src={image}
               alt=""
-              className="h-16 w-16 shrink-0 rounded-2xl object-cover object-top border border-[var(--border-main)] bg-[var(--bg-surface-subtle)]"
+              className="h-16 w-16 shrink-0 rounded-xl object-cover object-top border border-[var(--border-main)] bg-[var(--bg-surface-subtle)]"
               loading="lazy"
             />
           ) : (
             <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] font-display text-2xl font-bold text-[var(--text-main)]"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] font-display text-2xl font-bold text-[#1f3a6b] dark:text-[#dbbf95]"
               aria-hidden="true"
             >
               {initial}
@@ -63,45 +63,45 @@ export default function ProductCard({
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 to={`/products/${id}`}
-                className="font-display text-xl font-bold text-[var(--text-main)] hover:text-[#d96b43] dark:hover:text-[#e07a5f] transition-colors truncate"
+                className="font-display text-xl font-bold text-[var(--text-main)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors truncate"
               >
                 {title}
               </Link>
               {isBestOfWeek && (
-                <span className="rounded-full border border-[#d96b43]/30 bg-[#fbf3ee] dark:bg-[#e07a5f]/15 px-3 py-0.5 text-sm font-semibold text-[#b85028] dark:text-[#eb8b72]">
+                <span className="rounded-full border border-[#c9a271]/30 bg-[#c9a271]/15 px-3 py-0.5 font-mono text-xs font-semibold uppercase tracking-wider text-[#c9a271] dark:text-[#d8b98c]">
                   {badgeText || 'Best of Week'}
                 </span>
               )}
               {categories.slice(0, 2).map((cat) => (
                 <span
                   key={cat}
-                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3 py-0.5 text-sm font-medium text-[var(--text-muted)]"
+                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]"
                 >
                   {cat}
                 </span>
               ))}
             </div>
 
-            <p className="text-base text-[var(--text-muted)] line-clamp-2 leading-relaxed">
+            <p className="text-sm sm:text-base text-[var(--text-muted)] line-clamp-2 leading-relaxed">
               {tagline}
             </p>
 
             {/* Author & Meta */}
-            <div className="mt-1 flex flex-wrap items-center gap-2.5 text-sm text-[var(--text-subtle)]">
+            <div className="mt-1 flex flex-wrap items-center gap-2.5 text-xs sm:text-sm text-[var(--text-subtle)]">
               <span className="font-medium text-[var(--text-muted)]">
                 by {authorName}
               </span>
               <span aria-hidden="true">·</span>
-              <span className="uppercase text-sm font-semibold text-[var(--text-subtle)]">
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-subtle)]">
                 {stage}
               </span>
               <span aria-hidden="true">·</span>
               {enrollmentPaused ? (
-                <span className="font-semibold text-amber-700 dark:text-amber-400">
+                <span className="font-mono text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
                   Enrollment paused
                 </span>
               ) : (
-                <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                <span className="font-mono text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                   Open for testing
                 </span>
               )}
@@ -113,7 +113,7 @@ export default function ProductCard({
         <div className="self-end sm:self-center shrink-0">
           <Link
             to={`/products/${id}`}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--text-main)] shadow-warm-xs transition hover:border-[#d96b43] hover:text-[#d96b43] dark:hover:border-[#e07a5f] dark:hover:text-[#e07a5f]"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#182f56] dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white"
           >
             <span>View prototype</span>
             <span aria-hidden="true">→</span>
@@ -126,7 +126,7 @@ export default function ProductCard({
   // Grid Card Variant (Default)
   return (
     <article
-      className={`group flex h-full flex-col overflow-hidden rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#d96b43] dark:hover:border-[#e07a5f] hover:shadow-warm-md ${className}`}
+      className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border-main)] devhunt-card text-[var(--text-main)] shadow-warm-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#1f3a6b]/80 dark:hover:border-[#dbbf95]/80 hover:shadow-warm-md ${className}`}
     >
       {/* Thumbnail or Icon Banner */}
       <Link
@@ -143,12 +143,12 @@ export default function ProductCard({
           />
         ) : (
           <div className="flex h-52 w-full items-center justify-center bg-[var(--bg-surface-subtle)]">
-            <span className="font-display text-5xl font-extrabold text-[#d96b43]">{initial}</span>
+            <span className="font-display text-5xl font-bold text-[#1f3a6b] dark:text-[#dbbf95]">{initial}</span>
           </div>
         )}
 
         {isBestOfWeek && (
-          <div className="absolute top-3.5 right-3.5 rounded-full border border-[#d96b43]/30 bg-[#fbf3ee] dark:bg-[#141b16]/95 px-3 py-1 text-sm font-semibold text-[#b85028] dark:text-[#eb8b72] shadow-sm backdrop-blur-xs">
+          <div className="absolute top-3.5 right-3.5 rounded-full border border-[#1f3a6b]/30 bg-[#1f3a6b]/15 px-3 py-1 font-mono text-xs font-semibold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95] shadow-xs backdrop-blur-xs">
             {badgeText || 'Best of Week'}
           </div>
         )}
@@ -156,28 +156,28 @@ export default function ProductCard({
 
       <div className="flex flex-1 flex-col p-6 sm:p-7">
         {/* Badges row */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3 py-1 text-sm font-semibold text-[var(--text-muted)]">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             {stage}
           </span>
           {enrollmentPaused ? (
-            <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-sm font-semibold text-amber-800 dark:text-amber-300">
+            <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
               Paused
             </span>
           ) : (
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-              Enrollment open
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+              Open
             </span>
           )}
           {(product.isSample || isLocalDemo) && (
-            <span className="rounded-full border border-[#d96b43]/30 bg-[#fbf3ee] dark:bg-[#e07a5f]/10 px-3 py-1 text-sm font-semibold text-[#b85028] dark:text-[#eb8b72]">
+            <span className="rounded-full border border-[#1f3a6b]/30 bg-[#1f3a6b]/15 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
               {product.isSample ? 'Featured' : 'Community'}
             </span>
           )}
           {categories.slice(0, 2).map((cat) => (
             <span
               key={cat}
-              className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-sm font-medium text-[var(--text-subtle)]"
+              className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-[var(--text-subtle)]"
             >
               {cat}
             </span>
@@ -185,22 +185,22 @@ export default function ProductCard({
         </div>
 
         {/* Title */}
-        <h3 className="mt-4 font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-main)] break-words">
+        <h3 className="mt-3.5 font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-main)] break-words">
           <Link
             to={`/products/${id}`}
-            className="hover:text-[#d96b43] dark:hover:text-[#e07a5f] transition-colors"
+            className="hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
           >
             {title}
           </Link>
         </h3>
 
         {/* Tagline */}
-        <p className="mt-2 text-base leading-relaxed text-[var(--text-muted)] break-words line-clamp-2">
+        <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-muted)] break-words line-clamp-2">
           {tagline}
         </p>
 
         {/* Builder attribution */}
-        <div className="mt-4 flex items-center gap-1.5 text-sm text-[var(--text-subtle)]">
+        <div className="mt-3.5 flex items-center gap-1.5 text-xs sm:text-sm text-[var(--text-subtle)]">
           <span>by</span>
           <span className="font-semibold text-[var(--text-muted)]">
             {authorName}
@@ -212,7 +212,7 @@ export default function ProductCard({
           <div className="flex items-center pt-4 border-t border-[var(--border-main)]">
             <Link
               to={`/products/${id}`}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#141b16] px-5 py-3 text-sm font-semibold text-[#f4ede2] shadow-warm-xs transition hover:bg-[#202c24] dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-[#ffffff]"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#182f56] dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white"
             >
               View prototype
               <span aria-hidden="true">→</span>

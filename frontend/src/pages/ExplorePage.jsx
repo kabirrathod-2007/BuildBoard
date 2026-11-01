@@ -30,7 +30,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-20px' }}
         transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.2) }}
-        className="group flex flex-col md:flex-row overflow-hidden rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm transition-all duration-200 hover:border-[#d96b43] dark:hover:border-[#e07a5f] hover:shadow-warm-md"
+        className="group flex flex-col md:flex-row overflow-hidden rounded-2xl border border-[var(--border-main)] devhunt-card text-[var(--text-main)] shadow-warm-xs transition-all duration-200 hover:border-[#1f3a6b]/80 dark:hover:border-[#dbbf95]/80 hover:shadow-warm-md"
       >
         <Link
           to={`/products/${product.id}`}
@@ -46,18 +46,18 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
             />
           ) : (
             <div className="flex h-52 md:h-full w-full min-h-[180px] flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
-              <span className="font-display text-4xl font-extrabold text-[#d96b43]">
+              <span className="font-display text-4xl font-bold text-[#1f3a6b] dark:text-[#dbbf95]">
                 {product.name?.charAt(0)?.toUpperCase() || 'P'}
               </span>
             </div>
           )}
           {product.stage && (
-            <span className="absolute top-3 left-3 rounded-full border border-black/10 bg-black/60 backdrop-blur px-2.5 py-0.5 text-xs font-semibold text-white">
+            <span className="absolute top-3 left-3 rounded-full border border-black/10 bg-black/70 backdrop-blur-xs px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white">
               {product.stage}
             </span>
           )}
           {hasVideo && (
-            <span className="absolute bottom-3 left-3 rounded-full border border-black/10 bg-black/75 backdrop-blur px-2.5 py-0.5 text-xs font-semibold text-white flex items-center gap-1">
+            <span className="absolute bottom-3 left-3 rounded-full border border-black/10 bg-black/75 backdrop-blur-xs px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white flex items-center gap-1">
               ▶ Video
             </span>
           )}
@@ -68,11 +68,11 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
             {/* Top row: Badges & Maker */}
             <div className="flex flex-wrap items-center gap-2">
               {product.enrollmentPaused ? (
-                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:text-amber-300">
+                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
                   Paused
                 </span>
               ) : (
-                <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
                   Enrollment open
                 </span>
               )}
@@ -80,7 +80,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
               {product.categories.slice(0, 3).map((category) => (
                 <span
                   key={category}
-                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-subtle)]"
+                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-[var(--text-subtle)]"
                 >
                   {category}
                 </span>
@@ -98,7 +98,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
               <h3 className="font-display text-2xl font-bold tracking-tight text-[var(--text-main)]">
                 <Link
                   to={`/products/${product.id}`}
-                  className="hover:text-[#d96b43] dark:hover:text-[#e07a5f] transition-colors"
+                  className="hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
                 >
                   {product.name}
                 </Link>
@@ -109,15 +109,15 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
             </div>
 
             {/* Audience Highlight: Who it's for */}
-            <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3.5 py-2">
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#d96b43]">
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <div className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3.5 py-2">
+              <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-[#1f3a6b] dark:text-[#dbbf95]">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                <span>Who it&apos;s for:</span>
+                <span>Target Audience</span>
               </div>
               <p className="mt-0.5 text-sm font-medium text-[var(--text-main)] leading-relaxed line-clamp-2">
                 {product.audience}
@@ -130,17 +130,17 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
                 {product.targetRoles?.slice(0, 2).map((role) => (
                   <span
                     key={role}
-                    className="inline-flex items-center gap-1 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs sm:text-sm font-medium text-[var(--text-muted)]"
+                    className="inline-flex items-center gap-1 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-muted)]"
                   >
-                    <span className="text-[#d96b43] font-bold">Role:</span> {role}
+                    <span className="text-[#1f3a6b] dark:text-[#dbbf95] font-bold font-mono">Role:</span> {role}
                   </span>
                 ))}
                 {product.targetTechnologies?.slice(0, 2).map((tech) => (
                   <span
                     key={tech}
-                    className="inline-flex items-center gap-1 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs sm:text-sm font-medium text-[var(--text-subtle)]"
+                    className="inline-flex items-center gap-1 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-subtle)]"
                   >
-                    <span className="text-[#d96b43] font-bold">Stack:</span> {tech}
+                    <span className="text-[#1f3a6b] dark:text-[#dbbf95] font-bold font-mono">Stack:</span> {tech}
                   </span>
                 ))}
               </div>
@@ -150,7 +150,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
             {matchInfo && (
               <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2">
                 <div className="flex items-center justify-between text-xs sm:text-sm font-bold">
-                  <span className="text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                  <span className="text-emerald-800 dark:text-emerald-300 font-mono uppercase tracking-wider text-xs">
                     Profile Match: {matchInfo.score}/{matchInfo.maxScore}
                   </span>
                 </div>
@@ -167,12 +167,12 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
 
           {/* Bottom Action Row */}
           <div className="flex items-center justify-between gap-4 pt-3 border-t border-[var(--border-main)]">
-            <span className="text-xs text-[var(--text-subtle)]">
+            <span className="font-mono text-xs text-[var(--text-subtle)]">
               {product.whatToTry?.length ? `${product.whatToTry.length} test tasks requested` : 'Structured feedback ready'}
             </span>
             <Link
               to={`/products/${product.id}`}
-              className="inline-flex items-center gap-2 rounded-full bg-[#141b16] px-5 py-2.5 text-sm font-semibold text-[#f4ede2] shadow-warm-xs transition hover:bg-[#202c24] dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-[#ffffff]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#182f56] dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white"
             >
               <span>View prototype</span>
               <span aria-hidden="true">&rarr;</span>
@@ -190,7 +190,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.06, 0.3) }}
-      className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#d96b43] dark:hover:border-[#e07a5f] hover:shadow-warm-md"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--border-main)] devhunt-card text-[var(--text-main)] shadow-warm-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#1f3a6b]/80 dark:hover:border-[#dbbf95]/80 hover:shadow-warm-md"
     >
       <Link
         to={`/products/${product.id}`}
@@ -206,18 +206,18 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
           />
         ) : (
           <div className="flex h-52 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
-            <span className="font-display text-4xl font-extrabold text-[#d96b43]">
+            <span className="font-display text-4xl font-bold text-[#1f3a6b] dark:text-[#dbbf95]">
               {product.name?.charAt(0)?.toUpperCase() || 'P'}
             </span>
           </div>
         )}
         {product.stage && (
-          <span className="absolute top-3 left-3 rounded-full border border-black/10 bg-black/60 backdrop-blur px-2.5 py-0.5 text-xs font-semibold text-white">
+          <span className="absolute top-3 left-3 rounded-full border border-black/10 bg-black/70 backdrop-blur-xs px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-white">
             {product.stage}
           </span>
         )}
         {hasVideo && (
-          <span className="absolute bottom-3 left-3 rounded-full border border-black/10 bg-black/75 backdrop-blur px-2.5 py-0.5 text-xs font-semibold text-white flex items-center gap-1">
+          <span className="absolute bottom-3 left-3 rounded-full border border-black/10 bg-black/75 backdrop-blur-xs px-2.5 py-0.5 font-mono text-[11px] font-semibold text-white flex items-center gap-1">
             ▶ Video
           </span>
         )}
@@ -228,18 +228,18 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
           {/* Badges row */}
           <div className="flex flex-wrap items-center gap-1.5">
             {product.enrollmentPaused ? (
-              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:text-amber-300">
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
                 Paused
               </span>
             ) : (
-              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
                 Open
               </span>
             )}
             {product.categories.slice(0, 2).map((category) => (
               <span
                 key={category}
-                className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-subtle)]"
+                className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-[var(--text-subtle)]"
               >
                 {category}
               </span>
@@ -254,7 +254,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
           <h3 className="mt-3.5 font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-main)] break-words">
             <Link
               to={`/products/${product.id}`}
-              className="hover:text-[#d96b43] dark:hover:text-[#e07a5f] transition-colors"
+              className="hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors"
             >
               {product.name}
             </Link>
@@ -265,15 +265,15 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
           </p>
 
           {/* Highlighted Who it's for Audience Box */}
-          <div className="mt-3 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3.5 py-2">
-            <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#d96b43]">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <div className="mt-3 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3.5 py-2">
+            <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-[#1f3a6b] dark:text-[#dbbf95]">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
-              <span>Who it&apos;s for:</span>
+              <span>Target Audience</span>
             </div>
             <p className="mt-1 text-sm font-medium leading-relaxed text-[var(--text-main)] line-clamp-2">
               {product.audience}
@@ -282,21 +282,21 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
 
           {/* Target Roles & Tech Tags */}
           {(product.targetRoles?.length > 0 || product.targetTechnologies?.length > 0) && (
-            <div className="mt-2 flex flex-wrap items-center gap-1 text-xs sm:text-sm">
+            <div className="mt-2.5 flex flex-wrap items-center gap-1 text-xs">
               {product.targetRoles?.slice(0, 1).map((role) => (
                 <span
                   key={role}
-                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs sm:text-sm font-medium text-[var(--text-muted)]"
+                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-muted)]"
                 >
-                  {role}
+                  <span className="font-mono text-[#1f3a6b] dark:text-[#dbbf95] font-semibold">Role:</span> {role}
                 </span>
               ))}
               {product.targetTechnologies?.slice(0, 1).map((tech) => (
                 <span
                   key={tech}
-                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs sm:text-sm font-medium text-[var(--text-subtle)]"
+                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-subtle)]"
                 >
-                  {tech}
+                  <span className="font-mono text-[#1f3a6b] dark:text-[#dbbf95] font-semibold">Stack:</span> {tech}
                 </span>
               ))}
             </div>
@@ -304,12 +304,12 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
 
           {/* Match score bar (recommendation cards only) */}
           {matchInfo && (
-            <div className="mt-3.5 rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3.5 py-2.5">
+            <div className="mt-3.5 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3.5 py-2.5">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#1f3a6b] dark:text-[#dbbf95]">
                   Profile match
                 </p>
-                <span className="text-xs sm:text-sm font-bold tabular-nums text-[var(--text-main)]">
+                <span className="font-mono text-xs font-bold tabular-nums text-[var(--text-main)]">
                   {matchInfo.score}/{matchInfo.maxScore}
                 </span>
               </div>
@@ -319,13 +319,13 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
                     key={i}
                     className={`h-1 flex-1 rounded-full transition-colors ${
                       i < matchInfo.score
-                        ? 'bg-[#d96b43] dark:bg-[#e07a5f]'
+                        ? 'bg-[#1f3a6b] dark:bg-[#dbbf95]'
                         : 'bg-[var(--border-main)]'
                     }`}
                   />
                 ))}
               </div>
-              <ul className="mt-2 space-y-1 text-xs sm:text-sm font-medium text-[var(--text-main)]">
+              <ul className="mt-2 space-y-1 text-xs font-medium text-[var(--text-main)]">
                 {matchInfo.reasons.slice(0, 2).map((reason) => (
                   <li key={reason} className="flex items-start gap-1.5">
                     <svg className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -342,7 +342,7 @@ function ProductCard({ product, index, matchInfo, viewMode = 'grid' }) {
         <div className="mt-5 pt-4 border-t border-[var(--border-main)]">
           <Link
             to={`/products/${product.id}`}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#141b16] px-5 py-2.5 text-sm font-semibold text-[#f4ede2] shadow-warm-xs transition hover:bg-[#202c24] dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-[#ffffff]"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#1f3a6b] px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#182f56] dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white"
           >
             <span>View prototype</span>
             <span aria-hidden="true">&rarr;</span>
@@ -579,40 +579,51 @@ export default function ExplorePage() {
       >
         <Navbar />
 
-        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-14">
-          {/* ── Editorial Hero Banner ── */}
-          <motion.section
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="pt-2 pb-10 border-b border-[var(--border-main)]"
-          >
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
-                <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-tight text-[var(--text-main)]">
-                  Find something <br className="hidden sm:inline" />
-                  <span className="italic font-normal text-[#d96b43] dark:text-[#e07a5f]">worth trying.</span>
-                </h1>
-              </div>
-              <div className="max-w-xl lg:pb-1">
-                <p className="text-base sm:text-lg lg:text-xl leading-relaxed text-[var(--text-muted)]">
-                  Explore working software prototypes from independent makers, designers, and students. Try something useful today, then give the builder honest, actionable notes.
-                </p>
-                <div className="mt-5">
+        {/* Ambient Washes Header Banner */}
+        <section className="relative overflow-hidden border-b border-[var(--border-main)] bg-[var(--bg-page)]">
+          <div className="absolute inset-0 bg-hero-washes" aria-hidden="true" />
+
+          <div className="relative mx-auto max-w-7xl px-5 pt-12 pb-14 sm:px-8 lg:pt-16 lg:pb-18">
+            <div className="max-w-3xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 font-mono text-xs uppercase tracking-[0.14em] text-[var(--text-muted)] mb-4 shadow-2xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" />
+                PROTOTYPES DIRECTORY · DIRECT TESTING
+              </span>
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08] text-[var(--text-main)]">
+                Explore builds.
+                <span className="block text-[#1f3a6b] dark:text-[#dbbf95]">
+                  Smart directory.
+                </span>
+              </h1>
+              <p className="mt-4 text-base sm:text-lg leading-relaxed text-[var(--text-muted)] max-w-2xl">
+                Explore working software prototypes from independent makers, designers, and students. Try something useful today, then give the builder honest, actionable notes.
+              </p>
+
+              <div className="mt-8 flex flex-wrap items-center gap-3.5">
+                <Link
+                  to="/products/new"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#1f3a6b] px-6 py-3.5 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] hover:-translate-y-0.5 active:translate-y-0 dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
+                >
+                  <span>+ Submit a Prototype</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+                {user ? (
                   <Link
-                    to="/products/new"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#d96b43] px-5 py-2.5 text-sm font-semibold text-white shadow-warm hover:bg-[#c45a32] transition-colors"
+                    to="/profile/setup"
+                    className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3.5 text-sm font-semibold text-[var(--text-main)] shadow-2xs transition hover:bg-[var(--bg-surface-subtle)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95]"
                   >
-                    + Submit a Product
+                    <span>My Preferences</span>
                   </Link>
-                </div>
+                ) : null}
               </div>
             </div>
-          </motion.section>
+          </div>
+        </section>
 
+        <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-12">
           {/* ── Recommendations Section / Fallback States ── */}
           {user && hasProfileDetails && recommendedMatches.length > 0 ? (
-            <section aria-labelledby="recommended-heading" className="mt-16">
+            <section aria-labelledby="recommended-heading" className="mt-8">
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -622,15 +633,16 @@ export default function ExplorePage() {
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[#d96b43] px-3.5 py-1 text-sm font-bold uppercase tracking-wider text-white shadow-warm-xs">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1f3a6b]/15 px-3 py-1 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#1f3a6b] dark:text-[#dbbf95] border border-[#1f3a6b]/30 dark:border-[#dbbf95]/30">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" />
                       Curated For You
                     </span>
                   </div>
                   <h2
                     id="recommended-heading"
-                    className="mt-3 font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-main)]"
+                    className="mt-3 font-display text-2xl sm:text-4xl font-bold tracking-tight text-[var(--text-main)]"
                   >
-                    Matched to your <span className="italic font-normal text-[#d96b43] dark:text-[#e07a5f]">profile</span>
+                    Matched to your <span className="font-normal text-[#1f3a6b] dark:text-[#dbbf95]">profile</span>
                   </h2>
                   <p className="mt-2 text-base text-[var(--text-muted)]">
                     Prototypes explicitly seeking testers in your saved industries, roles, technologies, or product interests.
@@ -639,7 +651,7 @@ export default function ExplorePage() {
 
                 <Link
                   to="/profile/setup"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#b85028] dark:text-[#eb8b72] hover:underline underline-offset-4"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline underline-offset-4"
                 >
                   <span>Edit preferences</span>
                   <span aria-hidden="true">&rarr;</span>
@@ -664,11 +676,11 @@ export default function ExplorePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="mt-10 border-y border-[var(--border-main)] py-8"
+              className="mt-8 rounded-2xl border border-[var(--border-main)] devhunt-card p-6 sm:p-8"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div className="max-w-xl">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                  <span className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#1f3a6b] dark:text-[#dbbf95]">
                     Personalized Testing Matches
                   </span>
                   <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-main)]">
@@ -682,13 +694,13 @@ export default function ExplorePage() {
                   <Link
                     to="/sign-in"
                     state={{ from: location }}
-                    className="rounded-full bg-[#141b16] px-5 py-3 text-sm font-semibold text-[#f4ede2] shadow-warm-xs transition hover:bg-[#202c24] dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-[#ffffff]"
+                    className="rounded-full bg-[#1f3a6b] px-5 py-3 text-sm font-semibold text-white shadow-xs transition hover:bg-[#182f56] dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white"
                   >
                     Sign in for matches
                   </Link>
                   <Link
                     to="/sign-up"
-                    className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-semibold text-[var(--text-main)] shadow-warm-xs transition hover:bg-[var(--bg-surface-subtle)]"
+                    className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-semibold text-[var(--text-main)] shadow-xs transition hover:bg-[var(--bg-surface-subtle)]"
                   >
                     Create free account
                   </Link>
@@ -702,11 +714,11 @@ export default function ExplorePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="mt-10 border-y border-[var(--border-main)] py-8"
+              className="mt-8 rounded-2xl border border-[var(--border-main)] devhunt-card p-6 sm:p-8"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div className="max-w-xl">
-                  <span className="inline-block rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3 py-1 text-sm font-semibold text-[#b85028] dark:text-[#eb8b72]">
+                  <span className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#1f3a6b] dark:text-[#dbbf95]">
                     Profile Preferences
                   </span>
                   <h3 className="mt-2.5 font-display text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-main)]">
@@ -718,7 +730,7 @@ export default function ExplorePage() {
                 </div>
                 <Link
                   to="/profile/setup"
-                  className="rounded-full bg-[#d96b43] px-6 py-3 text-sm font-semibold text-white shadow-warm-xs transition hover:bg-[#b85028] whitespace-nowrap"
+                  className="rounded-full bg-[#1f3a6b] px-6 py-3 text-sm font-semibold text-white shadow-xs transition hover:bg-[#182f56] dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white whitespace-nowrap"
                 >
                   Set up your profile &rarr;
                 </Link>
@@ -731,11 +743,11 @@ export default function ExplorePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="mt-10 border-y border-[var(--border-main)] py-8"
+              className="mt-8 rounded-2xl border border-[var(--border-main)] devhunt-card p-6 sm:p-8"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div className="max-w-xl">
-                  <span className="text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                  <span className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#1f3a6b] dark:text-[#dbbf95]">
                     Match Overview
                   </span>
                   <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-main)]">
@@ -747,7 +759,7 @@ export default function ExplorePage() {
                 </div>
                 <Link
                   to="/profile/setup"
-                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-semibold text-[var(--text-main)] shadow-warm-xs transition hover:bg-[var(--bg-surface-subtle)] whitespace-nowrap"
+                  className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-5 py-3 text-sm font-semibold text-[var(--text-main)] shadow-xs transition hover:bg-[var(--bg-surface-subtle)] whitespace-nowrap"
                 >
                   Update profile preferences &rarr;
                 </Link>
@@ -766,21 +778,21 @@ export default function ExplorePage() {
             >
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
-                  <span className="text-sm font-bold uppercase tracking-wider text-[#b85028] dark:text-[#eb8b72]">
+                  <span className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#1f3a6b] dark:text-[#dbbf95]">
                     Directory
                   </span>
                   <h2
                     id="discover-heading"
-                    className="mt-1 font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-main)]"
+                    className="mt-1 font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-main)]"
                   >
-                    Discover <span className="italic font-normal text-[#d96b43] dark:text-[#e07a5f]">prototypes</span>
+                    Discover prototypes
                   </h2>
                 </div>
 
                 {/* Search input with keyboard hint */}
                 <div className="relative w-full md:max-w-md">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-subtle)]">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
@@ -792,7 +804,7 @@ export default function ExplorePage() {
                     onFocus={() => setSearchFocused(true)}
                     onBlur={() => setSearchFocused(false)}
                     placeholder="Search prototypes, tech stacks, or audiences..."
-                    className="w-full rounded-full border border-[var(--border-main)] bg-[var(--bg-page)] pl-11 pr-16 py-3 text-base text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 shadow-warm-xs"
+                    className="w-full rounded-full border border-[var(--border-main)] bg-[var(--bg-page)] pl-11 pr-16 py-3 text-sm sm:text-base text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 shadow-2xs"
                   />
                   {/* Keyboard hint or clear button */}
                   <div className="absolute inset-y-0 right-0 flex items-center pr-4">
@@ -801,7 +813,7 @@ export default function ExplorePage() {
                         type="button"
                         onClick={() => setSearch('')}
                         aria-label="Clear search"
-                        className="flex items-center text-base text-[var(--text-subtle)] hover:text-[var(--text-main)] cursor-pointer"
+                        className="flex items-center text-sm text-[var(--text-subtle)] hover:text-[var(--text-main)] cursor-pointer"
                       >
                         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <line x1="18" y1="6" x2="6" y2="18" />
@@ -809,7 +821,7 @@ export default function ExplorePage() {
                         </svg>
                       </button>
                     ) : showSlashHint ? (
-                      <kbd className="hidden sm:inline-flex items-center rounded-md border border-[var(--border-main)] bg-[var(--bg-page)] px-2 py-0.5 text-xs font-semibold text-[var(--text-subtle)]">
+                      <kbd className="hidden sm:inline-flex items-center rounded-md border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2 py-0.5 font-mono text-[11px] font-semibold text-[var(--text-subtle)]">
                         /
                       </kbd>
                     ) : null}
@@ -828,7 +840,7 @@ export default function ExplorePage() {
                         type="button"
                         onClick={() => scrollCategories('left')}
                         aria-label="Scroll categories left"
-                        className="absolute left-0 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm hover:border-[#d96b43] hover:text-[#d96b43] transition cursor-pointer -ml-2"
+                        className="absolute left-0 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-xs hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] transition cursor-pointer -ml-2"
                       >
                         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="15 18 9 12 15 6" />
@@ -861,23 +873,23 @@ export default function ExplorePage() {
                             aria-pressed={isActive}
                             className={`relative shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer select-none ${
                               isActive
-                                ? 'text-white'
-                                : 'border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[#d96b43]/40 shadow-xs'
+                                ? 'text-white dark:text-[#15203a]'
+                                : 'border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[#1f3a6b]/60 dark:hover:border-[#dbbf95]/60 shadow-2xs'
                             }`}
                           >
                             {/* Sliding background indicator */}
                             {isActive && (
                               <motion.span
                                 layoutId="explore-category-pill"
-                                className="absolute inset-0 rounded-full bg-[#d96b43] shadow-warm-xs border border-[#b85028] dark:border-[#eb8b72]/40"
+                                className="absolute inset-0 rounded-full bg-[#1f3a6b] dark:bg-[#f4ede2] shadow-xs border border-black/10 dark:border-white/10"
                                 transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                               />
                             )}
                             <span className="relative z-10">{category}</span>
                             <span
-                              className={`relative z-10 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
+                              className={`relative z-10 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 font-mono text-[11px] font-bold tabular-nums ${
                                 isActive
-                                  ? 'bg-white/25 text-white'
+                                  ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#15203a]'
                                   : 'bg-[var(--bg-surface-subtle)] text-[var(--text-subtle)]'
                               }`}
                             >
@@ -894,7 +906,7 @@ export default function ExplorePage() {
                         type="button"
                         onClick={() => scrollCategories('right')}
                         aria-label="Scroll categories right"
-                        className="absolute right-0 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-sm hover:border-[#d96b43] hover:text-[#d96b43] transition cursor-pointer -mr-2"
+                        className="absolute right-0 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] shadow-warm-xs hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] transition cursor-pointer -mr-2"
                       >
                         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="9 18 15 12 9 6" />
@@ -907,7 +919,7 @@ export default function ExplorePage() {
                   <div className="flex items-center gap-2.5 shrink-0 self-end lg:self-center">
                     {/* Grid / List view toggle */}
                     <div
-                      className="flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] p-1 shadow-xs text-[var(--text-muted)]"
+                      className="flex items-center rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] p-1 shadow-2xs text-[var(--text-muted)]"
                       role="group"
                       aria-label="View layout"
                     >
@@ -918,7 +930,7 @@ export default function ExplorePage() {
                         aria-pressed={viewMode === 'grid'}
                         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                           viewMode === 'grid'
-                            ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+                            ? 'bg-[#1f3a6b] text-white shadow-xs dark:bg-[#f4ede2] dark:text-[#15203a]'
                             : 'hover:text-[var(--text-main)]'
                         }`}
                       >
@@ -937,7 +949,7 @@ export default function ExplorePage() {
                         aria-pressed={viewMode === 'list'}
                         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                           viewMode === 'list'
-                            ? 'bg-[#141b16] text-[#f4ede2] shadow-warm-xs dark:bg-[#f3f4f0] dark:text-[#0b100c]'
+                            ? 'bg-[#1f3a6b] text-white shadow-xs dark:bg-[#f4ede2] dark:text-[#15203a]'
                             : 'hover:text-[var(--text-main)]'
                         }`}
                       >
@@ -960,10 +972,10 @@ export default function ExplorePage() {
                         onClick={() => setIsSortOpen((prev) => !prev)}
                         aria-haspopup="true"
                         aria-expanded={isSortOpen}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold transition-all shadow-xs cursor-pointer ${
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold transition-all shadow-2xs cursor-pointer ${
                           isSortOpen || sortBy !== 'newest'
-                            ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
-                            : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
+                            ? 'border-[#1f3a6b] bg-[#1f3a6b]/10 text-[#1f3a6b] dark:border-[#dbbf95] dark:bg-[#dbbf95]/10 dark:text-[#dbbf95]'
+                            : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95]'
                         }`}
                       >
                         <svg className="w-3.5 h-3.5 text-current shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -992,9 +1004,9 @@ export default function ExplorePage() {
                       {isSortOpen && (
                         <div
                           role="menu"
-                          className="absolute right-0 top-full mt-2 w-44 origin-top-right rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-1.5 text-[var(--text-main)] shadow-warm-xl focus:outline-none z-30 tdev-dropdown"
+                          className="absolute right-0 top-full mt-2 w-44 origin-top-right rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface)] p-1.5 text-[var(--text-main)] shadow-warm-lg focus:outline-none z-30 devhunt-card"
                         >
-                          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)] border-b border-[var(--border-main)]/60 mb-1">
+                          <div className="px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)] border-b border-[var(--border-main)]/60 mb-1">
                             Sort by
                           </div>
                           {[
@@ -1013,13 +1025,13 @@ export default function ExplorePage() {
                                 }}
                                 className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer text-left ${
                                   isSelected
-                                    ? 'bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
+                                    ? 'bg-[#1f3a6b]/15 text-[#1f3a6b] dark:bg-[#dbbf95]/15 dark:text-[#dbbf95]'
                                     : 'text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                                 }`}
                               >
                                 <span>{opt.label}</span>
                                 {isSelected && (
-                                  <svg className="w-3.5 h-3.5 text-[#d96b43] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg className="w-3.5 h-3.5 text-[#1f3a6b] dark:text-[#dbbf95] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="20 6 9 17 4 12" />
                                   </svg>
                                 )}
@@ -1064,7 +1076,7 @@ export default function ExplorePage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.2 }}
-                  className="mt-10 rounded-3xl border border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] px-8 py-16 text-center text-[var(--text-main)]"
+                  className="mt-10 rounded-2xl border border-dashed border-[var(--border-main)] bg-[var(--bg-surface)] px-8 py-16 text-center text-[var(--text-main)]"
                 >
                   <h3 className="font-display text-2xl font-bold">No matching prototypes found</h3>
                   <p className="mt-2 text-base text-[var(--text-muted)]">
@@ -1076,7 +1088,7 @@ export default function ExplorePage() {
                       setSearch('')
                       setActiveCategory('All products')
                     }}
-                    className="mt-6 rounded-full bg-[#d96b43] px-6 py-3 text-sm font-semibold text-white shadow-warm-xs cursor-pointer hover:bg-[#b85028]"
+                    className="mt-6 rounded-full bg-[#1f3a6b] px-6 py-3 text-sm font-semibold text-white shadow-xs cursor-pointer hover:bg-[#182f56] dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white"
                   >
                     Reset catalog filters
                   </button>

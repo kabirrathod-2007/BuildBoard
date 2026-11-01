@@ -50,8 +50,8 @@ function ProblemItem({ problem, index }) {
               title={hasValidated ? 'Undo validation' : 'Confirm: I have this problem too'}
               className={`flex min-w-[54px] sm:min-w-[62px] flex-col items-center justify-center rounded-xl border py-2 sm:py-2.5 px-2 text-xs font-bold transition-all cursor-pointer select-none active:scale-95 ${
                 hasValidated
-                  ? 'border-[#d96b43] bg-[#d96b43] text-white shadow-warm-xs'
-                  : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
+                  ? 'border-[#1f3a6b] bg-[#1f3a6b] text-white shadow-warm-xs dark:border-[#dbbf95] dark:bg-[#dbbf95] dark:text-[#15203a]'
+                  : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95]'
               }`}
             >
               <svg
@@ -74,7 +74,7 @@ function ProblemItem({ problem, index }) {
               to="/sign-in"
               state={{ from: location }}
               title="Sign in to validate problem"
-              className="flex min-w-[54px] sm:min-w-[62px] flex-col items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] py-2 sm:py-2.5 px-2 text-xs font-bold text-[var(--text-muted)] hover:border-[#d96b43] hover:text-[#d96b43] transition shadow-warm-xs"
+              className="flex min-w-[54px] sm:min-w-[62px] flex-col items-center justify-center rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] py-2 sm:py-2.5 px-2 text-xs font-bold text-[var(--text-muted)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] transition shadow-warm-xs"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <polyline points="18 15 12 9 6 15" />
@@ -89,7 +89,7 @@ function ProblemItem({ problem, index }) {
         <div className="flex-1 min-w-0">
           {/* Metadata line: Category, Stage, Maker */}
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-bold text-[#b85028] dark:text-[#eb8b72]">
+            <span className="font-bold text-[#1f3a6b] dark:text-[#dbbf95]">
               {problem.category}
             </span>
             <span className="text-[var(--text-subtle)]">&middot;</span>
@@ -113,7 +113,7 @@ function ProblemItem({ problem, index }) {
           </div>
 
           {/* Title */}
-          <h3 className="mt-1.5 font-display text-lg sm:text-xl md:text-2xl font-bold leading-snug tracking-tight text-[var(--text-main)] group-hover:text-[#d96b43] dark:group-hover:text-[#e07a5f] transition-colors">
+          <h3 className="mt-1.5 font-display text-lg sm:text-xl md:text-2xl font-bold leading-snug tracking-tight text-[var(--text-main)] group-hover:text-[#1f3a6b] dark:group-hover:text-[#dbbf95] transition-colors">
             <Link to={`/problems/${problem.id}`} className="focus:outline-none">
               <span className="absolute inset-0" aria-hidden="true" />
               {problem.title}
@@ -130,7 +130,7 @@ function ProblemItem({ problem, index }) {
             <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1.5 text-xs sm:text-sm text-[var(--text-muted)]">
               {problem.targetAudience && (
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-[#b85028] dark:text-[#eb8b72] uppercase tracking-wider text-[11px]">
+                  <span className="font-bold text-[#1f3a6b] dark:text-[#dbbf95] uppercase tracking-wider text-[11px]">
                     Suffered By:
                   </span>
                   <span className="font-medium text-[var(--text-main)]">
@@ -175,7 +175,7 @@ function ProblemItem({ problem, index }) {
               </span>
 
               {solutionsCount > 0 && (
-                <span className="flex items-center gap-1 font-semibold text-[#b85028] dark:text-[#eb8b72]">
+                <span className="flex items-center gap-1 font-semibold text-[#1f3a6b] dark:text-[#dbbf95]">
                   <span>💡 {solutionsCount} {solutionsCount === 1 ? 'solution attached' : 'solutions attached'}</span>
                 </span>
               )}
@@ -183,7 +183,7 @@ function ProblemItem({ problem, index }) {
 
             <Link
               to={`/problems/${problem.id}`}
-              className="relative z-10 font-semibold text-[#d96b43] group-hover:text-[#b85028] hover:underline transition inline-flex items-center gap-1 cursor-pointer"
+              className="relative z-10 font-semibold text-[#1f3a6b] group-hover:text-[#182f56] dark:text-[#dbbf95] dark:group-hover:text-[#ecdcc2] hover:underline transition inline-flex items-center gap-1 cursor-pointer"
             >
               <span>View discussion</span>
               <span aria-hidden="true">&rarr;</span>
@@ -350,7 +350,7 @@ export default function ProblemsPage() {
             <div className="max-w-3xl">
               <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-[var(--text-main)] leading-[1.1]">
                 Validate the problem <br className="hidden sm:inline" />
-                <span className="italic font-normal text-[#d96b43] dark:text-[#e07a5f]">
+                <span className="font-display text-[var(--text-main)] dark:text-[#dbbf95]">
                   before writing the code.
                 </span>
               </h1>
@@ -361,7 +361,7 @@ export default function ProblemsPage() {
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
                   to="/problems/new"
-                  className="rounded-xl bg-[#d96b43] px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-warm-md transition hover:bg-[#b85028] hover:-translate-y-0.5 active:translate-y-0"
+                  className="rounded-xl bg-[#1f3a6b] px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-warm-md transition hover:bg-[#182f56] hover:-translate-y-0.5 active:translate-y-0 dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2]"
                 >
                   + Share a Problem Hypothesis
                 </Link>
@@ -402,7 +402,7 @@ export default function ProblemsPage() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Search problems, pain points..."
-                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] pl-10 pr-8 py-2.5 text-xs sm:text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#d96b43] focus:ring-2 focus:ring-[#d96b43]/20 shadow-warm-xs"
+                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] pl-10 pr-8 py-2.5 text-xs sm:text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 shadow-warm-xs"
                     />
                     {search && (
                       <button
@@ -428,8 +428,8 @@ export default function ProblemsPage() {
                       aria-expanded={isFilterOpen}
                       className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all shadow-warm-xs cursor-pointer ${
                         activeCategory !== 'All categories' || isFilterOpen
-                          ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
-                          : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
+                          ? 'border-[#1f3a6b] bg-[#1f3a6b]/10 text-[#1f3a6b] dark:border-[#dbbf95] dark:bg-[#dbbf95]/15 dark:text-[#ecdcc2]'
+                          : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95]'
                       }`}
                     >
                       <svg className="h-4 w-4 shrink-0 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -439,7 +439,7 @@ export default function ProblemsPage() {
                         {activeCategory === 'All categories' ? 'Filter' : activeCategory}
                       </span>
                       {activeCategory !== 'All categories' && (
-                        <span className="flex h-1.5 w-1.5 rounded-full bg-[#d96b43]" />
+                        <span className="flex h-1.5 w-1.5 rounded-full bg-[#1f3a6b] dark:bg-[#dbbf95]" />
                       )}
                       <svg
                         className={`h-3.5 w-3.5 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}
@@ -476,13 +476,13 @@ export default function ProblemsPage() {
                               }}
                               className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer text-left ${
                                 isSelected
-                                  ? 'bg-[#d96b43]/10 text-[#d96b43] font-bold dark:text-[#eb8b72]'
+                                  ? 'bg-[#1f3a6b]/10 text-[#1f3a6b] font-bold dark:bg-[#dbbf95]/15 dark:text-[#ecdcc2]'
                                   : 'text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                               }`}
                             >
                               <span>{cat}</span>
                               {isSelected && (
-                                <svg className="w-3.5 h-3.5 text-[#d96b43] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <svg className="w-3.5 h-3.5 text-[#1f3a6b] dark:text-[#dbbf95] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12" />
                                 </svg>
                               )}
@@ -505,8 +505,8 @@ export default function ProblemsPage() {
                       aria-expanded={isSortOpen}
                       className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all shadow-warm-xs cursor-pointer ${
                         filterTab !== 'all' || isSortOpen
-                          ? 'border-[#d96b43] bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
-                          : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#d96b43] hover:text-[#d96b43]'
+                          ? 'border-[#1f3a6b] bg-[#1f3a6b]/10 text-[#1f3a6b] dark:border-[#dbbf95] dark:bg-[#dbbf95]/15 dark:text-[#ecdcc2]'
+                          : 'border-[var(--border-main)] bg-[var(--bg-surface)] text-[var(--text-main)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95]'
                       }`}
                     >
                       <svg className="h-4 w-4 shrink-0 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -553,12 +553,12 @@ export default function ProblemsPage() {
                               }}
                               className={`w-full flex items-start justify-between gap-2 px-3 py-2 rounded-xl text-left transition cursor-pointer ${
                                 isSelected
-                                  ? 'bg-[#d96b43]/10 text-[#d96b43] dark:text-[#eb8b72]'
+                                  ? 'bg-[#1f3a6b]/10 text-[#1f3a6b] dark:bg-[#dbbf95]/15 dark:text-[#ecdcc2]'
                                   : 'text-[var(--text-main)] hover:bg-[var(--bg-surface-subtle)]'
                               }`}
                             >
                               <div>
-                                <div className={`text-xs font-semibold ${isSelected ? 'text-[#d96b43] dark:text-[#eb8b72]' : 'text-[var(--text-main)]'}`}>
+                                <div className={`text-xs font-semibold ${isSelected ? 'text-[#1f3a6b] dark:text-[#ecdcc2]' : 'text-[var(--text-main)]'}`}>
                                   {opt.label}
                                 </div>
                                 <div className="text-[11px] text-[var(--text-muted)] mt-0.5 leading-snug">
@@ -566,7 +566,7 @@ export default function ProblemsPage() {
                                 </div>
                               </div>
                               {isSelected && (
-                                <svg className="w-3.5 h-3.5 text-[#d96b43] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <svg className="w-3.5 h-3.5 text-[#1f3a6b] dark:text-[#dbbf95] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12" />
                                 </svg>
                               )}
@@ -586,7 +586,7 @@ export default function ProblemsPage() {
                     Active Filters:
                   </span>
                   {activeCategory !== 'All categories' && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d96b43]/30 bg-[#d96b43]/10 px-3 py-1 font-semibold text-[#b85028] dark:text-[#eb8b72]">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1f3a6b]/30 bg-[#1f3a6b]/10 px-3 py-1 font-semibold text-[#1f3a6b] dark:border-[#dbbf95]/30 dark:bg-[#dbbf95]/15 dark:text-[#ecdcc2]">
                       <span>Category: {activeCategory}</span>
                       <button
                         type="button"
@@ -604,7 +604,7 @@ export default function ProblemsPage() {
                       <button
                         type="button"
                         onClick={() => setFilterTab('all')}
-                        className="hover:text-[#d96b43] cursor-pointer text-xs"
+                        className="hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] cursor-pointer text-xs"
                         title="Reset sort to all"
                       >
                         ✕
@@ -617,7 +617,7 @@ export default function ProblemsPage() {
                       <button
                         type="button"
                         onClick={() => setSearch('')}
-                        className="hover:text-[#d96b43] cursor-pointer text-xs"
+                        className="hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] cursor-pointer text-xs"
                         title="Clear search"
                       >
                         ✕
@@ -631,7 +631,7 @@ export default function ProblemsPage() {
                       setFilterTab('all')
                       setSearch('')
                     }}
-                    className="text-xs font-semibold text-[#d96b43] hover:underline ml-1 cursor-pointer"
+                    className="text-xs font-semibold text-[#1f3a6b] dark:text-[#dbbf95] hover:underline ml-1 cursor-pointer"
                   >
                     Reset all
                   </button>
@@ -664,7 +664,7 @@ export default function ProblemsPage() {
                       setActiveCategory('All categories')
                       setFilterTab('all')
                     }}
-                    className="mt-6 rounded-xl bg-[#d96b43] px-6 py-2.5 text-sm font-semibold text-white shadow-warm-xs cursor-pointer hover:bg-[#b85028]"
+                    className="mt-6 rounded-xl bg-[#1f3a6b] px-6 py-2.5 text-sm font-semibold text-white shadow-warm-xs cursor-pointer hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a]"
                   >
                     Reset Filters
                   </button>

@@ -22,13 +22,13 @@ function ActionLink({ children, href, variant = 'primary', className = '', size 
 
   const variantClasses = {
     primary:
-      'bg-[#d96b43] text-white border border-[#d96b43]/30 shadow-warm-md hover:bg-[#b85028] hover:-translate-y-0.5 hover:shadow-warm-lg',
+      'bg-[#1f3a6b] text-white border border-[#1f3a6b]/40 shadow-xs hover:bg-[#182f56] hover:-translate-y-0.5 dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white',
     secondary:
-      'bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-main)] hover:bg-[var(--bg-surface-subtle)] hover:border-[var(--border-strong)] hover:-translate-y-0.5 shadow-warm-xs',
+      'bg-[var(--bg-surface)] text-[var(--text-main)] border border-[var(--border-main)] hover:bg-[var(--bg-surface-subtle)] hover:border-[#1f3a6b] hover:-translate-y-0.5 shadow-2xs',
     darkForest:
-      'bg-[#141b16] text-[#f4ede2] border border-[#233127] shadow-warm-md hover:bg-[#1c2720] hover:-translate-y-0.5 dark:bg-[#f3f4f0] dark:text-[#0b100c] dark:hover:bg-white',
+      'bg-[#1f3a6b] text-[#f4ede2] border border-[#182f56] shadow-xs hover:bg-[#182f56] hover:-translate-y-0.5 dark:bg-[#f4ede2] dark:text-[#15203a] dark:hover:bg-white',
     outline:
-      'bg-transparent text-[var(--text-main)] border border-[var(--border-main)] hover:bg-[var(--bg-surface-subtle)] hover:border-[#d96b43]',
+      'bg-transparent text-[var(--text-main)] border border-[var(--border-main)] hover:bg-[var(--bg-surface-subtle)] hover:border-[#1f3a6b] dark:hover:border-[#dbbf95]',
     darkOutline:
       'bg-white/10 text-white border border-white/35 hover:bg-white/20 hover:border-white/60',
   }
@@ -47,7 +47,7 @@ function SectionHeader({ badgeText, title, description }) {
   return (
     <div className="mx-auto mb-10 sm:mb-12 flex max-w-3xl flex-col items-center text-center gap-2.5">
       {badgeText && (
-        <span className="inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold tracking-wider uppercase bg-[#d96b43]/10 text-[#d96b43] dark:bg-[#e07a5f]/15 dark:text-[#eb8b72] border border-[#d96b43]/20">
+        <span className="inline-flex items-center rounded-full px-3 py-1 font-mono text-[11px] font-semibold tracking-[0.14em] uppercase bg-[#c9a271]/15 text-[#c9a271] dark:text-[#d8b98c] border border-[#c9a271]/25">
           {badgeText}
         </span>
       )}
@@ -114,7 +114,7 @@ function ProductSpotlight({ products = [] }) {
         <p className="text-base text-[var(--text-muted)]">No prototypes available to spotlight.</p>
         <Link
           to="/products/new"
-          className="mt-3 inline-block text-base font-semibold text-[#d96b43] hover:underline"
+          className="mt-3 inline-block text-base font-semibold text-[#c9a271] dark:text-[#d8b98c] hover:underline"
         >
           Submit the first prototype →
         </Link>
@@ -129,14 +129,14 @@ function ProductSpotlight({ products = [] }) {
       onMouseLeave={() => setIsPaused(false)}
       onFocusCapture={() => setIsPaused(true)}
       onBlurCapture={() => setIsPaused(false)}
-      className="rounded-3xl border border-[var(--border-main)] bg-[var(--bg-surface)] overflow-hidden shadow-warm-lg"
+      className="rounded-2xl border border-[var(--border-main)] devhunt-card overflow-hidden shadow-warm-md"
       aria-roledescription="carousel"
       aria-label="Product spotlight"
     >
       {/* Spotlight Top Bar Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-6 py-4">
         <div className="flex items-center gap-3">
-          <span className="rounded-full bg-[var(--bg-surface)] px-3 py-1 text-sm font-semibold text-[var(--text-subtle)] border border-[var(--border-main)]">
+          <span className="rounded-full bg-[var(--bg-surface)] px-3 py-1 font-mono text-xs font-semibold text-[var(--text-subtle)] border border-[var(--border-main)]">
             {currentIndex + 1} of {count}
           </span>
           <button
@@ -150,7 +150,7 @@ function ProductSpotlight({ products = [] }) {
               setCurrentIndex(next)
             }}
             title="Random prototype jump"
-            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)] hover:border-[#d96b43] hover:text-[#d96b43] transition-all cursor-pointer active:scale-95 shadow-warm-xs"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)] hover:border-[#1f3a6b] hover:text-[#1f3a6b] dark:hover:border-[#dbbf95] dark:hover:text-[#dbbf95] transition-all cursor-pointer active:scale-95 shadow-2xs"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 12h.01M16 8h.01M8 8h.01M8 16h.01M16 16h.01M11 21h2c2.8 0 4.2 0 5.27-.545a5 5 0 0 0 2.185-2.185C21 17.2 21 15.8 21 13v-2c0-2.8 0-4.2-.545-5.27a5 5 0 0 0-2.185-2.185C17.2 3 15.8 3 13 3h-2c-2.8 0-4.2 0-5.27.545A5 5 0 0 0 3.545 5.73C3 6.8 3 8.2 3 11v2c0 2.8 0 4.2.545 5.27a5 5 0 0 0 2.185 2.185C6.8 21 8.2 21 11 21Z" />
@@ -188,7 +188,7 @@ function ProductSpotlight({ products = [] }) {
               setCurrentIndex((prev) => (prev + 1) % count)
             }
           }}
-          className="spotlight-progress h-full bg-[#d96b43]"
+          className="spotlight-progress h-full bg-[#1f3a6b] dark:bg-[#dbbf95]"
           style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
         />
       </div>
@@ -206,13 +206,13 @@ function ProductSpotlight({ products = [] }) {
           {/* Left Info Column */}
           <div className="lg:col-span-5 flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 text-xs font-semibold text-[var(--text-muted)]">
+              <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                 {currentProduct.stage || 'Working prototype'}
               </span>
               {currentProduct.categories?.slice(0, 2).map((cat) => (
                 <span
                   key={cat}
-                  className="rounded-full border border-[#d96b43]/20 bg-[#fbf3ee] dark:bg-[#e07a5f]/15 px-2.5 py-0.5 text-xs font-semibold text-[#b85028] dark:text-[#eb8b72]"
+                  className="rounded-full border border-[#c9a271]/20 bg-[#c9a271]/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#c9a271] dark:text-[#d8b98c]"
                 >
                   {cat}
                 </span>
@@ -228,7 +228,7 @@ function ProductSpotlight({ products = [] }) {
             </p>
 
             <div className="rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-3.5 sm:p-4 text-xs sm:text-sm space-y-1.5">
-              <div className="text-[11px] uppercase font-bold tracking-wider text-[#d96b43] dark:text-[#eb8b72]">
+              <div className="font-mono text-[11px] uppercase font-bold tracking-[0.12em] text-[#c9a271] dark:text-[#d8b98c]">
                 Builder&apos;s Feedback Request:
               </div>
               <p className="text-xs sm:text-sm text-[var(--text-main)] italic leading-relaxed">
@@ -262,11 +262,11 @@ function ProductSpotlight({ products = [] }) {
                 />
               ) : (
                 <div className="flex h-64 sm:h-80 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d96b43]/10 text-[#d96b43] dark:bg-[#d96b43]/20 border border-[#d96b43]/20 mb-3 shadow-warm-xs">
-                    <span className="font-display text-3xl font-extrabold">{currentProduct.name?.charAt(0)?.toUpperCase() || 'P'}</span>
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#c9a271]/15 text-[#c9a271] dark:text-[#d8b98c] border border-[#c9a271]/25 mb-3 shadow-2xs">
+                    <span className="font-display text-3xl font-bold">{currentProduct.name?.charAt(0)?.toUpperCase() || 'P'}</span>
                   </div>
                   <p className="font-display text-lg font-bold text-[var(--text-main)]">Prototype Preview</p>
-                  <p className="mt-1 text-xs text-[var(--text-subtle)]">No screenshots uploaded yet</p>
+                  <p className="mt-1 text-xs text-[var(--text-subtle)] font-mono">No screenshots uploaded yet</p>
                 </div>
               )}
             </div>
@@ -352,8 +352,10 @@ function KineticHeadline({ variants }) {
           </span>
         ))}
       </span>
-      <span className="relative inline-block overflow-visible text-[#d96b43] dark:text-[#e07a5f]">
-        <span className="block overflow-hidden pb-1">
+      <span className="relative inline-block overflow-visible">
+        <span
+          className="block overflow-hidden pb-1 bg-[linear-gradient(120deg,#1f3a6b_0%,#294777_38%,#7a6642_75%,#c9a271_100%)] bg-clip-text text-transparent dark:bg-none dark:text-[#dbbf95]"
+        >
           {line2Words.map((word) => (
             <span key={word} className="inline-block overflow-hidden mr-[0.28em] align-top">
               <motion.span variants={wordVariant} className="inline-block">
@@ -362,11 +364,11 @@ function KineticHeadline({ variants }) {
             </span>
           ))}
         </span>
-        {/* Subtle decorative curved terracotta underline */}
+        {/* Subtle decorative curved underline */}
         <svg
           viewBox="0 0 240 12"
           fill="none"
-          className="absolute -bottom-2 left-0 w-full max-w-[240px] pointer-events-none text-[#d96b43]/70 dark:text-[#e07a5f]/80 overflow-visible"
+          className="absolute -bottom-2 left-0 w-full max-w-[240px] pointer-events-none text-[#c9a271]/80 dark:text-[#dbbf95] overflow-visible"
           aria-hidden="true"
         >
           <motion.path
@@ -459,7 +461,7 @@ function HeroPrototypeLoopPreview() {
       title: 'Builder Reply',
       tag: 'Step 03',
       badge: '+1 Helpful Point',
-      badgeColor: 'border-[#d96b43]/30 bg-[#d96b43]/10 text-[#b85028] dark:text-[#eb8b72]',
+      badgeColor: 'border-[#c9a271]/30 bg-[#c9a271]/10 text-[#b88e5d] dark:text-[#ecdcc2]',
       icon: (
         <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="8" r="6" />
@@ -479,7 +481,7 @@ function HeroPrototypeLoopPreview() {
       style={{ perspective: 1000 }}
     >
       {/* Ambient background glow */}
-      <div className="absolute -inset-5 -z-10 rounded-[2.5rem] bg-[#d96b43]/[0.08] blur-xl" aria-hidden="true" />
+      <div className="absolute -inset-5 -z-10 rounded-[2.5rem] bg-[#c9a271]/[0.08] blur-xl" aria-hidden="true" />
 
       {/* Main Interactive Card */}
       <motion.div
@@ -499,16 +501,16 @@ function HeroPrototypeLoopPreview() {
         {/* Browser Mockup Chrome Header */}
         <div className="flex items-center justify-between border-b border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-4 py-2.5 rounded-t-2xl">
           <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#d96b43]/70" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#c9a271]/80" />
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--border-strong)]" />
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--border-strong)]" />
           </div>
           <div className="flex items-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-0.5 text-xs font-mono text-[var(--text-muted)]">
-            <span className="text-[#d96b43]">weeknote.app</span>
+            <span className="text-[#c9a271] dark:text-[#d8b98c]">weeknote.app</span>
             <span className="text-[var(--text-subtle)]">/</span>
             <span>sprint-42</span>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 font-mono">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
             Live Preview
           </span>
@@ -526,8 +528,8 @@ function HeroPrototypeLoopPreview() {
 
           {/* Core Testing Loop Overlay Badge */}
           <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4">
-            <div className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)]/90 backdrop-blur-md px-3 py-1 text-xs font-semibold text-[var(--text-main)] shadow-warm-xs flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#d96b43]" aria-hidden="true" />
+            <div className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)]/90 backdrop-blur-md px-3 py-1 font-mono text-xs font-semibold text-[var(--text-main)] shadow-2xs flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#c9a271] dark:bg-[#d8b98c]" aria-hidden="true" />
               <span>Feedback Loop in Action</span>
             </div>
           </div>
@@ -541,7 +543,7 @@ function HeroPrototypeLoopPreview() {
       >
         <div className="flex items-center justify-between border-b border-[var(--border-main)] pb-2.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#d96b43]">
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#c9a271] dark:text-[#d8b98c]">
               {current.tag}
             </span>
             <span className="text-xs font-semibold text-[var(--text-muted)]">
@@ -581,9 +583,9 @@ function HeroPrototypeLoopPreview() {
               role="tab"
               aria-selected={idx === activeStage}
               onClick={() => setActiveStage(idx)}
-              className={`flex-1 rounded-md py-1 text-[11px] font-semibold transition cursor-pointer text-center ${
+              className={`flex-1 rounded-md py-1 font-mono text-[11px] font-semibold transition cursor-pointer text-center ${
                 idx === activeStage
-                  ? 'bg-[#d96b43] text-white shadow-xs'
+                  ? 'bg-[#1f3a6b] text-white shadow-xs dark:bg-[#f4ede2] dark:text-[#15203a]'
                   : 'bg-[var(--bg-surface-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
               }`}
             >
@@ -662,16 +664,16 @@ function HowItWorksTimeline() {
             <div>
               {/* Step indicator */}
               <div className="flex items-center justify-between border-b border-[var(--border-main)] pb-3">
-                <span className="text-xs font-bold text-[#d96b43] dark:text-[#eb8b72] uppercase tracking-wider flex items-center gap-1.5">
+                <span className="font-mono text-xs font-bold text-[#c9a271] dark:text-[#d8b98c] uppercase tracking-wider flex items-center gap-1.5">
                   <span>{icon}</span>
                   <span>{step}</span>
                 </span>
-                <span className="text-xs uppercase font-semibold tracking-wider text-[var(--text-subtle)]">
+                <span className="font-mono text-xs uppercase font-semibold tracking-wider text-[var(--text-subtle)]">
                   {role}
                 </span>
               </div>
 
-              <h3 className="mt-5 font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-main)] group-hover:text-[#d96b43] transition-colors">
+              <h3 className="mt-5 font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-main)] group-hover:text-[#1f3a6b] dark:group-hover:text-[#dbbf95] transition-colors">
                 {title}
               </h3>
               <p className="mt-3 text-base leading-relaxed text-[var(--text-muted)]">
@@ -679,9 +681,9 @@ function HowItWorksTimeline() {
               </p>
             </div>
 
-            <div className="mt-8 border-t border-[var(--border-main)] pt-4 flex items-center justify-between text-xs font-medium text-[var(--text-subtle)]">
+            <div className="mt-8 border-t border-[var(--border-main)] pt-4 flex items-center justify-between font-mono text-xs font-medium text-[var(--text-subtle)]">
               <span>{meta}</span>
-              <span className="text-[#d96b43] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
+              <span className="text-[#c9a271] dark:text-[#d8b98c] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
                 →
               </span>
             </div>
@@ -729,22 +731,27 @@ export default function LandingPage() {
         <Navbar />
 
         <main id="main-content" tabIndex={-1} className="focus:outline-none">
-          {/* ── Editorial hero: clear message beside a real product preview ── */}
+          {/* ── Editorial hero: clear message beside interactive loop preview ── */}
           <section className="relative isolate overflow-hidden border-b border-[var(--border-main)] bg-[var(--bg-page)]">
+            {/* Subtle ambient washes */}
+            <div className="absolute inset-0 bg-hero-washes opacity-40 pointer-events-none" aria-hidden="true" />
+
+            {/* Background hero workspace image with gentle ambient washes */}
             <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
               <motion.img
                 src="/assets/landing/hero-builder-workspace.webp"
                 alt=""
-                className="h-full w-full object-cover object-[58%_center] opacity-[0.56] dark:opacity-[0.38]"
+                className="h-full w-full object-cover object-[58%_center] opacity-[0.52] dark:opacity-[0.28]"
                 initial={{ scale: 1.04 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                 fetchPriority="high"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-page)] via-[var(--bg-page)]/88 to-[var(--bg-page)]/10" />
-              <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-page)]/35 via-transparent to-[var(--bg-page)]/45" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(217,107,67,0.12),transparent_70%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-page)] via-[var(--bg-page)]/90 to-[var(--bg-page)]/20" />
+              <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-page)]/40 via-transparent to-[var(--bg-page)]/65" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(201,162,113,0.12),transparent_70%)] pointer-events-none" />
             </div>
+
             <motion.div
               variants={heroContainerVariants}
               initial="hidden"
@@ -753,7 +760,7 @@ export default function LandingPage() {
             >
               <div className="min-w-0 max-w-2xl">
                 <motion.div variants={heroItemVariants} className="mb-4">
-                  <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.1em] text-[#b85028] dark:text-[#eb8b72]">
+                  <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-[#c9a271] dark:text-[#dbbf95]">
                     Early software · Useful feedback
                   </span>
                 </motion.div>
@@ -762,7 +769,7 @@ export default function LandingPage() {
 
                 <motion.p
                   variants={heroItemVariants}
-                  className="mt-6 max-w-xl text-lg leading-8 text-[var(--text-muted)] sm:text-xl"
+                  className="mt-6 max-w-xl text-lg leading-8 text-[var(--text-muted)] sm:text-xl font-sans"
                 >
                   Put a working prototype in front of the right people. Learn where it helps, where it gets confusing, and what to improve next.
                 </motion.p>
@@ -781,7 +788,7 @@ export default function LandingPage() {
 
                 <motion.p
                   variants={heroItemVariants}
-                  className="mt-7 max-w-xl text-sm leading-relaxed text-[var(--text-subtle)]"
+                  className="mt-7 max-w-xl text-sm leading-relaxed text-[var(--text-subtle)] font-sans"
                 >
                   Join hundreds of builders and testers turning early prototypes into polished releases.
                 </motion.p>
@@ -824,7 +831,7 @@ export default function LandingPage() {
           >
             <div className="mx-auto max-w-7xl">
               <div className="max-w-3xl">
-                <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#d96b43] dark:text-[#eb8b72]">
+                <span className="font-mono text-xs sm:text-sm font-semibold uppercase tracking-[0.14em] text-[#c9a271] dark:text-[#d8b98c]">
                   How BuildBoard Works
                 </span>
                 <h2 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[var(--text-main)]">
