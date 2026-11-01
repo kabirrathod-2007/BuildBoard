@@ -81,13 +81,10 @@ export function AuthProvider({ children }) {
     }
     return null
   })
-  const [loading, setLoading] = useState(isFirebaseConfigured)
+  const [loading, setLoading] = useState(() => Boolean(isFirebaseConfigured && firebaseAuth))
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !firebaseAuth) {
-      setLoading(false)
-      return
-    }
+    if (!isFirebaseConfigured || !firebaseAuth) return
 
     let active = true
 

@@ -16,16 +16,14 @@ const missingConfig = requiredConfig.filter((key) => !firebaseConfig[key])
 
 export const isFirebaseConfigured = missingConfig.length === 0
 
-let firebaseApp = null
-let authInstance = null
-
-if (isFirebaseConfigured) {
-  firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
-  authInstance = getAuth(firebaseApp)
-} else {
+if (!isFirebaseConfigured) {
   console.warn(
     `[BuildBoard] Firebase configuration is incomplete (${missingConfig.join(', ')}). Running in demo auth mode.`
   )
 }
 
-export const firebaseAuth = authInstance
+export const firebaseApp = isFirebaseConfigured
+  ? (getApps().length > 0 ? getApp() : initializeApp(firebaseConfig))
+  : null
+
+export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null

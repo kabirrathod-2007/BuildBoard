@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext.jsx'
 import Logo from './Logo.jsx'
-import ThemeToggle from './ThemeToggle.jsx'
 import SettingsMenu from './SettingsMenu.jsx'
 import MobileNav from './MobileNav.jsx'
 
@@ -82,12 +81,6 @@ export default function Navbar({ className = '' }) {
 
         {/* Actions & Settings Menu */}
         <div className="hidden md:flex items-center gap-3">
-          {/* Subtle DevHunt Vertical Divider */}
-          <div className="h-5 w-px bg-[var(--border-main)] shrink-0" aria-hidden="true" />
-
-          {/* Quick Theme Toggle */}
-          <ThemeToggle />
-
           {loading ? (
             <div className="flex h-9 min-w-52 items-center justify-end gap-2.5" aria-label="Restoring your session" aria-live="polite">
               <span className="h-9 w-28 animate-pulse rounded-xl bg-[var(--bg-surface-subtle)]" />
