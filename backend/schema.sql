@@ -15,3 +15,15 @@ CREATE TABLE IF NOT EXISTS users (
   UNIQUE KEY uq_users_firebase_uid (firebase_uid),
   UNIQUE KEY uq_users_email (email)
 ) ENGINE=InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS user_profiles (
+  user_id BIGINT UNSIGNED NOT NULL,
+  profile_data JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id),
+  CONSTRAINT fk_user_profiles_user
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;

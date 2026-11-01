@@ -5,6 +5,7 @@ import helmet from 'helmet'
 import { database } from './config/database.js'
 import './config/firebase.js'
 import authRoutes from './routes/auth.js'
+import profileRoutes from './routes/profiles.js'
 
 const app = express()
 const port = Number(process.env.PORT || 3001)
@@ -37,6 +38,7 @@ app.get('/api/health', async (_req, res, next) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/profiles', profileRoutes)
 
 app.use((error, _req, res, _next) => {
   console.error('API request failed:', error.message)
