@@ -56,3 +56,49 @@ export async function saveUserProfile(profile) {
     body: JSON.stringify({ profile }),
   })
 }
+
+export async function fetchProducts(options = {}) {
+  const params = new URLSearchParams()
+  if (options.category && options.category !== 'All') {
+    params.set('category', options.category)
+  }
+  if (options.creator) {
+    params.set('creator', options.creator)
+  }
+  const queryString = params.toString() ? `?${params.toString()}` : ''
+  return request(`/api/products${queryString}`, { method: 'GET' })
+}
+
+export async function fetchProduct(slugOrId) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}`, { method: 'GET' })
+}
+
+export async function createProductListing(productData) {
+  return request('/api/products', {
+    method: 'POST',
+    body: JSON.stringify(productData),
+  })
+}
+
+export async function updateProductListing(slugOrId, productData) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(productData),
+  })
+}
+
+export async function toggleProductPause(slugOrId, enrollmentPaused) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}/pause`, {
+    method: 'PATCH',
+    body: JSON.stringify(
+      typeof enrollmentPaused === 'boolean' ? { enrollmentPaused } : {}
+    ),
+  })
+}
+
+export async function deleteProductListing(slugOrId) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}`, {
+    method: 'DELETE',
+  })
+}
+

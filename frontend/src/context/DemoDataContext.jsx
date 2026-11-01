@@ -4,7 +4,15 @@ import { products as initialSeedProducts } from '../data/products'
 import { seedProblems as initialSeedProblems } from '../data/problems'
 import { deleteMediaFile } from '../utils/indexedDB'
 import { useAuth } from './AuthContext.jsx'
-import { fetchUserProfile, saveUserProfile } from '../lib/api.js'
+import {
+  fetchUserProfile,
+  saveUserProfile,
+  fetchProducts,
+  createProductListing,
+  updateProductListing,
+  toggleProductPause,
+  deleteProductListing,
+} from '../lib/api.js'
 
 const DemoDataContext = createContext(null)
 
@@ -41,6 +49,57 @@ export const DemoDataProvider = ({ children }) => {
   const { user } = useAuth()
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState(null)
+
+  // Server products synchronized from MySQL API
+  const [serverProducts, setServerProducts] = useState([])
+  const [productsLoading, setProductsLoading] = useState(false)
+  const [productsError, setProductsError] = useState(null)
+
+  const loadServerProducts = useCallback(async () => {
+    try {
+      setProductsLoading(true)
+      setProductsError(null)
+      const res = await fetchProducts()
+      if (Array.isArray(res?.products)) {
+        setServerProducts(res.products.map((p) => ({ ...p, isServerSynced: true })))
+      }
+    } catch (err) {
+      console.warn('[BuildBoard] Could not load products from API:', err.message)
+      setProductsError(err.message)
+    } finally {
+      setProductsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    async function initProducts() {
+      try {
+        setProductsLoading(true)
+        setProductsError(null)
+        const res = await fetchProducts()
+        if (active && Array.isArray(res?.products)) {
+          setServerProducts(res.products.map((p) => ({ ...p, isServerSynced: true })))
+        }
+      } catch (err) {
+        if (active) {
+          console.warn('[BuildBoard] Could not load products from API:', err.message)
+          setProductsError(err.message)
+        }
+      } finally {
+        if (active) {
+          setProductsLoading(false)
+        }
+      }
+    }
+
+    initProducts()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   // Custom products created on this device
   const [customProducts, setCustomProducts] = useState(() => {
@@ -253,13 +312,17 @@ export const DemoDataProvider = ({ children }) => {
     }
   }, [deletedProductIds])
 
-  // Combined product list (user-submitted and edited demo products override seed products, excluding deleted products)
+  // Combined product list (server products take precedence, then local custom products, then sample seed products)
   const products = useMemo(() => {
     const deletedSet = new Set(deletedProductIds)
-    const activeCustom = customProducts.filter((p) => !deletedSet.has(p.id))
-    const customIds = new Set(activeCustom.map((p) => p.id))
-    const remainingSeed = initialSeedProducts.filter((p) => !customIds.has(p.id) && !deletedSet.has(p.id))
-    const all = [...activeCustom, ...remainingSeed]
+    const activeServer = serverProducts.filter((p) => !deletedSet.has(p.id) && !deletedSet.has(p.slug))
+    const serverKeys = new Set(activeServer.flatMap((p) => [p.id, p.slug].filter(Boolean)))
+
+    const activeCustom = customProducts.filter((p) => !deletedSet.has(p.id) && !serverKeys.has(p.id))
+    const customKeys = new Set([...serverKeys, ...activeCustom.map((p) => p.id)])
+
+    const remainingSeed = initialSeedProducts.filter((p) => !customKeys.has(p.id) && !deletedSet.has(p.id))
+    const all = [...activeServer, ...activeCustom, ...remainingSeed]
     return all.map((p) => {
       const email = (p.creatorEmail || '').toLowerCase().trim()
       if (email && profiles[email]?.displayName?.trim()) {
@@ -270,19 +333,63 @@ export const DemoDataProvider = ({ children }) => {
       }
       return p
     })
-  }, [customProducts, profiles, deletedProductIds])
+  }, [serverProducts, customProducts, profiles, deletedProductIds])
 
-  const addProduct = (formData) => {
+  const addProduct = async (formData) => {
     const baseSlug = slugify(formData.name) || 'product'
     let id = baseSlug
-    if (products.some((p) => p.id === id)) {
+    if (products.some((p) => p.id === id || p.slug === id)) {
       id = `${baseSlug}-${Date.now().toString().slice(-4)}`
     }
 
     const creatorEmail = (formData.creatorEmail || '').toLowerCase().trim()
 
+    // Try cloud persistence first if user is logged in & email is verified
+    if (user?.email && user?.emailVerified) {
+      try {
+        const res = await createProductListing({
+          name: formData.name.trim(),
+          tagline: formData.tagline.trim(),
+          description: formData.description ? formData.description.trim() : formData.tagline.trim(),
+          stage: formData.stage || 'Working prototype',
+          audience: formData.audience.trim(),
+          feedbackRequest: formData.feedbackRequest.trim(),
+          productUrl: formData.prototypeUrl ? formData.prototypeUrl.trim() : '',
+          githubUrl: formData.githubUrl ? formData.githubUrl.trim() : '',
+          imageUrl: formData.image ? formData.image.trim() : '',
+          gallery: Array.isArray(formData.gallery) ? formData.gallery : [],
+          videoUrl: formData.videoUrl ? formData.videoUrl.trim() : '',
+          categories: formData.categories && formData.categories.length > 0 ? formData.categories : ['Other'],
+          targetRoles: Array.isArray(formData.targetRoles) ? formData.targetRoles : [],
+          targetIndustries: Array.isArray(formData.targetIndustries) ? formData.targetIndustries : [],
+          targetTechnologies: Array.isArray(formData.targetTechnologies) ? formData.targetTechnologies : [],
+          whatToTry: [
+            'Test the core prototype workflow',
+            'Check for usability friction or confusing steps',
+            'Share what you expected to happen vs what occurred',
+          ],
+        })
+
+        if (res?.product) {
+          const serverProduct = {
+            ...res.product,
+            maker: formData.maker || (creatorEmail ? profiles[creatorEmail]?.displayName?.trim() : null) || (creatorEmail ? creatorEmail.split('@')[0] : 'Builder'),
+            mediaId: formData.mediaId || null,
+            galleryMediaIds: Array.isArray(formData.galleryMediaIds) ? formData.galleryMediaIds : [],
+            videoMediaId: formData.videoMediaId || null,
+            isServerSynced: true,
+          }
+          setServerProducts((prev) => [serverProduct, ...prev.filter((p) => p.id !== serverProduct.id)])
+          return serverProduct
+        }
+      } catch (err) {
+        console.warn('[BuildBoard] Cloud product creation failed, falling back to local demo:', err.message)
+      }
+    }
+
     const newProduct = {
       id,
+      slug: id,
       name: formData.name.trim(),
       tagline: formData.tagline.trim(),
       description: formData.description ? formData.description.trim() : formData.tagline.trim(),
@@ -301,6 +408,7 @@ export const DemoDataProvider = ({ children }) => {
         'Share what you expected to happen vs what occurred',
       ],
       image: formData.image ? formData.image.trim() : '',
+      imageUrl: formData.image ? formData.image.trim() : '',
       mediaId: formData.mediaId || null,
       gallery: Array.isArray(formData.gallery) ? formData.gallery : [],
       galleryMediaIds: Array.isArray(formData.galleryMediaIds) ? formData.galleryMediaIds : [],
@@ -413,7 +521,7 @@ export const DemoDataProvider = ({ children }) => {
   const isProductOwner = (productId, userEmail) => {
     if (!productId || !userEmail) return false
     const normalized = userEmail.toLowerCase().trim()
-    const product = products.find((p) => p.id === productId)
+    const product = products.find((p) => p.id === productId || p.slug === productId)
     if (!product || !product.creatorEmail) return false
     return product.creatorEmail.toLowerCase().trim() === normalized
   }
@@ -567,11 +675,11 @@ export const DemoDataProvider = ({ children }) => {
   }
 
   // --- Product Listing Management ---
-  const updateProduct = (productId, userEmail, updatedFields) => {
+  const updateProduct = async (productId, userEmail, updatedFields) => {
     if (!productId || !userEmail) {
       return { success: false, error: 'User and product ID are required.' }
     }
-    const targetProduct = products.find((p) => p.id === productId)
+    const targetProduct = products.find((p) => p.id === productId || p.slug === productId)
     if (!targetProduct) {
       return { success: false, error: 'Product listing not found.' }
     }
@@ -624,6 +732,41 @@ export const DemoDataProvider = ({ children }) => {
       return { success: false, error: 'Feedback request is required.' }
     }
 
+    // If product is synced with server, persist via API
+    if (user?.email && user?.emailVerified && targetProduct.isServerSynced) {
+      try {
+        const res = await updateProductListing(targetProduct.id, {
+          name,
+          tagline,
+          description,
+          productUrl: prototypeUrl,
+          audience,
+          feedbackRequest,
+          categories,
+          targetRoles,
+          targetIndustries,
+          targetTechnologies,
+          githubUrl: updatedFields.githubUrl || null,
+          imageUrl: updatedFields.imageUrl || updatedFields.image || null,
+          gallery: Array.isArray(updatedFields.gallery) ? updatedFields.gallery : [],
+          videoUrl: updatedFields.videoUrl || null,
+          stage: updatedFields.stage || targetProduct.stage,
+        })
+        if (res?.product) {
+          const updatedRecord = {
+            ...targetProduct,
+            ...res.product,
+            isServerSynced: true,
+          }
+          setServerProducts((prev) => prev.map((p) => p.id === updatedRecord.id ? updatedRecord : p))
+          return { success: true, product: updatedRecord, isServerSynced: true }
+        }
+      } catch (err) {
+        console.warn('[BuildBoard] Server update failed:', err.message)
+        return { success: false, error: err.message }
+      }
+    }
+
     // Preserve product ownership, existing enrollment, feedback, and metrics
     // Store an updatedAt timestamp when listing is actually edited.
     const updatedRecord = {
@@ -643,7 +786,7 @@ export const DemoDataProvider = ({ children }) => {
     }
 
     setCustomProducts((prev) => {
-      const existsIndex = prev.findIndex((p) => p.id === productId)
+      const existsIndex = prev.findIndex((p) => p.id === productId || p.slug === productId)
       if (existsIndex >= 0) {
         const copy = [...prev]
         copy[existsIndex] = updatedRecord
@@ -655,11 +798,11 @@ export const DemoDataProvider = ({ children }) => {
     return { success: true, product: updatedRecord }
   }
 
-  const toggleProductEnrollment = (productId, userEmail) => {
+  const toggleProductEnrollment = async (productId, userEmail) => {
     if (!productId || !userEmail) {
       return { success: false, error: 'User and product ID are required.' }
     }
-    const targetProduct = products.find((p) => p.id === productId)
+    const targetProduct = products.find((p) => p.id === productId || p.slug === productId)
     if (!targetProduct) {
       return { success: false, error: 'Product listing not found.' }
     }
@@ -668,7 +811,23 @@ export const DemoDataProvider = ({ children }) => {
     }
 
     const nextPaused = !targetProduct.enrollmentPaused
-    // Important: Do NOT update updatedAt on enrollment pause/resume changes!
+
+    if (user?.email && user?.emailVerified && targetProduct.isServerSynced) {
+      try {
+        const res = await toggleProductPause(targetProduct.id, nextPaused)
+        const updatedRecord = {
+          ...targetProduct,
+          enrollmentPaused: res.enrollmentPaused,
+          isServerSynced: true,
+        }
+        setServerProducts((prev) => prev.map((p) => p.id === updatedRecord.id ? updatedRecord : p))
+        return { success: true, enrollmentPaused: res.enrollmentPaused, isServerSynced: true }
+      } catch (err) {
+        console.warn('[BuildBoard] Cloud pause toggle failed:', err.message)
+        return { success: false, error: err.message }
+      }
+    }
+
     const updatedRecord = {
       ...targetProduct,
       enrollmentPaused: nextPaused,
@@ -676,7 +835,7 @@ export const DemoDataProvider = ({ children }) => {
     }
 
     setCustomProducts((prev) => {
-      const existsIndex = prev.findIndex((p) => p.id === productId)
+      const existsIndex = prev.findIndex((p) => p.id === productId || p.slug === productId)
       if (existsIndex >= 0) {
         const copy = [...prev]
         copy[existsIndex] = updatedRecord
@@ -688,16 +847,26 @@ export const DemoDataProvider = ({ children }) => {
     return { success: true, enrollmentPaused: nextPaused }
   }
 
-  const deleteProduct = (productId, userEmail) => {
+  const deleteProduct = async (productId, userEmail) => {
     if (!productId || !userEmail) {
       return { success: false, error: 'User and product ID are required.' }
     }
-    const targetProduct = products.find((p) => p.id === productId)
+    const targetProduct = products.find((p) => p.id === productId || p.slug === productId)
     if (!targetProduct) {
       return { success: false, error: 'Product listing not found.' }
     }
     if (!isProductOwner(productId, userEmail)) {
       return { success: false, error: 'Only the product creator can delete this listing.' }
+    }
+
+    if (user?.email && user?.emailVerified && targetProduct.isServerSynced) {
+      try {
+        await deleteProductListing(targetProduct.id)
+        setServerProducts((prev) => prev.filter((p) => p.id !== targetProduct.id))
+      } catch (err) {
+        console.warn('[BuildBoard] Cloud delete failed:', err.message)
+        return { success: false, error: err.message }
+      }
     }
 
     // Clean up any IndexedDB media if present
@@ -714,16 +883,16 @@ export const DemoDataProvider = ({ children }) => {
     }
 
     // Remove from customProducts
-    setCustomProducts((prev) => prev.filter((p) => p.id !== productId))
+    setCustomProducts((prev) => prev.filter((p) => p.id !== productId && p.slug !== productId))
 
     // Track as deleted so even seed products or modified seed won't resurface
-    setDeletedProductIds((prev) => (prev.includes(productId) ? prev : [...prev, productId]))
+    setDeletedProductIds((prev) => (prev.includes(targetProduct.id) ? prev : [...prev, targetProduct.id]))
 
     // Clean up associated enrollments
     setEnrollments((prev) => {
       const copy = { ...prev }
       Object.keys(copy).forEach((k) => {
-        if (k.endsWith(`:${productId}`)) {
+        if (k.endsWith(`:${productId}`) || k.endsWith(`:${targetProduct.id}`)) {
           delete copy[k]
         }
       })
@@ -731,12 +900,13 @@ export const DemoDataProvider = ({ children }) => {
     })
 
     // Clean up associated feedback
-    setFeedbackList((prev) => prev.filter((fb) => fb.productId !== productId))
+    setFeedbackList((prev) => prev.filter((fb) => fb.productId !== productId && fb.productId !== targetProduct.id))
 
     // Clean up views
     setViews((prev) => {
       const copy = { ...prev }
       delete copy[productId]
+      delete copy[targetProduct.id]
       return copy
     })
 
@@ -744,7 +914,7 @@ export const DemoDataProvider = ({ children }) => {
     setProblems((prev) =>
       prev.map((prob) => ({
         ...prob,
-        solutions: (prob.solutions || []).filter((sol) => sol.productId !== productId),
+        solutions: (prob.solutions || []).filter((sol) => sol.productId !== productId && sol.productId !== targetProduct.id),
       }))
     )
 
@@ -752,7 +922,7 @@ export const DemoDataProvider = ({ children }) => {
     setReminderDismissals((prev) => {
       const copy = { ...prev }
       Object.keys(copy).forEach((k) => {
-        if (k.endsWith(`:${productId}`)) {
+        if (k.endsWith(`:${productId}`) || k.endsWith(`:${targetProduct.id}`)) {
           delete copy[k]
         }
       })
@@ -1055,6 +1225,9 @@ export const DemoDataProvider = ({ children }) => {
     <DemoDataContext.Provider
       value={{
         products,
+        loadServerProducts,
+        productsLoading,
+        productsError,
         addProduct,
         updateProduct,
         deleteProduct,

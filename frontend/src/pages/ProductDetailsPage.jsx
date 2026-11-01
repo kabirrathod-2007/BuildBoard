@@ -6,6 +6,7 @@ import { useDemoData } from '../context/DemoDataContext.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { getFeedbackReminderInfo } from '../utils/feedbackReminder.js'
 import { useIndexedDbMedia } from '../utils/indexedDB.js'
+import { fetchProduct } from '../lib/api.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 
@@ -138,7 +139,29 @@ export default function ProductDetailsPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const product = products.find((item) => item.id === productId)
+  const contextProduct = products.find((item) => item.id === productId || item.slug === productId)
+  const [serverDetail, setServerDetail] = useState(null)
+
+  useEffect(() => {
+    if (!productId) return
+    let active = true
+    async function loadDetail() {
+      try {
+        const res = await fetchProduct(productId)
+        if (active && res?.product) {
+          setServerDetail(res.product)
+        }
+      } catch {
+        // Fall back to context product if offline or sample
+      }
+    }
+    loadDetail()
+    return () => {
+      active = false
+    }
+  }, [productId, user?.email])
+
+  const product = serverDetail || contextProduct
   const makerProfile = product?.creatorEmail ? getProfile(product.creatorEmail) : null
   const makerName =
     makerProfile?.displayName?.trim() ||

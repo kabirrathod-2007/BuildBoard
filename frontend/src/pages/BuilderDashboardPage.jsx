@@ -194,7 +194,7 @@ export default function BuilderDashboardPage() {
     })
   }
 
-  const handleSaveEdit = (e) => {
+  const handleSaveEdit = async (e) => {
     e.preventDefault()
     if (!user || !editingProduct) return
 
@@ -225,7 +225,7 @@ export default function BuilderDashboardPage() {
       return
     }
 
-    const res = updateProduct(editingProduct.id, user.email, editFormData)
+    const res = await updateProduct(editingProduct.id, user.email, editFormData)
     if (!res.success) {
       setEditErrors({ form: res.error })
       return
@@ -236,14 +236,16 @@ export default function BuilderDashboardPage() {
     setEditErrors({})
     setActionNotice({
       type: 'success',
-      message: `Listing "${savedName}" updated successfully on this device.`,
+      message: res.isServerSynced
+        ? `Listing "${savedName}" updated successfully in the cloud.`
+        : `Listing "${savedName}" updated successfully on this device.`,
     })
     setTimeout(() => setActionNotice(null), 4000)
   }
 
-  const handleToggleEnrollment = (productId, productName) => {
+  const handleToggleEnrollment = async (productId, productName) => {
     if (!user) return
-    const res = toggleProductEnrollment(productId, user.email)
+    const res = await toggleProductEnrollment(productId, user.email)
     if (!res.success) {
       setActionNotice({ type: 'error', message: res.error })
       return
@@ -251,7 +253,9 @@ export default function BuilderDashboardPage() {
     const statusText = res.enrollmentPaused ? 'paused' : 'resumed'
     setActionNotice({
       type: 'success',
-      message: `Enrollment for "${productName}" is now ${statusText} on this device.`,
+      message: res.isServerSynced
+        ? `Enrollment for "${productName}" is now ${statusText} in the cloud.`
+        : `Enrollment for "${productName}" is now ${statusText} on this device.`,
     })
     setTimeout(() => setActionNotice(null), 4000)
   }
@@ -259,9 +263,9 @@ export default function BuilderDashboardPage() {
   // Listing Deletion State & Handlers
   const [productToDelete, setProductToDelete] = useState(null)
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!user || !productToDelete) return
-    const res = deleteProduct(productToDelete.id, user.email)
+    const res = await deleteProduct(productToDelete.id, user.email)
     if (!res.success) {
       setActionNotice({ type: 'error', message: res.error })
     } else {

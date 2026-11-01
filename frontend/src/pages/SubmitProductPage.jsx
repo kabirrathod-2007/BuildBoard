@@ -305,7 +305,7 @@ export default function SubmitProductPage() {
     const finalImage = imageUrl.trim()
     const finalGallery = finalImage ? [finalImage] : []
 
-    const newProduct = addProduct({
+    const newProduct = await addProduct({
       name: formData.name.trim(),
       tagline: formData.tagline.trim(),
       prototypeUrl: formData.prototypeUrl.trim(),
@@ -326,7 +326,7 @@ export default function SubmitProductPage() {
       videoMediaId,
     })
 
-    navigate(`/products/${newProduct.id}`)
+    navigate(`/products/${newProduct.slug || newProduct.id}`)
   }
 
   const handleReset = () => {
