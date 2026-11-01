@@ -89,6 +89,8 @@ function ProfilePageContent({
 
   // Banner status
   const [savedSuccessMessage, setSavedSuccessMessage] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   // Derive role-aware status from participation choices
   const hasBuilder = participation.includes('builder')
@@ -115,7 +117,7 @@ function ProfilePageContent({
     setSavedSuccessMessage('')
   }
 
-  const handleSavePreferences = (e) => {
+  const handleSavePreferences = async (e) => {
     if (e) e.preventDefault()
     const updatedData = {
       ...(savedProfile || {}),
@@ -145,13 +147,21 @@ function ProfilePageContent({
       cardDensity,
     }
 
-    onSaveProfile(updatedData)
-    // CRITICAL: Preferences form vanishes upon saving, leaving the clean summary and an Edit button!
-    setIsEditingPreferences(false)
-    setSavedSuccessMessage('Profile preferences saved successfully! Explore recommendations will immediately prioritize your updated criteria.')
+    try {
+      setIsSaving(true)
+      setSaveError('')
+      await onSaveProfile(updatedData)
+      // CRITICAL: Preferences form vanishes upon saving, leaving the clean summary and an Edit button!
+      setIsEditingPreferences(false)
+      setSavedSuccessMessage('Profile preferences saved successfully! Explore recommendations will immediately prioritize your updated criteria.')
+    } catch (err) {
+      setSaveError(err.message || 'Could not save profile.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleSaveAccountSettings = (e) => {
+  const handleSaveAccountSettings = async (e) => {
     if (e) e.preventDefault()
     const updatedData = {
       ...(savedProfile || {}),
@@ -180,20 +190,36 @@ function ProfilePageContent({
       soundEffects,
       cardDensity,
     }
-    onSaveProfile(updatedData)
-    setSavedSuccessMessage('Account and profile details saved successfully.')
+    try {
+      setIsSaving(true)
+      setSaveError('')
+      await onSaveProfile(updatedData)
+      setSavedSuccessMessage('Account and profile details saved successfully.')
+    } catch (err) {
+      setSaveError(err.message || 'Could not save account settings.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
 
-  const handleSaveAppearance = (newTheme, newDensity) => {
+  const handleSaveAppearance = async (newTheme, newDensity) => {
     if (newTheme) setTheme(newTheme)
     if (newDensity) setCardDensity(newDensity)
     const updatedData = {
       ...(savedProfile || {}),
       cardDensity: newDensity || cardDensity,
     }
-    onSaveProfile(updatedData)
-    setSavedSuccessMessage('Display and theme preferences updated.')
+    try {
+      setIsSaving(true)
+      setSaveError('')
+      await onSaveProfile(updatedData)
+      setSavedSuccessMessage('Display and theme preferences updated.')
+    } catch (err) {
+      setSaveError(err.message || 'Could not save appearance settings.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleCancelEditing = () => {
@@ -292,6 +318,19 @@ function ProfilePageContent({
                 <span className="rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--text-subtle)]">
                   Active role: <strong className="text-[var(--text-main)] capitalize">{roleLabel}</strong>
                 </span>
+                {savedProfile?.isServerSynced && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Cloud Synced
+                  </span>
+                )}
+                {savedProfile && savedProfile.isServerSynced === false && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+                    Local Demo
+                  </span>
+                )}
                 {location && (
                   <span className="hidden sm:inline-flex items-center gap-1 text-xs text-[var(--text-subtle)]">
                     <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -413,7 +452,9 @@ function ProfilePageContent({
                       {savedSuccessMessage}
                     </h2>
                     <p className="mt-0.5 text-xs sm:text-sm text-[var(--text-muted)]">
-                      Your changes are saved locally in this browser. Explore recommendations will reflect these preferences immediately.
+                      {savedProfile?.isServerSynced
+                        ? 'Your profile is synchronized with BuildBoard cloud storage. Recommendations will prioritize these criteria.'
+                        : 'Your changes are saved in this browser. Explore recommendations will reflect these preferences immediately.'}
                     </p>
                   </div>
                 </div>
@@ -431,7 +472,67 @@ function ProfilePageContent({
               </div>
             </motion.div>
           )}
+
+          {saveError && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8 }}
+              role="alert"
+              className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 sm:p-5 text-[var(--text-main)] shadow-warm-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <svg className="h-5 w-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <div>
+                    <h2 className="text-sm font-bold text-rose-800 dark:text-rose-300">
+                      Could not save profile
+                    </h2>
+                    <p className="mt-0.5 text-xs sm:text-sm text-[var(--text-muted)]">
+                      {saveError}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSaveError('')}
+                  aria-label="Dismiss error"
+                  className="rounded-lg p-1 text-[var(--text-muted)] hover:text-[var(--text-main)] cursor-pointer"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
+
+        {/* Local Demo Profile Notice Banner */}
+        {savedProfile && savedProfile.isServerSynced === false && !savedSuccessMessage && (
+          <div className="rounded-2xl border border-[#c9a271]/40 bg-[#c9a271]/10 p-4 sm:p-5 text-[var(--text-main)] shadow-warm-xs">
+            <div className="flex items-start gap-3">
+              <svg className="h-5 w-5 text-[#c9a271] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <div>
+                <h2 className="text-sm font-bold text-[var(--text-main)]">
+                  Local demo profile detected
+                </h2>
+                <p className="mt-0.5 text-xs sm:text-sm text-[var(--text-muted)]">
+                  We pre-filled your preferences from your browser&apos;s local demo storage. Click &ldquo;Save Preferences&rdquo; below to sync them with your cloud account.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tester Recognition Overview Card */}
         <div className="rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] p-4 sm:p-5 text-[var(--text-main)] shadow-warm-xs">
@@ -794,9 +895,10 @@ function ProfilePageContent({
                   )}
                   <button
                     type="submit"
-                    className="min-h-[38px] rounded-full bg-[#1f3a6b] px-6 py-1.5 text-xs sm:text-sm font-bold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer"
+                    disabled={isSaving}
+                    className="min-h-[38px] rounded-full bg-[#1f3a6b] px-6 py-1.5 text-xs sm:text-sm font-bold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer disabled:opacity-50"
                   >
-                    Save Preferences
+                    {isSaving ? 'Saving…' : 'Save Preferences'}
                   </button>
                 </div>
               </div>
@@ -1418,9 +1520,10 @@ function ProfilePageContent({
           <div className="pt-2">
             <button
               type="submit"
-              className="min-h-[48px] rounded-full bg-[#1f3a6b] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer"
+              disabled={isSaving}
+              className="min-h-[48px] rounded-full bg-[#1f3a6b] px-8 py-3 text-sm font-semibold text-white shadow-warm-sm transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] cursor-pointer disabled:opacity-50"
             >
-              Save Account Settings
+              {isSaving ? 'Saving…' : 'Save Account Settings'}
             </button>
           </div>
         </motion.form>
@@ -1664,7 +1767,7 @@ function ProfilePageContent({
 
 export default function ProfileSetupPage() {
   const { user } = useAuth()
-  const { getProfile, saveProfile, getTesterRecognition } = useDemoData()
+  const { getProfile, saveProfile, getTesterRecognition, profileLoading } = useDemoData()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -1726,6 +1829,28 @@ export default function ProfileSetupPage() {
               >
                 ← Return to Explore
               </Link>
+            </div>
+          </div>
+          <Footer />
+        </main>
+      </MotionConfig>
+    )
+  }
+
+  // Loading skeleton while fetching cloud profile
+  if (profileLoading && !savedProfile) {
+    return (
+      <MotionConfig reducedMotion="user">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] transition-colors focus:outline-none flex flex-col justify-between"
+        >
+          <Navbar />
+          <div className="mx-auto flex w-full max-w-md flex-1 items-center justify-center px-5 py-24">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#1f3a6b] dark:border-[#dbbf95] border-t-transparent" aria-label="Loading profile..." />
+              <p className="text-sm font-medium text-[var(--text-muted)]">Loading profile from BuildBoard cloud…</p>
             </div>
           </div>
           <Footer />

@@ -3,6 +3,8 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback } 
 import { products as initialSeedProducts } from '../data/products'
 import { seedProblems as initialSeedProblems } from '../data/problems'
 import { deleteMediaFile } from '../utils/indexedDB'
+import { useAuth } from './AuthContext.jsx'
+import { fetchUserProfile, saveUserProfile } from '../lib/api.js'
 
 const DemoDataContext = createContext(null)
 
@@ -36,6 +38,10 @@ function slugify(text) {
 }
 
 export const DemoDataProvider = ({ children }) => {
+  const { user } = useAuth()
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [profileError, setProfileError] = useState(null)
+
   // Custom products created on this device
   const [customProducts, setCustomProducts] = useState(() => {
     try {
@@ -148,6 +154,66 @@ export const DemoDataProvider = ({ children }) => {
       console.error('Failed to sync demo profiles to localStorage', e)
     }
   }, [profiles])
+
+  // Synchronize authenticated user profile with MySQL cloud API
+  useEffect(() => {
+    if (!user?.email || !user?.emailVerified) return
+
+    let active = true
+    const normalizedEmail = user.email.toLowerCase().trim()
+
+    async function loadServerProfile() {
+      try {
+        setProfileLoading(true)
+        setProfileError(null)
+        const result = await fetchUserProfile()
+        if (!active) return
+
+        if (result?.profile) {
+          // Server profile exists: cloud data is authoritative
+          setProfiles((prev) => ({
+            ...prev,
+            [normalizedEmail]: {
+              ...result.profile,
+              email: normalizedEmail,
+              updatedAt: result.updatedAt,
+              isServerSynced: true,
+            },
+          }))
+        } else {
+          // No profile in cloud yet: mark existing local demo profile if present
+          setProfiles((prev) => {
+            const existing = prev[normalizedEmail]
+            if (existing && existing.isServerSynced !== false) {
+              return {
+                ...prev,
+                [normalizedEmail]: {
+                  ...existing,
+                  isServerSynced: false,
+                },
+              }
+            }
+            return prev
+          })
+        }
+      } catch (err) {
+        if (active) {
+          console.warn('[BuildBoard] Could not load profile from server:', err.message)
+          setProfileError(err.message)
+        }
+      } finally {
+        if (active) {
+          setProfileLoading(false)
+        }
+      }
+    }
+
+    loadServerProfile()
+
+    return () => {
+      active = false
+    }
+  }, [user?.email, user?.emailVerified])
 
   // Reminder dismissals mapping: key is "userEmail:productId", value is dismissal timestamp
   const [reminderDismissals, setReminderDismissals] = useState(() => {
@@ -703,22 +769,32 @@ export const DemoDataProvider = ({ children }) => {
     return profiles[normalized] || null
   }, [profiles])
 
-  const saveProfile = (userEmail, profileData) => {
+  const saveProfile = async (userEmail, profileData) => {
     if (!userEmail) return null
     const normalized = userEmail.toLowerCase().trim()
-    const updated = {
-      ...profileData,
-      email: normalized,
-      updatedAt: new Date().toISOString(),
+
+    let serverResult = null
+    const isAuthenticatedUser = user?.email && user.email.toLowerCase().trim() === normalized
+
+    if (isAuthenticatedUser && user.emailVerified) {
+      serverResult = await saveUserProfile(profileData)
     }
+
+    const updated = {
+      ...(serverResult?.profile || profileData),
+      email: normalized,
+      updatedAt: serverResult?.updatedAt || new Date().toISOString(),
+      isServerSynced: Boolean(serverResult?.updatedAt),
+    }
+
     setProfiles((prev) => ({
       ...prev,
       [normalized]: updated,
     }))
 
     // Synchronize maker displayName on user-created custom products and problems
-    if (profileData.displayName?.trim()) {
-      const newMaker = profileData.displayName.trim()
+    if (updated.displayName?.trim()) {
+      const newMaker = updated.displayName.trim()
       setCustomProducts((prev) =>
         prev.map((p) =>
           (p.creatorEmail || '').toLowerCase().trim() === normalized ? { ...p, maker: newMaker } : p
@@ -1007,6 +1083,8 @@ export const DemoDataProvider = ({ children }) => {
         profiles,
         getProfile,
         saveProfile,
+        profileLoading,
+        profileError,
         problems: effectiveProblems,
         addProblem,
         deleteProblem,
