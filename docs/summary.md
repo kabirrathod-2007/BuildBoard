@@ -187,17 +187,17 @@ The previous iteration (`BuildBoard-Landing-Full`) was a single-page marketing c
 BuildBoard is currently operating in a **hybrid architecture phase**:
 - **Authentication & User Identity**: Fully migrated to production cloud infrastructure. User accounts, secure password hashing, and email verification are managed via **Firebase Authentication**. An **Express 5 API** cryptographically verifies Firebase ID tokens and maintains synchronized user records in **MySQL** keyed by the immutable `firebase_uid`.
 - **User Profile Persistence (Milestone 1 — Shipped)**: `user_profiles` table implemented in MySQL (`user_id` FK to `users`, `profile_data JSON`). Dedicated authenticated endpoints (`GET /api/profiles/me` and `PUT /api/profiles/me`) validate and persist profile data. The frontend client (`DemoDataContext.jsx` and `ProfileSetupPage.jsx`) automatically fetches cloud profiles, pre-fills from local demo profiles without overwriting server data, and persists changes directly to MySQL.
-- **Product Listings Persistence (Milestone 2 — Implementation Complete, Verification in Progress)**: Normalized `products`, `product_target_criteria`, and `product_test_steps` tables designed. Full CRUD and pause/resume routes (`/api/products`) implemented with `optionalAuth` and `requireAuth`. Strictly masks `product_url` in public catalog and unlocks it for verified product owners. Frontend connected via `DemoDataContext.jsx`, `SubmitProductPage.jsx`, `BuilderDashboardPage.jsx`, and `ProductDetailsPage.jsx`.
-- **Domain Modeling & Community Data**: Testing checklists, enrollment states, reviews, replies, and problem threads currently continue to execute via client-side storage (`localStorage` and `IndexedDB`) to maintain instant prototyping without database migration disruption.
+- **Product Listings Persistence (Milestone 2 — Shipped)**: Normalized `products`, `product_target_criteria`, and `product_test_steps` tables implemented in MySQL. Full CRUD and pause/resume routes (`/api/products`) with `optionalAuth` and `requireAuth`. Strictly masks `product_url` in public catalog and unlocks it for verified product owners. Fully verified in MySQL and UI.
+- **Enrollments & Gated Prototype Access (Milestone 3 — Implementation Complete, Verification in Progress)**: `product_enrollments` table designed with unique composite keys `(user_id, product_id)`. Enrollment endpoints (`POST/DELETE /api/products/:slugOrId/enroll`, `GET /api/enrollments/me`) enforce owner exclusion, paused enrollment gating, and unmask `productUrl` strictly for verified enrolled testers. Frontend synchronizes active tester enrollments.
+- **Domain Modeling & Community Data**: Structured reviews, replies, and problem threads currently continue to execute via client-side storage (`localStorage` and `IndexedDB`) to maintain instant prototyping without database migration disruption.
 
 ### Next Roadmap Milestones
-1. **Milestone 2 — Product Listings Migration (Verification Phase)**:
-   - Execute `003_products.sql` migration in TablePlus.
-   - Run Postman verification suite on `/api/products` endpoints.
-2. **Milestone 3 — Enrollments and Gated Prototype Access**:
-   - Store enrollments by user ID and product ID with unique constraint.
-   - Prevent new enrollments when paused by builder while preserving existing testers' access.
-   - Return prototype URL only from authenticated endpoints that verify active enrollment.
+1. **Milestone 3 — Enrollments and Gated Prototype Access (Verification Phase)**:
+   - Execute `004_enrollments.sql` migration in TablePlus.
+   - Run Postman / UI verification on enrollment lifecycle and gated link access.
+2. **Milestone 4 — Feedback and Builder Replies**:
+   - Persist structured feedback, builder replies, and helpful marks in MySQL.
+   - Calculate recognition points deterministically from persisted helpful marks.
 3. **Milestone 4 — Feedback and Builder Replies**:
    - Persist structured feedback, builder replies, and helpful marks in MySQL.
    - Calculate recognition points deterministically from persisted helpful marks.

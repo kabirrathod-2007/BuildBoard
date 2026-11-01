@@ -32,6 +32,7 @@ This document provides a comprehensive, chronological, and thematic log of every
    - Decision 4.5: User Profile Storage via JSON in MySQL (`user_profiles`)
    - Decision 4.6: Client Profile Synchronization & Safe Local Demo Migration
    - Decision 4.7: Normalized Product Listings & Protected URL Masking in MySQL (`products`)
+   - Decision 4.8: Enforced Enrollment Gates & Tester Access Control (`product_enrollments`)
 5. [Tooling & Engineering Methodology](#5-tooling--engineering-methodology)
 6. [Summary Matrix of Code Decisions](#6-summary-matrix-of-code-decisions)
 
@@ -368,6 +369,26 @@ This document provides a comprehensive, chronological, and thematic log of every
 - **Why It Was Changed:**
   - Normalizing targeting criteria enables performant indexing and high-precision matching across categories, industries, roles, and technologies.
   - Enforcing prototype URL masking server-side guarantees that unauthenticated viewers or unenrolled testers cannot bypass the feedback loop by inspecting network traffic.
+
+---
+
+### Decision 4.8: Enforced Enrollment Gates & Tester Access Control (`product_enrollments`)
+
+- **What Changed:**
+  - Authored `backend/migrations/004_enrollments.sql` and updated `backend/schema.sql` declaring `product_enrollments`:
+    - `user_id BIGINT UNSIGNED NOT NULL` (FK to `users(id) ON DELETE CASCADE`).
+    - `product_id BIGINT UNSIGNED NOT NULL` (FK to `products(id) ON DELETE CASCADE`).
+    - Composite unique index `uq_user_product_enrollment (user_id, product_id)` preventing duplicate tester signups.
+    - Single-column indexes on `product_id` and `user_id` for fast counting and reverse lookup.
+  - Implemented server-side enrollment endpoints:
+    - `POST /api/products/:slugOrId/enroll`: Authenticated. Rejects owner self-enrollment (400) and paused enrollment attempts for new testers (409 Conflict). Returns unmasked `productUrl` upon successful enrollment.
+    - `DELETE /api/products/:slugOrId/enroll`: Authenticated tester unenrollment.
+    - `GET /api/products/:slugOrId/enrollment`: Authenticated status check.
+    - `GET /api/enrollments/me`: Lists all enrolled prototypes with unmasked prototype URLs.
+  - Updated `GET /api/products/:slugOrId` to resolve enrollment status via `optionalAuth`, dynamically unmasking `product_url` strictly for the verified creator OR active enrolled tester.
+  - Connected `DemoDataContext.jsx` and `ProductDetailsPage.jsx` to synchronize cloud enrollments upon auth and seamlessly transition the UI to an unlocked prototype state.
+- **Why It Was Changed:**
+  - The Enrollment Gate is BuildBoard's core value proposition: builders receive high-signal, thoughtful feedback in exchange for prototype access. Enforcing enrollment verification and prototype URL masking in MySQL guarantees that access controls cannot be circumvented via client inspection or direct API calls.
 
 ---
 

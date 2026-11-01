@@ -17,7 +17,8 @@ This document traces the exact step-by-step code execution flow between files, c
 10. [Journey 8: User Authentication & Backend Identity Synchronization Flow](#10-journey-8-user-authentication--backend-identity-synchronization-flow)
 11. [Journey 9: User Profile Retrieval & Persistence (`/api/profiles/me`)](#11-journey-9-user-profile-retrieval--persistence-apiprofilesme)
 12. [Journey 10: Product Listing Lifecycle & Protected Access (`/api/products`)](#12-journey-10-product-listing-lifecycle--protected-access-apiproducts)
-13. [End-to-End Sequence Diagram](#13-end-to-end-sequence-diagram)
+13. [Journey 11: Tester Enrollment & Gated Access Flow (`/api/products/:slug/enroll`)](#13-journey-11-tester-enrollment--gated-access-flow-apiproductsslugenroll)
+14. [End-to-End Sequence Diagram](#14-end-to-end-sequence-diagram)
 
 ---
 ## 1. Application Boot & Initialization Flow
@@ -497,7 +498,35 @@ sequenceDiagram
 
 ---
 
-## 13. End-to-End Sequence Diagram
+## 13. Journey 11: Tester Enrollment & Gated Access Flow (`/api/products/:slug/enroll`)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Tester
+    participant Frontend as ProductDetailsPage.jsx
+    participant DemoCtx as DemoDataContext.jsx
+    participant API as Express API (/api/products & /api/enrollments)
+    participant Auth as requireAuth
+    participant MySQL as MySQL Database (buildboard)
+
+    Tester->>Frontend: Clicks "Enroll to Unlock Prototype Link"
+    Frontend->>DemoCtx: enrollInProduct(productId, user.email)
+    DemoCtx->>API: POST /api/products/:slugOrId/enroll (Bearer token)
+    API->>Auth: requireAuth verifies token & email_verified
+    API->>MySQL: SELECT * FROM products WHERE slug = ?
+    MySQL-->>API: product row
+    API->>API: Verify user != creator & !enrollment_paused
+    API->>MySQL: INSERT INTO product_enrollments (user_id, product_id) VALUES (?, ?)
+    MySQL-->>API: 1 row affected
+    API-->>DemoCtx: 201 Created { enrolled: true, enrolledAt, productUrl: "https://..." }
+    DemoCtx->>Frontend: Updates local enrollment & unmasks productUrl
+    Frontend-->>Tester: Renders "Prototype Link Unlocked" banner & enables feedback form
+```
+
+---
+
+## 14. End-to-End Sequence Diagram
 
 ```
 +---------------+           +---------------+           +-----------------+          +-------------------+
