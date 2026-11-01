@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router'
 import { MotionConfig, motion, AnimatePresence } from 'motion/react'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useDemoData } from '../context/DemoDataContext.jsx'
 import { useTheme } from '../context/ThemeContext.jsx'
+import { checkUsernameAvailability } from '../lib/api.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 import {
@@ -64,7 +65,11 @@ function ProfilePageContent({
   )
 
   // Account & identity settings
-  const [handle, setHandle] = useState(savedProfile?.handle || '')
+  const initialUsername = savedProfile?.username || savedProfile?.handle?.replace(/^@/, '') || ''
+  const [username, setUsername] = useState(initialUsername)
+  const [availabilityError, setAvailabilityError] = useState('')
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false)
+
   const [bio, setBio] = useState(savedProfile?.bio || '')
   const [location, setLocation] = useState(savedProfile?.location || '')
   const [website, setWebsite] = useState(savedProfile?.website || '')
@@ -92,6 +97,60 @@ function ProfilePageContent({
   const [saveError, setSaveError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
+  // Derived username format validation
+  const cleanUsername = username.trim().replace(/^@/, '').toLowerCase()
+  const isUsernameFormatValid = /^[a-z0-9_-]{3,30}$/.test(cleanUsername)
+  const isCurrentUsername = Boolean(savedProfile?.username && cleanUsername === savedProfile.username.toLowerCase())
+
+  // Real-time remote collision check for edited username
+  useEffect(() => {
+    if (!cleanUsername || !isUsernameFormatValid || isCurrentUsername) {
+      return
+    }
+
+    let active = true
+    const timer = setTimeout(async () => {
+      setIsCheckingUsername(true)
+      try {
+        const res = await checkUsernameAvailability(cleanUsername)
+        if (!active) return
+        if (res.available) {
+          setAvailabilityError('')
+        } else {
+          setAvailabilityError(res.error || 'This username is already taken. Please choose another one.')
+        }
+      } catch (err) {
+        if (!active) return
+        setAvailabilityError(err.message || 'Could not verify username.')
+      } finally {
+        if (active) setIsCheckingUsername(false)
+      }
+    }, 350)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [cleanUsername, isUsernameFormatValid, isCurrentUsername])
+
+  const usernameError = !cleanUsername
+    ? 'Username is required.'
+    : !isUsernameFormatValid
+    ? 'Username must be 3-30 characters long and can only contain lowercase letters, numbers, hyphens, and underscores.'
+    : availabilityError
+
+  const usernameStatus = isCheckingUsername
+    ? 'checking'
+    : isCurrentUsername
+    ? 'current'
+    : !isUsernameFormatValid
+    ? 'invalid'
+    : availabilityError
+    ? 'taken'
+    : cleanUsername
+    ? 'available'
+    : null
+
   // Derive role-aware status from participation choices
   const hasBuilder = participation.includes('builder')
   const hasTester = participation.includes('tester')
@@ -108,7 +167,9 @@ function ProfilePageContent({
   const effectiveDisplayName =
     displayName.trim() || (userEmail ? userEmail.split('@')[0] : 'Member')
   const userInitial = effectiveDisplayName.charAt(0).toUpperCase()
-  const effectiveHandle = handle.trim() ? `@${handle.replace(/^@/, '')}` : `@${userEmail ? userEmail.split('@')[0] : 'member'}`
+  const effectiveHandle = username.trim()
+    ? `@${username.trim().replace(/^@/, '')}`
+    : `@${userEmail ? userEmail.split('@')[0] : 'member'}`
 
   const toggleArrayItem = (setter, item) => {
     setter((prev) =>
@@ -119,9 +180,24 @@ function ProfilePageContent({
 
   const handleSavePreferences = async (e) => {
     if (e) e.preventDefault()
+    if (!cleanUsername) {
+      setSaveError('Username is required.')
+      return
+    }
+    if (!isUsernameFormatValid) {
+      setSaveError('Username must be 3-30 characters long and can only contain lowercase letters, numbers, hyphens, and underscores.')
+      return
+    }
+    if (usernameStatus === 'taken') {
+      setSaveError(availabilityError || 'This username is already taken. Please choose another one.')
+      return
+    }
+
     const updatedData = {
       ...(savedProfile || {}),
       displayName: effectiveDisplayName,
+      username: cleanUsername,
+      handle: cleanUsername,
       participation,
       experienceLevel,
       interests,
@@ -131,7 +207,6 @@ function ProfilePageContent({
       testingDevices,
       feedbackFocus,
       availability,
-      handle,
       bio,
       location,
       website,
@@ -163,10 +238,24 @@ function ProfilePageContent({
 
   const handleSaveAccountSettings = async (e) => {
     if (e) e.preventDefault()
+    if (!cleanUsername) {
+      setSaveError('Username is required.')
+      return
+    }
+    if (!isUsernameFormatValid) {
+      setSaveError('Username must be 3-30 characters long and can only contain lowercase letters, numbers, hyphens, and underscores.')
+      return
+    }
+    if (usernameStatus === 'taken') {
+      setSaveError(availabilityError || 'This username is already taken. Please choose another one.')
+      return
+    }
+
     const updatedData = {
       ...(savedProfile || {}),
       displayName: effectiveDisplayName,
-      handle,
+      username: cleanUsername,
+      handle: cleanUsername,
       bio,
       location,
       website,
@@ -196,7 +285,11 @@ function ProfilePageContent({
       await onSaveProfile(updatedData)
       setSavedSuccessMessage('Account and profile details saved successfully.')
     } catch (err) {
-      setSaveError(err.message || 'Could not save account settings.')
+      const msg = err.message || 'Could not save account settings.'
+      setSaveError(msg)
+      if (msg.toLowerCase().includes('username')) {
+        setAvailabilityError(msg)
+      }
     } finally {
       setIsSaving(false)
     }
@@ -226,6 +319,7 @@ function ProfilePageContent({
     // Revert state back to current savedProfile
     if (savedProfile) {
       setDisplayName(savedProfile.displayName || '')
+      setUsername(savedProfile.username || savedProfile.handle?.replace(/^@/, '') || '')
       setParticipation(savedProfile.participation || ['tester'])
       setExperienceLevel(savedProfile.experienceLevel || '')
       setInterests(savedProfile.interests || [])
@@ -277,7 +371,8 @@ function ProfilePageContent({
         testingDevices: ['Chrome / Web Browser'],
         feedbackFocus: ['UI & Visual Polish'],
         availability: '1-2 hours / week',
-        handle: '',
+        username: savedProfile?.username || '',
+        handle: savedProfile?.username || '',
         bio: '',
         location: '',
         website: '',
@@ -1351,22 +1446,58 @@ function ProfilePageContent({
               </div>
 
               <div>
-                <label htmlFor="account-handle" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-main)]">
-                  Handle / Username
+                <label htmlFor="account-username" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-main)]">
+                  Username <span className="text-[#c9a271]">*</span>
                 </label>
                 <div className="relative mt-2">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-sm font-semibold text-[var(--text-muted)]">
                     @
                   </span>
                   <input
-                    id="account-handle"
+                    id="account-username"
                     type="text"
-                    value={handle.replace(/^@/, '')}
-                    onChange={(e) => setHandle(e.target.value)}
+                    value={username.replace(/^@/, '')}
+                    onChange={(e) => {
+                      setUsername(e.target.value)
+                      setSavedSuccessMessage('')
+                    }}
                     placeholder="alexrivera"
-                    className="w-full min-h-[44px] rounded-xl border border-[var(--border-main)] bg-[var(--bg-surface)] pl-8 pr-4 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20"
+                    required
+                    className={`w-full min-h-[44px] rounded-xl border bg-[var(--bg-surface)] pl-8 pr-10 py-2 text-sm text-[var(--text-main)] outline-none transition focus:border-[#c9a271] focus:ring-2 focus:ring-[#c9a271]/20 ${
+                      usernameError
+                        ? 'border-rose-500 bg-rose-50/20 dark:bg-rose-950/20'
+                        : usernameStatus === 'available' || usernameStatus === 'current'
+                        ? 'border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20'
+                        : 'border-[var(--border-main)]'
+                    }`}
                   />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    {usernameStatus === 'checking' && (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--text-muted)] border-t-transparent" />
+                    )}
+                    {(usernameStatus === 'available' || usernameStatus === 'current') && (
+                      <svg className="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                    {usernameError && (
+                      <svg className="h-4 w-4 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="15" y1="9" x2="9" y2="15" />
+                        <line x1="9" y1="9" x2="15" y2="15" />
+                      </svg>
+                    )}
+                  </div>
                 </div>
+                {usernameError ? (
+                  <p className="mt-1 text-xs font-semibold text-rose-500">{usernameError}</p>
+                ) : usernameStatus === 'available' ? (
+                  <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">Username is available!</p>
+                ) : (
+                  <p className="mt-1 text-xs text-[var(--text-subtle)]">
+                    Unique identifier on BuildBoard. 3-30 lowercase letters, numbers, hyphens, and underscores.
+                  </p>
+                )}
               </div>
 
               <div className="sm:col-span-2">

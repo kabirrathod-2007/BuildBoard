@@ -19,6 +19,7 @@ export async function requireAuth(req, res, next) {
       firebaseUid: decoded.uid,
       email: decoded.email.toLowerCase().trim(),
       emailVerified: decoded.email_verified,
+      displayName: decoded.name || '',
     }
     return next()
   } catch {

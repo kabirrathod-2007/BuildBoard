@@ -13,6 +13,7 @@ export default function SignUpPage() {
   const location = useLocation()
   const { signUp } = useAuth()
 
+  const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
@@ -21,7 +22,16 @@ export default function SignUpPage() {
 
   function validate() {
     const nextErrors = {}
+    const trimmedDisplayName = displayName.trim()
     const trimmedEmail = email.trim()
+
+    if (!trimmedDisplayName) {
+      nextErrors.displayName = 'Display name is required.'
+    } else if (trimmedDisplayName.length < 2) {
+      nextErrors.displayName = 'Display name must be at least 2 characters long.'
+    } else if (trimmedDisplayName.length > 60) {
+      nextErrors.displayName = 'Display name cannot exceed 60 characters.'
+    }
 
     if (!trimmedEmail) {
       nextErrors.email = 'Email is required.'
@@ -46,7 +56,7 @@ export default function SignUpPage() {
     setAuthError('')
     setIsSubmitting(true)
     try {
-      const created = await signUp(email.trim(), password)
+      const created = await signUp(email.trim(), password, displayName.trim())
       navigate('/verify-email', {
         state: {
           email: created.email,
@@ -129,6 +139,44 @@ export default function SignUpPage() {
             </p>
 
             <form className="mt-7 space-y-4" onSubmit={handleSubmit} noValidate>
+              <div>
+                <label
+                  className="mb-1.5 block text-sm font-semibold text-[var(--text-main)]"
+                  htmlFor="displayName"
+                >
+                  Display Name
+                </label>
+                <input
+                  className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-subtle)] focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
+                    errors.displayName
+                      ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
+                      : 'border-[var(--border-main)]'
+                  }`}
+                  id="displayName"
+                  name="displayName"
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => {
+                    setDisplayName(e.target.value)
+                    if (errors.displayName) setErrors((prev) => ({ ...prev, displayName: undefined }))
+                  }}
+                  autoComplete="name"
+                  placeholder="e.g. Alex Rivera"
+                  required
+                  aria-invalid={Boolean(errors.displayName)}
+                  aria-describedby={errors.displayName ? 'display-name-error' : undefined}
+                />
+                {errors.displayName ? (
+                  <p id="display-name-error" className="mt-1 text-sm font-semibold text-rose-500" role="alert">
+                    {errors.displayName}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-[var(--text-subtle)]">
+                    We&apos;ll automatically assign you a unique random username matching this name.
+                  </p>
+                )}
+              </div>
+
               <div>
                 <label
                   className="mb-1.5 block text-sm font-semibold text-[var(--text-main)]"

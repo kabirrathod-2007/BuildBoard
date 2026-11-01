@@ -57,6 +57,13 @@ export async function saveUserProfile(profile) {
   })
 }
 
+export async function checkUsernameAvailability(username) {
+  if (!username) return { available: false, error: 'Username is required.' }
+  return request(`/api/profiles/check-username?username=${encodeURIComponent(username)}`, {
+    method: 'GET',
+  })
+}
+
 export async function fetchProducts(options = {}) {
   const params = new URLSearchParams()
   if (options.category && options.category !== 'All') {

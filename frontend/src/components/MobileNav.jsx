@@ -16,6 +16,7 @@ export default function MobileNav({
   const { getProfile } = useDemoData()
   const userProfile = user?.email ? getProfile(user.email) : null
   const displayName = userProfile?.displayName?.trim()
+  const username = userProfile?.username || user?.username || ''
 
   // Close menu when route changes
   const [prevPathname, setPrevPathname] = useState(location.pathname)
@@ -165,6 +166,9 @@ export default function MobileNav({
                   {displayName ? (
                     <div className="mt-0.5">
                       <span className="block font-bold text-[var(--text-main)] text-sm">{displayName}</span>
+                      {username && (
+                        <span className="block font-mono text-xs text-[#d8b98c]">@{username}</span>
+                      )}
                       <span className="break-all font-mono text-xs opacity-70">{user.email}</span>
                     </div>
                   ) : (

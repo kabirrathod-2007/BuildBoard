@@ -10,6 +10,7 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  updateProfile,
   verifyPasswordResetCode,
 } from 'firebase/auth'
 import { firebaseAuth, isFirebaseConfigured } from '../lib/firebase.js'
@@ -20,13 +21,20 @@ export const useAuth = () => useContext(AuthContext)
 const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001').replace(/\/$/, '')
 const DEMO_STORAGE_KEY = 'buildboard_demo_auth_user'
 
-async function syncUserWithApi(firebaseUser) {
+async function syncUserWithApi(firebaseUser, extraData = {}) {
   const token = await firebaseUser.getIdToken()
   let response
   try {
     response = await fetch(`${apiBaseUrl}/api/auth/me`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        displayName: firebaseUser.displayName || '',
+        ...extraData,
+      }),
     })
   } catch {
     throw new Error('Could not reach the BuildBoard API. Start the backend and check its MySQL connection.')
@@ -46,7 +54,8 @@ function toAppUser(firebaseUser, databaseUser = null) {
     id: databaseUser?.id ?? null,
     email: firebaseUser.email,
     emailVerified: firebaseUser.emailVerified,
-    displayName: firebaseUser.displayName || '',
+    displayName: databaseUser?.displayName || firebaseUser.displayName || '',
+    username: databaseUser?.username || '',
   }
 }
 
@@ -171,15 +180,21 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const signUp = async (email, password) => {
+  const signUp = async (email, password, displayName = '') => {
+    const trimmedDisplayName = (displayName || '').trim()
     if (!isFirebaseConfigured || !firebaseAuth) {
       const trimmed = (email || '').trim() || 'member@example.com'
+      const baseSlug = (trimmedDisplayName || trimmed.split('@')[0])
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+        .slice(0, 15) || 'member'
       const appUser = {
         uid: 'demo-' + Date.now(),
         id: 'demo-user-1',
         email: trimmed,
         emailVerified: true,
-        displayName: trimmed.split('@')[0],
+        displayName: trimmedDisplayName || trimmed.split('@')[0],
+        username: `${baseSlug}${Math.floor(1000 + Math.random() * 9000)}`,
       }
       setUser(appUser)
       try {
@@ -187,13 +202,16 @@ export function AuthProvider({ children }) {
       } catch {
         // ignore
       }
-      return { email: trimmed }
+      return { email: trimmed, displayName: appUser.displayName }
     }
 
     await setPersistence(firebaseAuth, browserLocalPersistence)
     const credential = await createUserWithEmailAndPassword(firebaseAuth, email.trim(), password)
 
     try {
+      if (trimmedDisplayName) {
+        await updateProfile(credential.user, { displayName: trimmedDisplayName }).catch(() => {})
+      }
       await sendEmailVerification(credential.user, {
         url: `${window.location.origin}/verify-email?email=${encodeURIComponent(credential.user.email || email)}`,
       })
@@ -201,7 +219,7 @@ export function AuthProvider({ children }) {
       await firebaseSignOut(firebaseAuth)
     }
 
-    return { email: credential.user.email || email.trim() }
+    return { email: credential.user.email || email.trim(), displayName: trimmedDisplayName }
   }
 
   const resendVerificationEmail = async (email, password) => {

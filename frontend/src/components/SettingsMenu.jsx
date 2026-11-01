@@ -25,6 +25,7 @@ export default function SettingsMenu({ className = '' }) {
   const displayName =
     userProfile?.displayName?.trim() ||
     (user?.email ? user.email.split('@')[0] : 'Member')
+  const username = userProfile?.username || user?.username || ''
   const userInitial = displayName ? displayName.charAt(0).toUpperCase() : 'U'
 
   // Close menu on route change
@@ -131,7 +132,12 @@ export default function SettingsMenu({ className = '' }) {
                 <p className="truncate text-sm font-bold text-[var(--text-main)]">
                   {displayName}
                 </p>
-                <p className="truncate font-mono text-sm text-[var(--text-muted)]">
+                {username && (
+                  <p className="truncate text-xs font-mono font-medium text-[#1f3a6b] dark:text-[#dbbf95]">
+                    @{username}
+                  </p>
+                )}
+                <p className="truncate font-mono text-xs text-[var(--text-muted)]">
                   {user.email}
                 </p>
               </div>
