@@ -838,5 +838,171 @@ router.get('/:slugOrId/enrollment', requireAuth, async (req, res, next) => {
   }
 })
 
+function parseFeedbackReply(raw) {
+  if (!raw) return null
+  if (typeof raw === 'object') return raw
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+// ----------------------------------------------------------------------
+// POST /api/products/:slugOrId/feedback (Submit feedback on product)
+// ----------------------------------------------------------------------
+router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT id, creator_id, name FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const product = rows[0]
+
+    // Block owner from submitting feedback on their own product
+    if (Number(product.creator_id) === Number(userId)) {
+      return res.status(403).json({ error: 'You cannot submit feedback on your own prototype.' })
+    }
+
+    // Enforce enrollment
+    const [enrollmentRows] = await database.execute(
+      'SELECT id FROM product_enrollments WHERE user_id = ? AND product_id = ? LIMIT 1',
+      [userId, product.id],
+    )
+    if (enrollmentRows.length === 0) {
+      return res.status(403).json({ error: 'You must be enrolled as a tester before submitting feedback.' })
+    }
+
+    const { category, experience, likes } = req.body || {}
+    const trimmedCategory = typeof category === 'string' ? category.trim() : ''
+    const trimmedExperience = typeof experience === 'string' ? experience.trim() : ''
+    const trimmedLikes = typeof likes === 'string' ? likes.trim() : ''
+
+    if (!trimmedCategory) {
+      return res.status(400).json({ error: 'Please choose a feedback category.' })
+    }
+    if (!trimmedExperience || trimmedExperience.length < 3) {
+      return res.status(400).json({ error: 'Feedback experience must be at least 3 characters long.' })
+    }
+    if (trimmedExperience.length > 5000) {
+      return res.status(400).json({ error: 'Feedback experience cannot exceed 5,000 characters.' })
+    }
+    if (trimmedLikes.length > 5000) {
+      return res.status(400).json({ error: 'Feedback likes cannot exceed 5,000 characters.' })
+    }
+
+    const [insertResult] = await database.execute(
+      `INSERT INTO product_feedback (product_id, user_id, category, experience, likes)
+       VALUES (?, ?, ?, ?, ?)`,
+      [product.id, userId, trimmedCategory, trimmedExperience, trimmedLikes || null],
+    )
+
+    const insertId = insertResult.insertId
+
+    // Fetch author info to return complete feedback item
+    const [userRows] = await database.execute(
+      `SELECT 
+         u.email,
+         up.profile_data->>'$.displayName' AS display_name,
+         up.profile_data->>'$.roles[0]' AS primary_role
+       FROM users u
+       LEFT JOIN user_profiles up ON up.user_id = u.id
+       WHERE u.id = ? LIMIT 1`,
+      [userId],
+    )
+
+    const author = userRows[0] || {}
+
+    return res.status(201).json({
+      success: true,
+      feedback: {
+        id: String(insertId),
+        productId: String(product.id),
+        category: trimmedCategory,
+        experience: trimmedExperience,
+        likes: trimmedLikes,
+        isHelpful: false,
+        helpfulMarkedAt: null,
+        reply: null,
+        createdAt: new Date().toISOString(),
+        userEmail: author.email || req.authUser.email || '',
+        testerName: author.display_name || (author.email ? author.email.split('@')[0] : 'Community Tester'),
+        testerRole: author.primary_role || 'Community Tester',
+      },
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// GET /api/products/:slugOrId/feedback (Get all feedback on product)
+// ----------------------------------------------------------------------
+router.get('/:slugOrId/feedback', async (req, res, next) => {
+  try {
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT id FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const productId = rows[0].id
+
+    const [feedbackRows] = await database.execute(
+      `SELECT 
+         pf.*,
+         u.email AS user_email,
+         up.profile_data->>'$.displayName' AS display_name,
+         up.profile_data->>'$.roles[0]' AS primary_role,
+         up.profile_data->>'$.experienceLevel' AS experience_level
+       FROM product_feedback pf
+       JOIN users u ON u.id = pf.user_id
+       LEFT JOIN user_profiles up ON up.user_id = pf.user_id
+       WHERE pf.product_id = ?
+       ORDER BY pf.created_at DESC`,
+      [productId],
+    )
+
+    const feedback = feedbackRows.map((r) => ({
+      id: String(r.id),
+      productId: String(r.product_id),
+      category: r.category,
+      experience: r.experience,
+      likes: r.likes || '',
+      isHelpful: Boolean(r.is_helpful),
+      helpfulMarkedAt: r.helpful_marked_at,
+      reply: parseFeedbackReply(r.builder_reply),
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+      userEmail: r.user_email,
+      testerName: r.display_name || (r.user_email ? r.user_email.split('@')[0] : 'Community Tester'),
+      testerRole: r.primary_role || 'Community Tester',
+    }))
+
+    return res.json({
+      productId: String(productId),
+      count: feedback.length,
+      feedback,
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
 export default router
 

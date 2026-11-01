@@ -18,6 +18,11 @@ This service verifies Firebase Authentication ID tokens and keeps a MySQL user r
 - `DELETE /api/products/:slugOrId/enroll` (Authenticated) unenrolls tester from product.
 - `GET /api/products/:slugOrId/enrollment` (Authenticated) retrieves tester enrollment status and timestamp.
 - `GET /api/enrollments/me` (Authenticated) returns array of all active prototype enrollments for the current user, each including full product detail with unlocked `productUrl`.
+- `POST /api/products/:slugOrId/feedback` (Authenticated) submits feedback; blocks owner self-feedback (403), enforces tester enrollment (403).
+- `GET /api/products/:slugOrId/feedback` (Public) lists all community tester feedback on product with author profile and maker reply.
+- `GET /api/feedback/me` (Authenticated) returns current user's submitted feedback notes and recognition metrics (`totalPoints`, `helpfulCount`).
+- `POST /api/feedback/:id/reply` (Authenticated, Creator-only) dispatches or edits maker reply to tester critique.
+- `PATCH /api/feedback/:id/helpful` (Authenticated, Creator-only) toggles helpful recognition mark (+1 point for tester).
 
 The frontend sign-up, sign-in, and email verification pages are wired to Firebase Authentication and connect to `POST /api/auth/me` upon successful authentication. User profile setup is wired to `/api/profiles/me`. Existing product, enrollment, feedback, and problem data continue to use the local demo context; full data migration for domain models is slated for future milestones.
 
