@@ -1,0 +1,667 @@
+import { Router } from 'express'
+import { database } from '../config/database.js'
+import { requireAuth } from '../middleware/requireAuth.js'
+import { optionalAuth } from '../middleware/optionalAuth.js'
+
+const router = Router()
+
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '')
+}
+
+function isValidUrl(string) {
+  if (!string || typeof string !== 'string') return false
+  try {
+    const parsed = new URL(string.trim())
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+async function findUserId(firebaseUid) {
+  const [rows] = await database.execute(
+    'SELECT id FROM users WHERE firebase_uid = ? LIMIT 1',
+    [firebaseUid],
+  )
+  return rows[0]?.id ?? null
+}
+
+function sanitizeStringArray(arr, maxItems = 50, maxLength = 100) {
+  if (!Array.isArray(arr)) return []
+  return [...new Set(
+    arr
+      .filter((item) => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0 && item.length <= maxLength)
+  )].slice(0, maxItems)
+}
+
+function validateProductInput(body, isUpdate = false) {
+  if (!body || typeof body !== 'object') {
+    return { error: 'Send a valid product data object.' }
+  }
+
+  const name = typeof body.name === 'string' ? body.name.trim() : ''
+  if (!name || name.length < 2 || name.length > 150) {
+    return { error: 'Product name is required (between 2 and 150 characters).' }
+  }
+
+  const tagline = typeof body.tagline === 'string' ? body.tagline.trim() : ''
+  if (!tagline || tagline.length < 5 || tagline.length > 255) {
+    return { error: 'Tagline is required (between 5 and 255 characters).' }
+  }
+
+  const description = typeof body.description === 'string' && body.description.trim()
+    ? body.description.trim()
+    : tagline
+  if (description.length > 10000) {
+    return { error: 'Description cannot exceed 10,000 characters.' }
+  }
+
+  const stage = typeof body.stage === 'string' && body.stage.trim()
+    ? body.stage.trim().slice(0, 50)
+    : 'Working prototype'
+
+  const audience = typeof body.audience === 'string' ? body.audience.trim() : ''
+  if (!audience || audience.length > 2000) {
+    return { error: 'Target audience is required (up to 2,000 characters).' }
+  }
+
+  const feedbackRequest = typeof body.feedbackRequest === 'string' ? body.feedbackRequest.trim() : ''
+  if (!feedbackRequest || feedbackRequest.length > 2000) {
+    return { error: 'Feedback request is required (up to 2,000 characters).' }
+  }
+
+  const rawProductUrl = body.productUrl || body.prototypeUrl
+  if (!rawProductUrl || !isValidUrl(rawProductUrl)) {
+    return { error: 'A valid prototype URL starting with http:// or https:// is required.' }
+  }
+  const productUrl = rawProductUrl.trim()
+  if (productUrl.length > 500) {
+    return { error: 'Prototype URL cannot exceed 500 characters.' }
+  }
+
+  let githubUrl = null
+  if (body.githubUrl && typeof body.githubUrl === 'string' && body.githubUrl.trim()) {
+    if (!isValidUrl(body.githubUrl)) {
+      return { error: 'GitHub URL must be a valid URL starting with http:// or https://' }
+    }
+    githubUrl = body.githubUrl.trim().slice(0, 500)
+  }
+
+  let imageUrl = null
+  const rawImage = body.imageUrl || body.image
+  if (rawImage && typeof rawImage === 'string' && rawImage.trim()) {
+    if (!isValidUrl(rawImage)) {
+      return { error: 'Cover image URL must be a valid URL starting with http:// or https://' }
+    }
+    imageUrl = rawImage.trim().slice(0, 500)
+  }
+
+  let videoUrl = null
+  if (body.videoUrl && typeof body.videoUrl === 'string' && body.videoUrl.trim()) {
+    if (!isValidUrl(body.videoUrl)) {
+      return { error: 'Video URL must be a valid URL starting with http:// or https://' }
+    }
+    videoUrl = body.videoUrl.trim().slice(0, 500)
+  }
+
+  let gallery = null
+  if (Array.isArray(body.gallery)) {
+    gallery = body.gallery
+      .filter((url) => typeof url === 'string' && isValidUrl(url))
+      .map((url) => url.trim().slice(0, 500))
+      .slice(0, 20)
+  }
+
+  const rawCategories = Array.isArray(body.categories) ? body.categories : []
+  const categories = sanitizeStringArray(rawCategories, 20, 100)
+  if (categories.length === 0) {
+    return { error: 'Select at least one category.' }
+  }
+
+  const targetRoles = sanitizeStringArray(body.targetRoles, 30, 100)
+  const targetIndustries = sanitizeStringArray(body.targetIndustries, 30, 100)
+  const targetTechnologies = sanitizeStringArray(body.targetTechnologies, 30, 100)
+
+  let whatToTry = null
+  if (Array.isArray(body.whatToTry)) {
+    whatToTry = body.whatToTry
+      .filter((step) => typeof step === 'string' && step.trim().length > 0)
+      .map((step) => step.trim().slice(0, 1000))
+      .slice(0, 20)
+  }
+
+  if (!isUpdate && (!whatToTry || whatToTry.length === 0)) {
+    whatToTry = [
+      'Test the core prototype workflow',
+      'Check for usability friction or confusing steps',
+      'Share what you expected to happen vs what occurred',
+    ]
+  }
+
+  return {
+    data: {
+      name,
+      tagline,
+      description,
+      stage,
+      audience,
+      feedbackRequest,
+      productUrl,
+      githubUrl,
+      imageUrl,
+      gallery,
+      videoUrl,
+      categories,
+      targetRoles,
+      targetIndustries,
+      targetTechnologies,
+      whatToTry,
+    },
+  }
+}
+
+async function attachCriteriaAndSteps(products, userId = null) {
+  if (products.length === 0) return []
+
+  const productIds = products.map((p) => p.id)
+
+  const [criteriaRows] = await database.query(
+    'SELECT product_id, criteria_type, criteria_value FROM product_target_criteria WHERE product_id IN (?)',
+    [productIds],
+  )
+
+  const [stepsRows] = await database.query(
+    'SELECT product_id, step_order, instruction FROM product_test_steps WHERE product_id IN (?) ORDER BY step_order ASC',
+    [productIds],
+  )
+
+  const criteriaMap = new Map()
+  for (const row of criteriaRows) {
+    if (!criteriaMap.has(row.product_id)) {
+      criteriaMap.set(row.product_id, {
+        category: [],
+        role: [],
+        industry: [],
+        technology: [],
+      })
+    }
+    const bucket = criteriaMap.get(row.product_id)
+    if (bucket[row.criteria_type]) {
+      bucket[row.criteria_type].push(row.criteria_value)
+    }
+  }
+
+  const stepsMap = new Map()
+  for (const row of stepsRows) {
+    if (!stepsMap.has(row.product_id)) {
+      stepsMap.set(row.product_id, [])
+    }
+    stepsMap.get(row.product_id).push(row.instruction)
+  }
+
+  return products.map((row) => {
+    const isOwner = Boolean(userId && Number(row.creator_id) === Number(userId))
+    const criteria = criteriaMap.get(row.id) || { category: [], role: [], industry: [], technology: [] }
+    const steps = stepsMap.get(row.id) || []
+
+    let gallery = []
+    if (Array.isArray(row.gallery)) {
+      gallery = row.gallery
+    } else if (typeof row.gallery === 'string') {
+      try {
+        gallery = JSON.parse(row.gallery)
+      } catch {
+        gallery = []
+      }
+    } else if (row.image_url) {
+      gallery = [row.image_url]
+    }
+
+    return {
+      id: String(row.id),
+      slug: row.slug,
+      name: row.name,
+      tagline: row.tagline,
+      description: row.description,
+      stage: row.stage,
+      audience: row.audience,
+      feedbackRequest: row.feedback_request,
+      // CRITICAL SECURITY RULE: product_url is masked for non-owners in catalog responses
+      productUrl: isOwner ? row.product_url : null,
+      githubUrl: row.github_url || '',
+      imageUrl: row.image_url || '',
+      image: row.image_url || '',
+      gallery,
+      videoUrl: row.video_url || '',
+      isSample: Boolean(row.is_sample),
+      enrollmentPaused: Boolean(row.enrollment_paused),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      creatorEmail: row.creator_email,
+      maker: row.maker_name || row.creator_email.split('@')[0],
+      categories: criteria.category.length > 0 ? criteria.category : ['Other'],
+      targetRoles: criteria.role,
+      targetIndustries: criteria.industry,
+      targetTechnologies: criteria.technology,
+      whatToTry: steps,
+      isOwner,
+    }
+  })
+}
+
+// ----------------------------------------------------------------------
+// GET /api/products (Public product catalog)
+// ----------------------------------------------------------------------
+router.get('/', optionalAuth, async (req, res, next) => {
+  try {
+    let userId = null
+    if (req.authUser) {
+      userId = await findUserId(req.authUser.firebaseUid)
+    }
+
+    const { category, creator } = req.query
+
+    // If filtering by creator=me, user must be authenticated
+    if (creator === 'me') {
+      if (!userId) {
+        return res.status(401).json({ error: 'Sign in to view your products.' })
+      }
+      const [rows] = await database.execute(
+        `SELECT 
+           p.*, 
+           u.email AS creator_email, 
+           up.profile_data->>'$.displayName' AS maker_name
+         FROM products p
+         JOIN users u ON u.id = p.creator_id
+         LEFT JOIN user_profiles up ON up.user_id = p.creator_id
+         WHERE p.creator_id = ?
+         ORDER BY p.created_at DESC`,
+        [userId],
+      )
+      const list = await attachCriteriaAndSteps(rows, userId)
+      return res.json({ products: list })
+    }
+
+    let query = `
+      SELECT 
+        p.*, 
+        u.email AS creator_email, 
+        up.profile_data->>'$.displayName' AS maker_name
+      FROM products p
+      JOIN users u ON u.id = p.creator_id
+      LEFT JOIN user_profiles up ON up.user_id = p.creator_id
+    `
+    const params = []
+
+    if (category && typeof category === 'string' && category !== 'All') {
+      query += `
+        JOIN product_target_criteria ptc 
+          ON ptc.product_id = p.id 
+          AND ptc.criteria_type = 'category' 
+          AND ptc.criteria_value = ?
+      `
+      params.push(category)
+    }
+
+    query += ' ORDER BY p.created_at DESC LIMIT 100'
+
+    const [rows] = await database.execute(query, params)
+    const list = await attachCriteriaAndSteps(rows, userId)
+    return res.json({ products: list })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// GET /api/products/:slugOrId (Public product detail with owner gate)
+// ----------------------------------------------------------------------
+router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
+  try {
+    const { slugOrId } = req.params
+
+    let userId = null
+    if (req.authUser) {
+      userId = await findUserId(req.authUser.firebaseUid)
+    }
+
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const query = `
+      SELECT 
+        p.*, 
+        u.email AS creator_email, 
+        up.profile_data->>'$.displayName' AS maker_name
+      FROM products p
+      JOIN users u ON u.id = p.creator_id
+      LEFT JOIN user_profiles up ON up.user_id = p.creator_id
+      WHERE ${isNumeric ? 'p.id = ? OR p.slug = ?' : 'p.slug = ?'}
+      LIMIT 1
+    `
+    const params = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+    const [rows] = await database.execute(query, params)
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const [product] = await attachCriteriaAndSteps(rows, userId)
+    return res.json({ product })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// POST /api/products (Create product listing)
+// ----------------------------------------------------------------------
+router.post('/', requireAuth, async (req, res, next) => {
+  const { data, error } = validateProductInput(req.body)
+  if (error) return res.status(400).json({ error })
+
+  const connection = await database.getConnection()
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    // Generate unique slug
+    let baseSlug = slugify(data.name) || 'product'
+    let slug = baseSlug
+    const [existing] = await connection.execute(
+      'SELECT id FROM products WHERE slug = ? LIMIT 1',
+      [slug],
+    )
+    if (existing.length > 0) {
+      slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`
+    }
+
+    await connection.beginTransaction()
+
+    const [insertResult] = await connection.execute(
+      `INSERT INTO products (
+         slug, creator_id, name, tagline, description, stage,
+         audience, feedback_request, product_url, github_url,
+         image_url, gallery, video_url, is_sample, enrollment_paused
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE, FALSE)`,
+      [
+        slug,
+        userId,
+        data.name,
+        data.tagline,
+        data.description,
+        data.stage,
+        data.audience,
+        data.feedbackRequest,
+        data.productUrl,
+        data.githubUrl,
+        data.imageUrl,
+        data.gallery ? JSON.stringify(data.gallery) : null,
+        data.videoUrl,
+      ],
+    )
+
+    const productId = insertResult.insertId
+
+    // Insert criteria rows
+    const criteriaRows = []
+    for (const cat of data.categories) {
+      criteriaRows.push([productId, 'category', cat])
+    }
+    for (const role of data.targetRoles) {
+      criteriaRows.push([productId, 'role', role])
+    }
+    for (const ind of data.targetIndustries) {
+      criteriaRows.push([productId, 'industry', ind])
+    }
+    for (const tech of data.targetTechnologies) {
+      criteriaRows.push([productId, 'technology', tech])
+    }
+
+    if (criteriaRows.length > 0) {
+      await connection.query(
+        'INSERT INTO product_target_criteria (product_id, criteria_type, criteria_value) VALUES ?',
+        [criteriaRows],
+      )
+    }
+
+    // Insert test steps
+    if (Array.isArray(data.whatToTry) && data.whatToTry.length > 0) {
+      const stepRows = data.whatToTry.map((step, idx) => [productId, idx + 1, step])
+      await connection.query(
+        'INSERT INTO product_test_steps (product_id, step_order, instruction) VALUES ?',
+        [stepRows],
+      )
+    }
+
+    await connection.commit()
+
+    // Fetch the newly created product
+    const [rows] = await connection.execute(
+      `SELECT 
+         p.*, 
+         u.email AS creator_email, 
+         up.profile_data->>'$.displayName' AS maker_name
+       FROM products p
+       JOIN users u ON u.id = p.creator_id
+       LEFT JOIN user_profiles up ON up.user_id = p.creator_id
+       WHERE p.id = ? LIMIT 1`,
+      [productId],
+    )
+
+    const [createdProduct] = await attachCriteriaAndSteps(rows, userId)
+    return res.status(201).json({ product: createdProduct })
+  } catch (err) {
+    await connection.rollback()
+    return next(err)
+  } finally {
+    connection.release()
+  }
+})
+
+// ----------------------------------------------------------------------
+// PUT /api/products/:slugOrId (Update product listing by creator)
+// ----------------------------------------------------------------------
+router.put('/:slugOrId', requireAuth, async (req, res, next) => {
+  const { data, error } = validateProductInput(req.body, true)
+  if (error) return res.status(400).json({ error })
+
+  const connection = await database.getConnection()
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT * FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [existing] = await connection.execute(selectQuery, selectParams)
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const targetProduct = existing[0]
+    if (Number(targetProduct.creator_id) !== Number(userId)) {
+      return res.status(403).json({ error: 'Only the creator can edit this product listing.' })
+    }
+
+    await connection.beginTransaction()
+
+    await connection.execute(
+      `UPDATE products 
+       SET name = ?, tagline = ?, description = ?, stage = ?,
+           audience = ?, feedback_request = ?, product_url = ?,
+           github_url = ?, image_url = ?, gallery = ?, video_url = ?
+       WHERE id = ?`,
+      [
+        data.name,
+        data.tagline,
+        data.description,
+        data.stage,
+        data.audience,
+        data.feedbackRequest,
+        data.productUrl,
+        data.githubUrl,
+        data.imageUrl,
+        data.gallery ? JSON.stringify(data.gallery) : null,
+        data.videoUrl,
+        targetProduct.id,
+      ],
+    )
+
+    // Replace criteria
+    await connection.execute('DELETE FROM product_target_criteria WHERE product_id = ?', [targetProduct.id])
+
+    const criteriaRows = []
+    for (const cat of data.categories) {
+      criteriaRows.push([targetProduct.id, 'category', cat])
+    }
+    for (const role of data.targetRoles) {
+      criteriaRows.push([targetProduct.id, 'role', role])
+    }
+    for (const ind of data.targetIndustries) {
+      criteriaRows.push([targetProduct.id, 'industry', ind])
+    }
+    for (const tech of data.targetTechnologies) {
+      criteriaRows.push([targetProduct.id, 'technology', tech])
+    }
+
+    if (criteriaRows.length > 0) {
+      await connection.query(
+        'INSERT INTO product_target_criteria (product_id, criteria_type, criteria_value) VALUES ?',
+        [criteriaRows],
+      )
+    }
+
+    // Replace test steps if provided
+    if (Array.isArray(data.whatToTry)) {
+      await connection.execute('DELETE FROM product_test_steps WHERE product_id = ?', [targetProduct.id])
+      if (data.whatToTry.length > 0) {
+        const stepRows = data.whatToTry.map((step, idx) => [targetProduct.id, idx + 1, step])
+        await connection.query(
+          'INSERT INTO product_test_steps (product_id, step_order, instruction) VALUES ?',
+          [stepRows],
+        )
+      }
+    }
+
+    await connection.commit()
+
+    const [rows] = await connection.execute(
+      `SELECT 
+         p.*, 
+         u.email AS creator_email, 
+         up.profile_data->>'$.displayName' AS maker_name
+       FROM products p
+       JOIN users u ON u.id = p.creator_id
+       LEFT JOIN user_profiles up ON up.user_id = p.creator_id
+       WHERE p.id = ? LIMIT 1`,
+      [targetProduct.id],
+    )
+
+    const [updatedProduct] = await attachCriteriaAndSteps(rows, userId)
+    return res.json({ product: updatedProduct })
+  } catch (err) {
+    await connection.rollback()
+    return next(err)
+  } finally {
+    connection.release()
+  }
+})
+
+// ----------------------------------------------------------------------
+// PATCH /api/products/:slugOrId/pause (Toggle enrollment pause by creator)
+// ----------------------------------------------------------------------
+router.patch('/:slugOrId/pause', requireAuth, async (req, res, next) => {
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT id, slug, creator_id, enrollment_paused FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const targetProduct = rows[0]
+    if (Number(targetProduct.creator_id) !== Number(userId)) {
+      return res.status(403).json({ error: 'Only the product creator can pause or resume enrollment.' })
+    }
+
+    const nextPaused = typeof req.body?.enrollmentPaused === 'boolean'
+      ? req.body.enrollmentPaused
+      : !targetProduct.enrollment_paused
+
+    await database.execute(
+      'UPDATE products SET enrollment_paused = ? WHERE id = ?',
+      [nextPaused, targetProduct.id],
+    )
+
+    return res.json({
+      id: String(targetProduct.id),
+      slug: targetProduct.slug,
+      enrollmentPaused: Boolean(nextPaused),
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// DELETE /api/products/:slugOrId (Delete product listing by creator)
+// ----------------------------------------------------------------------
+router.delete('/:slugOrId', requireAuth, async (req, res, next) => {
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT id, creator_id FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const targetProduct = rows[0]
+    if (Number(targetProduct.creator_id) !== Number(userId)) {
+      return res.status(403).json({ error: 'Only the product creator can delete this listing.' })
+    }
+
+    await database.execute('DELETE FROM products WHERE id = ?', [targetProduct.id])
+
+    return res.json({
+      success: true,
+      message: 'Product listing deleted successfully.',
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+export default router
+

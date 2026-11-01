@@ -8,6 +8,12 @@ This service verifies Firebase Authentication ID tokens and keeps a MySQL user r
 - `POST /api/auth/me` requires `Authorization: Bearer <Firebase ID token>`, verifies the token and revocation status with Firebase Admin, requires a verified email, and creates or updates the user's MySQL row.
 - `GET /api/profiles/me` requires `Authorization: Bearer <Firebase ID token>`, verifies authentication, maps to the user record, and retrieves `profile` JSON and `updatedAt`.
 - `PUT /api/profiles/me` requires `Authorization: Bearer <Firebase ID token>`, validates profile fields (string/array length constraints against allowed keys), and upserts `user_profiles` in MySQL.
+- `GET /api/products` (Public) lists products with aggregated categories and test steps. **Masks `product_url` to `null`** for catalog privacy. Supports `?category=` filter and `?creator=me` (requires Bearer token).
+- `GET /api/products/:slugOrId` (Public with `optionalAuth`) retrieves single product details. Unlocks `product_url` only when requester is the verified creator.
+- `POST /api/products` (Authenticated) creates a new product listing, generates slug, and inserts target criteria and test steps in a MySQL transaction.
+- `PUT /api/products/:slugOrId` (Authenticated) updates listing fields, replacing criteria and test steps inside a transaction (creator-only).
+- `PATCH /api/products/:slugOrId/pause` (Authenticated) toggles or updates `enrollment_paused` (creator-only).
+- `DELETE /api/products/:slugOrId` (Authenticated) deletes product listing with cascading deletion of criteria and test steps (creator-only).
 
 The frontend sign-up, sign-in, and email verification pages are wired to Firebase Authentication and connect to `POST /api/auth/me` upon successful authentication. User profile setup is wired to `/api/profiles/me`. Existing product, enrollment, feedback, and problem data continue to use the local demo context; full data migration for domain models is slated for future milestones.
 
