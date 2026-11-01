@@ -43,22 +43,31 @@ export default function SubmitProblemPage() {
     return Object.keys(errs).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validate()) return
 
-    const newProb = addProblem({
-      title,
-      statement,
-      workarounds,
-      targetAudience,
-      proposedConcept,
-      category,
-      maker: (user?.email ? getProfile(user.email)?.displayName?.trim() : null) || (user?.email ? user.email.split('@')[0] : 'Independent Builder'),
-      creatorEmail: user?.email || '',
-    })
+    try {
+      const newProb = await addProblem({
+        title,
+        statement,
+        workarounds,
+        targetAudience,
+        proposedConcept,
+        category,
+        maker: (user?.email ? getProfile(user.email)?.displayName?.trim() : null) || (user?.email ? user.email.split('@')[0] : 'Independent Builder'),
+        creatorEmail: user?.email || '',
+      })
 
-    navigate(`/problems/${newProb.id}`)
+      if (newProb) {
+        navigate(`/problems/${newProb.slug || newProb.id}`)
+      }
+    } catch (err) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: err.message || 'Could not publish problem hypothesis. Ensure database is migrated.',
+      }))
+    }
   }
 
   return (
@@ -254,6 +263,11 @@ export default function SubmitProblemPage() {
 
             {/* Submit Action */}
             <div className="pt-8">
+              {errors.submit && (
+                <div className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-center text-sm font-semibold text-rose-600 dark:text-rose-400">
+                  {errors.submit}
+                </div>
+              )}
               <button
                 type="submit"
                 className="w-full rounded-full bg-[#1f3a6b] px-6 py-3.5 text-sm font-bold uppercase tracking-wider text-white shadow-warm-md transition hover:bg-[#182f56] dark:bg-[#dbbf95] dark:text-[#15203a] dark:hover:bg-[#ecdcc2] hover:-translate-y-0.5 active:translate-y-0 cursor-pointer min-h-[48px]"

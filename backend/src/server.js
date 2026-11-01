@@ -9,6 +9,7 @@ import profileRoutes from './routes/profiles.js'
 import productRoutes from './routes/products.js'
 import enrollmentRoutes from './routes/enrollments.js'
 import feedbackRoutes from './routes/feedback.js'
+import problemsRoutes from './routes/problems.js'
 
 const app = express()
 const port = Number(process.env.PORT || 3001)
@@ -20,7 +21,9 @@ const allowedOrigins = new Set(
 )
 
 app.disable('x-powered-by')
-app.use(helmet())
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}))
 app.use(cors({
   origin(origin, callback) {
     if (!origin || allowedOrigins.has(origin)) return callback(null, true)
@@ -45,6 +48,7 @@ app.use('/api/profiles', profileRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/enrollments', enrollmentRoutes)
 app.use('/api/feedback', feedbackRoutes)
+app.use('/api/problems', problemsRoutes)
 
 app.use((error, _req, res, _next) => {
   console.error('API request failed:', error.message)

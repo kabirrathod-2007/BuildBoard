@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router'
 import { motion, AnimatePresence } from 'motion/react'
 import { useDemoData } from '../context/DemoDataContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
+import { fetchProblemDetails } from '../lib/api.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 
@@ -365,7 +366,31 @@ export default function ProblemDetailsPage() {
   const [selectedProductId, setSelectedProductId] = useState('')
   const [attachError, setAttachError] = useState('')
 
-  const problem = getProblem(problemId)
+  const contextProblem = getProblem(problemId)
+  const [serverProblem, setServerProblem] = useState(null)
+
+  useEffect(() => {
+    if (!problemId) return
+    let active = true
+
+    async function loadProblem() {
+      try {
+        const res = await fetchProblemDetails(problemId)
+        if (active && res?.problem) {
+          setServerProblem(res.problem)
+        }
+      } catch {
+        if (active) setServerProblem(null)
+      }
+    }
+
+    loadProblem()
+    return () => {
+      active = false
+    }
+  }, [problemId])
+
+  const problem = serverProblem || contextProblem
   const problemMakerProfile = problem?.creatorEmail ? getProfile(problem.creatorEmail) : null
   const problemMakerName =
     problemMakerProfile?.displayName?.trim() ||

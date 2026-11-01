@@ -198,9 +198,13 @@ function ProblemItem({ problem, index }) {
 
 export default function ProblemsPage() {
   useDocumentTitle('Community Problem Board & Pre-MVP Validation | BuildBoard')
-  const { problems } = useDemoData()
+  const { problems, loadServerProblems } = useDemoData()
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    loadServerProblems?.()
+  }, [loadServerProblems])
 
   const search = searchParams.get('q') || ''
   const activeCategory = searchParams.get('cat') || 'All categories'

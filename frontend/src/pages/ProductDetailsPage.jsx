@@ -122,6 +122,7 @@ export default function ProductDetailsPage() {
     products,
     enrollInProduct,
     isEnrolledInProduct,
+    loadMyEnrollments,
     getEnrollmentDate,
     dismissFeedbackReminder,
     isFeedbackReminderDismissed,
@@ -171,14 +172,24 @@ export default function ProductDetailsPage() {
     }
   }, [productId, loadProductFeedback])
 
+  useEffect(() => {
+    if (user?.email) {
+      loadMyEnrollments?.()
+    }
+  }, [user?.email, loadMyEnrollments])
+
   const product = serverDetail || contextProduct
   const makerProfile = product?.creatorEmail ? getProfile(product.creatorEmail) : null
   const makerName =
     makerProfile?.displayName?.trim() ||
     product?.maker ||
     (product?.creatorEmail ? product.creatorEmail.split('@')[0] : 'Independent Creator')
-  const isEnrolled = user && product ? isEnrolledInProduct(product.id, user.email) : false
-  const isOwner = user && product ? isProductOwner(product.id, user.email) : false
+  const isEnrolled = user && product
+    ? (Boolean(product?.isEnrolled) || isEnrolledInProduct(product.id, user.email) || isEnrolledInProduct(product.slug, user.email))
+    : false
+  const isOwner = user && product
+    ? (Boolean(product?.isOwner) || isProductOwner(product.id, user.email) || isProductOwner(product.slug, user.email))
+    : false
 
   // IndexedDB media integration
   const { url: coverDbUrl } = useIndexedDbMedia(product?.mediaId, product?.image || '')
@@ -275,10 +286,10 @@ export default function ProductDetailsPage() {
     const result = await enrollInProduct(product.id, user.email)
     if (!result.success) {
       setEnrollmentError(result.error)
-    } else if (result.productUrl) {
+    } else {
       setServerDetail((prev) => ({
         ...(prev || product),
-        productUrl: result.productUrl,
+        productUrl: result.productUrl || prev?.productUrl || product?.productUrl,
         isEnrolled: true,
       }))
     }

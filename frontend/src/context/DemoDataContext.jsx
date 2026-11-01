@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
 import { products as initialSeedProducts } from '../data/products'
-import { seedProblems as initialSeedProblems } from '../data/problems'
 import { deleteMediaFile } from '../utils/indexedDB'
 import { useAuth } from './AuthContext.jsx'
 import {
@@ -20,6 +19,13 @@ import {
   replyToFeedbackApi,
   toggleFeedbackHelpfulApi,
   fetchMyFeedback,
+  fetchProblems,
+  createProblemApi,
+  deleteProblemApi,
+  toggleProblemValidationApi,
+  toggleProblemTesterSignupApi,
+  addProblemCommentApi,
+  attachProblemSolutionApi,
 } from '../lib/api.js'
 
 const DemoDataContext = createContext(null)
@@ -32,14 +38,20 @@ export const useDemoData = () => {
   return context
 }
 
-const PRODUCTS_STORAGE_KEY = 'buildboard_demo_custom_products'
-const DELETED_PRODUCTS_STORAGE_KEY = 'buildboard_demo_deleted_products'
-const ENROLLMENTS_STORAGE_KEY = 'buildboard_demo_enrollments'
-const FEEDBACK_STORAGE_KEY = 'buildboard_demo_feedback'
-const VIEWS_STORAGE_KEY = 'buildboard_demo_views'
-const PROFILES_STORAGE_KEY = 'buildboard_demo_profiles'
+// Purge legacy demo localStorage caches so every account starts completely clean from MySQL
+try {
+  localStorage.removeItem('buildboard_demo_custom_products')
+  localStorage.removeItem('buildboard_demo_deleted_products')
+  localStorage.removeItem('buildboard_demo_enrollments')
+  localStorage.removeItem('buildboard_demo_feedback')
+  localStorage.removeItem('buildboard_demo_views')
+  localStorage.removeItem('buildboard_demo_profiles')
+  localStorage.removeItem('buildboard_demo_problems')
+} catch {
+  // Ignore in restricted environments
+}
+
 const REMINDER_DISMISSALS_STORAGE_KEY = 'buildboard_demo_reminder_dismissals'
-const PROBLEMS_STORAGE_KEY = 'buildboard_demo_problems'
 
 function slugify(text) {
   return text
@@ -109,118 +121,25 @@ export const DemoDataProvider = ({ children }) => {
     }
   }, [])
 
-  // Custom products created on this device
-  const [customProducts, setCustomProducts] = useState(() => {
-    try {
-      const saved = localStorage.getItem(PRODUCTS_STORAGE_KEY)
-      if (!saved) return []
-      const parsed = JSON.parse(saved)
-      const UNSPLASH_FALLBACK = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'
-      // Clean up legacy fallback image from products created without an image
-      return parsed.map((p) => {
-        let updated = p
-        if (p.image === UNSPLASH_FALLBACK) {
-          updated = { ...updated, image: '' }
-        }
-        if (Array.isArray(updated.gallery)) {
-          const cleanedGallery = updated.gallery.filter((g) => g !== UNSPLASH_FALLBACK)
-          if (cleanedGallery.length !== updated.gallery.length) {
-            updated = { ...updated, gallery: cleanedGallery }
-          }
-        }
-        return updated
-      })
-    } catch {
-      return []
-    }
-  })
+  // Custom products created on this device (in memory only; cloud MySQL is authoritative)
+  const [customProducts, setCustomProducts] = useState([])
 
-  // Enrollments mapping: key is "userEmail:productId", value is timestamp
-  const [enrollments, setEnrollments] = useState(() => {
-    try {
-      const saved = localStorage.getItem(ENROLLMENTS_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : {}
-    } catch {
-      return {}
-    }
-  })
+  // Enrollments mapping: key is "userEmail:productId", value is timestamp (cloud authoritative)
+  const [enrollments, setEnrollments] = useState({})
 
-  // Feedback list: array of feedback objects
-  const [feedbackList, setFeedbackList] = useState(() => {
-    try {
-      const saved = localStorage.getItem(FEEDBACK_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : []
-    } catch {
-      return []
-    }
-  })
+  // Feedback list: array of feedback objects (cloud authoritative)
+  const [feedbackList, setFeedbackList] = useState([])
 
   // Views mapping: key is productId, value is total view count
-  const [views, setViews] = useState(() => {
-    try {
-      const saved = localStorage.getItem(VIEWS_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : {}
-    } catch {
-      return {}
-    }
-  })
+  const [views, setViews] = useState({})
 
+  // Profiles mapping: key is normalized email, value is profile object (cloud authoritative)
+  const [profiles, setProfiles] = useState({})
 
-  // Synchronize custom products to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(customProducts))
-    } catch (e) {
-      console.error('Failed to sync demo products to localStorage', e)
-    }
-  }, [customProducts])
-
-  // Synchronize enrollments to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(ENROLLMENTS_STORAGE_KEY, JSON.stringify(enrollments))
-    } catch (e) {
-      console.error('Failed to sync demo enrollments to localStorage', e)
-    }
-  }, [enrollments])
-
-  // Synchronize feedback to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(FEEDBACK_STORAGE_KEY, JSON.stringify(feedbackList))
-    } catch (e) {
-      console.error('Failed to sync demo feedback to localStorage', e)
-    }
-  }, [feedbackList])
-
-  // Synchronize views to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(VIEWS_STORAGE_KEY, JSON.stringify(views))
-    } catch (e) {
-      console.error('Failed to sync demo views to localStorage', e)
-    }
-  }, [views])
-
-
-  // Profiles mapping: key is normalized email, value is profile object
-  const [profiles, setProfiles] = useState(() => {
-    try {
-      const saved = localStorage.getItem(PROFILES_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : {}
-    } catch {
-      return {}
-    }
-  })
-
-  // Synchronize profiles to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(profiles))
-    } catch (e) {
-      console.error('Failed to sync demo profiles to localStorage', e)
-    }
-  }, [profiles])
+  // Problems state synchronized from MySQL cloud API
+  const [problems, setProblems] = useState([])
+  const [problemsLoading, setProblemsLoading] = useState(false)
+  const [problemsError, setProblemsError] = useState(null)
 
   // Synchronize authenticated user profile with MySQL cloud API
   useEffect(() => {
@@ -277,7 +196,10 @@ export const DemoDataProvider = ({ children }) => {
 
   // Synchronize authenticated user enrollments with MySQL cloud API
   const loadMyEnrollments = useCallback(async () => {
-    if (!user?.email) return []
+    if (!user?.email) {
+      setEnrollments({})
+      return []
+    }
     try {
       const res = await fetchMyEnrollments()
       if (Array.isArray(res?.enrollments)) {
@@ -292,7 +214,6 @@ export const DemoDataProvider = ({ children }) => {
             newEntries[`${normalized}:${item.product.slug}`] = enrolledAt
           }
         }
-        // Reset to only THIS user's active cloud enrollments so accounts don't bleed
         setEnrollments(newEntries)
         return res.enrollments
       }
@@ -302,44 +223,12 @@ export const DemoDataProvider = ({ children }) => {
     return []
   }, [user])
 
-  useEffect(() => {
-    if (!user?.email || !user?.emailVerified) return
-    let active = true
-
-    async function syncCloudEnrollments() {
-      try {
-        const res = await fetchMyEnrollments()
-        if (active && Array.isArray(res?.enrollments)) {
-          const normalized = user.email.toLowerCase().trim()
-          const newEntries = {}
-          for (const item of res.enrollments) {
-            const enrolledAt = item.enrolledAt || new Date().toISOString()
-            if (item.product?.id) {
-              newEntries[`${normalized}:${item.product.id}`] = enrolledAt
-            }
-            if (item.product?.slug) {
-              newEntries[`${normalized}:${item.product.slug}`] = enrolledAt
-            }
-          }
-          setEnrollments(newEntries)
-        }
-      } catch (err) {
-        if (active) {
-          console.warn('[BuildBoard] Could not load user enrollments:', err.message)
-        }
-      }
-    }
-
-    syncCloudEnrollments()
-
-    return () => {
-      active = false
-    }
-  }, [user])
-
   // Synchronize authenticated user feedback with MySQL cloud API
   const loadMyFeedback = useCallback(async () => {
-    if (!user?.email) return []
+    if (!user?.email) {
+      setFeedbackList([])
+      return []
+    }
     try {
       const res = await fetchMyFeedback()
       if (Array.isArray(res?.feedback)) {
@@ -348,11 +237,7 @@ export const DemoDataProvider = ({ children }) => {
           ...f,
           userEmail: (f.userEmail || normalized).toLowerCase().trim(),
         }))
-        setFeedbackList((prev) => {
-          const incomingIds = new Set(list.map((f) => String(f.id)))
-          const remaining = prev.filter((f) => !incomingIds.has(String(f.id)))
-          return [...list, ...remaining]
-        })
+        setFeedbackList(list)
         return list
       }
     } catch (err) {
@@ -362,37 +247,74 @@ export const DemoDataProvider = ({ children }) => {
   }, [user])
 
   useEffect(() => {
-    if (!user?.email || !user?.emailVerified) return
     let active = true
 
-    async function syncCloudFeedback() {
-      try {
-        const res = await fetchMyFeedback()
-        if (active && Array.isArray(res?.feedback)) {
-          const normalized = user.email.toLowerCase().trim()
-          const list = res.feedback.map((f) => ({
-            ...f,
-            userEmail: (f.userEmail || normalized).toLowerCase().trim(),
-          }))
-          setFeedbackList((prev) => {
-            const incomingIds = new Set(list.map((f) => String(f.id)))
-            const remaining = prev.filter((f) => !incomingIds.has(String(f.id)))
-            return [...list, ...remaining]
-          })
-        }
-      } catch (err) {
-        if (active) {
-          console.warn('[BuildBoard] Could not load user feedback from cloud:', err.message)
-        }
+    async function syncUserData() {
+      if (!user?.email) {
+        setEnrollments((prev) => (Object.keys(prev).length === 0 ? prev : {}))
+        setFeedbackList((prev) => (prev.length === 0 ? prev : []))
+        return
+      }
+      if (active) {
+        await Promise.allSettled([loadMyEnrollments(), loadMyFeedback()])
       }
     }
 
-    syncCloudFeedback()
+    syncUserData()
 
     return () => {
       active = false
     }
-  }, [user])
+  }, [user?.email, loadMyEnrollments, loadMyFeedback])
+
+  // Synchronize community problems with MySQL cloud API
+  const loadServerProblems = useCallback(async (params = {}) => {
+    try {
+      setProblemsLoading(true)
+      setProblemsError(null)
+      const res = await fetchProblems(params)
+      if (Array.isArray(res?.problems)) {
+        setProblems(res.problems)
+        return res.problems
+      }
+    } catch (err) {
+      console.warn('[BuildBoard] Could not load problems from API:', err.message)
+      setProblemsError(err.message)
+    } finally {
+      setProblemsLoading(false)
+    }
+    return []
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    async function initProblems() {
+      try {
+        setProblemsLoading(true)
+        setProblemsError(null)
+        const res = await fetchProblems()
+        if (active && Array.isArray(res?.problems)) {
+          setProblems(res.problems)
+        }
+      } catch (err) {
+        if (active) {
+          console.warn('[BuildBoard] Could not load problems from API:', err.message)
+          setProblemsError(err.message)
+        }
+      } finally {
+        if (active) {
+          setProblemsLoading(false)
+        }
+      }
+    }
+
+    initProblems()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   // Reminder dismissals mapping: key is "userEmail:productId", value is dismissal timestamp
   const [reminderDismissals, setReminderDismissals] = useState(() => {
@@ -413,24 +335,8 @@ export const DemoDataProvider = ({ children }) => {
     }
   }, [reminderDismissals])
 
-  // Deleted product IDs tracking (persisted across sessions)
-  const [deletedProductIds, setDeletedProductIds] = useState(() => {
-    try {
-      const saved = localStorage.getItem(DELETED_PRODUCTS_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : []
-    } catch {
-      return []
-    }
-  })
-
-  // Synchronize deleted product IDs to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(DELETED_PRODUCTS_STORAGE_KEY, JSON.stringify(deletedProductIds))
-    } catch (e) {
-      console.error('Failed to sync deleted product IDs to localStorage', e)
-    }
-  }, [deletedProductIds])
+  // Deleted product IDs tracking (in memory)
+  const [deletedProductIds, setDeletedProductIds] = useState([])
 
   // Combined product list (server products take precedence, then local custom products, then sample seed products)
   const products = useMemo(() => {
@@ -1098,7 +1004,7 @@ export const DemoDataProvider = ({ children }) => {
     if (!productId || !userEmail) {
       return { success: false, error: 'User and product ID are required.' }
     }
-    const targetProduct = products.find((p) => p.id === productId || p.slug === productId)
+    const targetProduct = products.find((p) => String(p.id) === String(productId) || p.slug === productId)
     if (!targetProduct) {
       return { success: false, error: 'Product listing not found.' }
     }
@@ -1108,9 +1014,9 @@ export const DemoDataProvider = ({ children }) => {
 
     const nextPaused = !targetProduct.enrollmentPaused
 
-    if (user?.email && user?.emailVerified && targetProduct.isServerSynced) {
+    if (user?.email && user?.emailVerified) {
       try {
-        const res = await toggleProductPause(targetProduct.id, nextPaused)
+        const res = await toggleProductPause(targetProduct.id || targetProduct.slug, nextPaused)
         const updatedRecord = {
           ...targetProduct,
           enrollmentPaused: res.enrollmentPaused,
@@ -1127,7 +1033,6 @@ export const DemoDataProvider = ({ children }) => {
     const updatedRecord = {
       ...targetProduct,
       enrollmentPaused: nextPaused,
-      isLocalDemo: true,
     }
 
     setCustomProducts((prev) => {
@@ -1276,167 +1181,111 @@ export const DemoDataProvider = ({ children }) => {
     return updated
   }
 
-  // Migration helper to link seed replies if loaded from older localStorage
-  const migrateComments = (commentsList) => {
-    if (!Array.isArray(commentsList)) return []
-    return commentsList.map((c) => {
-      if (!c.parentId) {
-        if (c.id === 'c2') return { ...c, parentId: 'c1', replyToAuthor: 'Alex Mercer' }
-        if (c.id === 'c3') return { ...c, parentId: 'c1', replyToAuthor: 'Elena Rostova' }
-        if (c.id === 'c6') return { ...c, parentId: 'c5', replyToAuthor: 'Priya N.' }
-      }
-      return c
-    })
-  }
-
   // --- Community Problems & Pre-MVP Validation ---
-  const [problems, setProblems] = useState(() => {
+  const addProblem = async (problemData) => {
     try {
-      const saved = localStorage.getItem(PROBLEMS_STORAGE_KEY)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        // Ensure initial seed problems are merged in if not present
-        const savedIds = new Set(parsed.map((p) => p.id))
-        const unaddedSeeds = initialSeedProblems.filter((p) => !savedIds.has(p.id))
-        const combined = [...parsed, ...unaddedSeeds]
-        return combined.map((p) => ({
-          ...p,
-          comments: migrateComments(p.comments),
-        }))
+      const res = await createProblemApi({
+        title: problemData.title.trim(),
+        statement: problemData.statement.trim(),
+        workarounds: (problemData.workarounds || '').trim(),
+        targetAudience: (problemData.targetAudience || '').trim(),
+        proposedConcept: (problemData.proposedConcept || '').trim(),
+        category: problemData.category || 'Developer Tools',
+        targetRoles: Array.isArray(problemData.targetRoles) ? problemData.targetRoles : [],
+        targetIndustries: Array.isArray(problemData.targetIndustries) ? problemData.targetIndustries : [],
+      })
+      if (res?.problem) {
+        setProblems((prev) => [res.problem, ...prev.filter((p) => p.id !== res.problem.id)])
+        return res.problem
       }
-      return initialSeedProblems.map((p) => ({
-        ...p,
-        comments: migrateComments(p.comments),
-      }))
-    } catch {
-      return initialSeedProblems
+    } catch (err) {
+      console.warn('[BuildBoard] Cloud problem creation failed:', err.message)
+      throw err
     }
-  })
+  }
 
-  // Synchronize problems to localStorage
-  useEffect(() => {
+  const toggleProblemValidation = async (problemId) => {
+    if (!problemId) return { success: false, error: 'Problem ID is required.' }
     try {
-      localStorage.setItem(PROBLEMS_STORAGE_KEY, JSON.stringify(problems))
-    } catch (e) {
-      console.error('Failed to sync problems to localStorage', e)
+      const res = await toggleProblemValidationApi(problemId)
+      setProblems((prev) =>
+        prev.map((prob) => {
+          if (String(prob.id) === String(problemId) || prob.slug === String(problemId)) {
+            return {
+              ...prob,
+              hasValidated: res.validated,
+              validationCount: res.validationCount,
+            }
+          }
+          return prob
+        })
+      )
+      return { success: true, validated: res.validated, count: res.validationCount }
+    } catch (err) {
+      return { success: false, error: err.message || 'Failed to toggle validation.' }
     }
-  }, [problems])
-
-  const addProblem = (problemData) => {
-    const baseSlug = slugify(problemData.title) || 'problem'
-    let id = baseSlug
-    if (problems.some((p) => p.id === id)) {
-      id = `${baseSlug}-${Date.now().toString().slice(-4)}`
-    }
-
-    const creatorEmail = (problemData.creatorEmail || '').toLowerCase().trim()
-    const newProblem = {
-      id,
-      title: problemData.title.trim(),
-      statement: problemData.statement.trim(),
-      workarounds: (problemData.workarounds || '').trim(),
-      targetAudience: (problemData.targetAudience || '').trim(),
-      targetRoles: Array.isArray(problemData.targetRoles) ? problemData.targetRoles : [],
-      targetIndustries: Array.isArray(problemData.targetIndustries) ? problemData.targetIndustries : [],
-      proposedConcept: (problemData.proposedConcept || '').trim(),
-      category: problemData.category || 'Developer Tools',
-      stage: 'Validating Need',
-      maker: problemData.maker || (creatorEmail ? profiles[creatorEmail]?.displayName?.trim() : null) || (creatorEmail ? creatorEmail.split('@')[0] : 'Independent Builder'),
-      creatorEmail,
-      validatedBy: creatorEmail ? [creatorEmail] : [],
-      testerSignups: [],
-      comments: [],
-      createdAt: new Date().toISOString(),
-    }
-
-    setProblems((prev) => [newProblem, ...prev])
-    return newProblem
   }
 
-  const toggleProblemValidation = (problemId, userEmail) => {
-    if (!problemId || !userEmail) return { success: false, error: 'Problem ID and user email required.' }
-    const normalized = userEmail.toLowerCase().trim()
+  const toggleProblemTesterSignup = async (problemId) => {
+    if (!problemId) return { success: false, error: 'Problem ID is required.' }
+    try {
+      const res = await toggleProblemTesterSignupApi(problemId)
+      setProblems((prev) =>
+        prev.map((prob) => {
+          if (String(prob.id) === String(problemId) || prob.slug === String(problemId)) {
+            return {
+              ...prob,
+              hasSignedUp: res.signedUp,
+              testerSignupCount: res.testerSignupCount,
+            }
+          }
+          return prob
+        })
+      )
+      return { success: true, signedUp: res.signedUp, count: res.testerSignupCount }
+    } catch (err) {
+      return { success: false, error: err.message || 'Failed to toggle tester waitlist signup.' }
+    }
+  }
 
-    let updatedValidated = false
-    setProblems((prev) =>
-      prev.map((prob) => {
-        if (prob.id !== problemId) return prob
-        const hasValidated = prob.validatedBy?.includes(normalized)
-        updatedValidated = !hasValidated
-        const newValidatedBy = hasValidated
-          ? prob.validatedBy.filter((e) => e !== normalized)
-          : [...(prob.validatedBy || []), normalized]
-        return {
-          ...prob,
-          validatedBy: newValidatedBy,
-        }
+  const addProblemComment = async (problemId, { text, parentId = null, replyToAuthor = null }) => {
+    if (!problemId || !text?.trim()) return null
+    try {
+      const res = await addProblemCommentApi(problemId, {
+        text: text.trim(),
+        parentId: parentId || null,
+        replyToAuthor: replyToAuthor || null,
       })
-    )
-    return { success: true, validated: updatedValidated }
-  }
-
-  const toggleProblemTesterSignup = (problemId, userEmail) => {
-    if (!problemId || !userEmail) return { success: false, error: 'Problem ID and user email required.' }
-    const normalized = userEmail.toLowerCase().trim()
-
-    let updatedSignedUp = false
-    setProblems((prev) =>
-      prev.map((prob) => {
-        if (prob.id !== problemId) return prob
-        const hasSignedUp = prob.testerSignups?.includes(normalized)
-        updatedSignedUp = !hasSignedUp
-        const newSignups = hasSignedUp
-          ? prob.testerSignups.filter((e) => e !== normalized)
-          : [...(prob.testerSignups || []), normalized]
-        return {
-          ...prob,
-          testerSignups: newSignups,
-        }
-      })
-    )
-    return { success: true, signedUp: updatedSignedUp }
-  }
-
-  const addProblemComment = (problemId, { text, authorEmail, authorName, parentId = null, replyToAuthor = null }) => {
-    if (!problemId || !text?.trim() || !authorEmail) return null
-    const normalizedEmail = authorEmail.toLowerCase().trim()
-
-    const newComment = {
-      id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      parentId: parentId || null,
-      replyToAuthor: replyToAuthor || null,
-      authorEmail: normalizedEmail,
-      authorName: authorName || profiles[normalizedEmail]?.displayName?.trim() || normalizedEmail.split('@')[0],
-      text: text.trim(),
-      createdAt: new Date().toISOString(),
-      isMakerReply: false,
+      if (res?.comment) {
+        setProblems((prev) =>
+          prev.map((prob) => {
+            if (String(prob.id) === String(problemId) || prob.slug === String(problemId)) {
+              return {
+                ...prob,
+                commentCount: (prob.commentCount || 0) + 1,
+                comments: [...(prob.comments || []), res.comment],
+              }
+            }
+            return prob
+          })
+        )
+        return res.comment
+      }
+    } catch (err) {
+      console.warn('[BuildBoard] Cloud comment creation failed:', err.message)
+      throw err
     }
-
-    setProblems((prev) =>
-      prev.map((prob) => {
-        if (prob.id !== problemId) return prob
-        const isMaker = prob.creatorEmail === normalizedEmail
-        const commentWithRole = { ...newComment, isMakerReply: isMaker }
-        return {
-          ...prob,
-          comments: [...(prob.comments || []), commentWithRole],
-        }
-      })
-    )
-    return newComment
   }
 
-  const deleteProblem = (problemId, userEmail) => {
-    if (!problemId || !userEmail) return { success: false, error: 'Problem ID and user email required.' }
-    const normalized = userEmail.toLowerCase().trim()
-    const target = problems.find((p) => p.id === problemId)
-    if (!target) return { success: false, error: 'Problem hypothesis not found.' }
-    if (target.creatorEmail && target.creatorEmail.toLowerCase().trim() !== normalized) {
-      return { success: false, error: 'Only the originator who posted this hypothesis can delete it.' }
+  const deleteProblem = async (problemId) => {
+    if (!problemId) return { success: false, error: 'Problem ID is required.' }
+    try {
+      await deleteProblemApi(problemId)
+      setProblems((prev) => prev.filter((p) => String(p.id) !== String(problemId) && p.slug !== String(problemId)))
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message || 'Failed to delete problem hypothesis.' }
     }
-
-    setProblems((prev) => prev.filter((p) => p.id !== problemId))
-    return { success: true }
   }
 
   const toggleProblemNotification = (problemId, userEmail) => {
@@ -1462,35 +1311,36 @@ export const DemoDataProvider = ({ children }) => {
     return { success: true, subscribed: updatedNotified }
   }
 
-  const attachProblemSolution = (problemId, solutionData) => {
+  const attachProblemSolution = async (problemId, solutionData) => {
     if (!problemId || !solutionData?.title?.trim()) {
       return { success: false, error: 'Problem ID and solution title required.' }
     }
-    const authorEmail = (solutionData.authorEmail || '').toLowerCase().trim()
-    const newSolution = {
-      id: `sol-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      title: solutionData.title.trim(),
-      description: (solutionData.description || '').trim(),
-      productId: solutionData.productId || null,
-      productUrl: solutionData.productUrl ? solutionData.productUrl.trim() : '',
-      authorEmail,
-      authorName: solutionData.authorName || (authorEmail ? profiles[authorEmail]?.displayName?.trim() : null) || 'Independent Maker',
-      isMaker: Boolean(solutionData.isMaker),
-      upvotes: authorEmail ? [authorEmail] : [],
-      createdAt: new Date().toISOString(),
-    }
-
-    setProblems((prev) =>
-      prev.map((prob) => {
-        if (prob.id !== problemId) return prob
-        return {
-          ...prob,
-          stage: 'Prototyping',
-          solutions: [...(prob.solutions || []), newSolution],
-        }
+    try {
+      const res = await attachProblemSolutionApi(problemId, {
+        title: solutionData.title.trim(),
+        description: (solutionData.description || '').trim(),
+        productUrl: (solutionData.productUrl || '').trim(),
+        productId: solutionData.productId || null,
       })
-    )
-    return { success: true, solution: newSolution }
+      if (res?.solution) {
+        setProblems((prev) =>
+          prev.map((prob) => {
+            if (String(prob.id) === String(problemId) || prob.slug === String(problemId)) {
+              return {
+                ...prob,
+                stage: 'Prototyping',
+                solutionCount: (prob.solutionCount || 0) + 1,
+                solutions: [...(prob.solutions || []), res.solution],
+              }
+            }
+            return prob
+          })
+        )
+        return { success: true, solution: res.solution }
+      }
+    } catch (err) {
+      return { success: false, error: err.message || 'Failed to attach solution.' }
+    }
   }
 
   const effectiveProblems = useMemo(() => {
@@ -1559,6 +1409,9 @@ export const DemoDataProvider = ({ children }) => {
         profileLoading,
         profileError,
         problems: effectiveProblems,
+        loadServerProblems,
+        problemsLoading,
+        problemsError,
         addProblem,
         deleteProblem,
         toggleProblemValidation,

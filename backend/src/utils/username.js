@@ -53,3 +53,4 @@ export async function generateUniqueUsername(database, displayName, excludeUserI
   // Fallback with timestamp slice if high collision
   return `${base}${Date.now().toString().slice(-6)}`
 }
+

@@ -165,4 +165,67 @@ export async function fetchMyFeedback() {
   })
 }
 
+// ----------------------------------------------------------------------
+// Problems API Methods
+// ----------------------------------------------------------------------
+
+export async function fetchProblems(params = {}) {
+  const query = new URLSearchParams()
+  if (params.category && params.category !== 'All') query.set('category', params.category)
+  if (params.stage && params.stage !== 'All') query.set('stage', params.stage)
+  if (params.role) query.set('role', params.role)
+  if (params.industry) query.set('industry', params.industry)
+  if (params.search) query.set('search', params.search)
+
+  const queryString = query.toString()
+  const endpoint = queryString ? `/api/problems?${queryString}` : '/api/problems'
+  return request(endpoint, { method: 'GET' })
+}
+
+export async function fetchProblemDetails(slugOrId) {
+  return request(`/api/problems/${encodeURIComponent(slugOrId)}`, {
+    method: 'GET',
+  })
+}
+
+export async function createProblemApi(data) {
+  return request('/api/problems', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deleteProblemApi(slugOrId) {
+  return request(`/api/problems/${encodeURIComponent(slugOrId)}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function toggleProblemValidationApi(slugOrId) {
+  return request(`/api/problems/${encodeURIComponent(slugOrId)}/validate`, {
+    method: 'POST',
+  })
+}
+
+export async function toggleProblemTesterSignupApi(slugOrId) {
+  return request(`/api/problems/${encodeURIComponent(slugOrId)}/tester-signup`, {
+    method: 'POST',
+  })
+}
+
+export async function addProblemCommentApi(slugOrId, commentData) {
+  return request(`/api/problems/${encodeURIComponent(slugOrId)}/comments`, {
+    method: 'POST',
+    body: JSON.stringify(commentData),
+  })
+}
+
+export async function attachProblemSolutionApi(slugOrId, solutionData) {
+  return request(`/api/problems/${encodeURIComponent(slugOrId)}/solutions`, {
+    method: 'POST',
+    body: JSON.stringify(solutionData),
+  })
+}
+
+
 
