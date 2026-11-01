@@ -46,10 +46,11 @@ export default function TesterActivityPage() {
   const feedbackByProduct = useMemo(() => {
     const map = new Map()
     for (const fb of userFeedback) {
-      if (!map.has(fb.productId)) {
-        map.set(fb.productId, [])
+      const pid = String(fb.productId)
+      if (!map.has(pid)) {
+        map.set(pid, [])
       }
-      map.get(fb.productId).push(fb)
+      map.get(pid).push(fb)
     }
     return map
   }, [userFeedback])
@@ -64,17 +65,17 @@ export default function TesterActivityPage() {
   const totalHelpfulNotes = recognition.helpfulCount
 
   const reviewedEnrolledCount = enrolledItems.filter((item) =>
-    feedbackByProduct.has(item.productId)
+    feedbackByProduct.has(String(item.productId))
   ).length
   const pendingEnrolledCount = totalEnrolled - reviewedEnrolledCount
 
   // Filtered enrolled prototypes
   const filteredEnrolled = useMemo(() => {
     if (enrolledFilter === 'submitted') {
-      return enrolledItems.filter((item) => feedbackByProduct.has(item.productId))
+      return enrolledItems.filter((item) => feedbackByProduct.has(String(item.productId)))
     }
     if (enrolledFilter === 'pending') {
-      return enrolledItems.filter((item) => !feedbackByProduct.has(item.productId))
+      return enrolledItems.filter((item) => !feedbackByProduct.has(String(item.productId)))
     }
     return enrolledItems
   }, [enrolledItems, enrolledFilter, feedbackByProduct])

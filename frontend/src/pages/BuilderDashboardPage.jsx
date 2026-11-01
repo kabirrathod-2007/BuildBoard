@@ -40,6 +40,7 @@ export default function BuilderDashboardPage() {
     getProductViewCount,
     getProductEnrollmentCount,
     getProductFeedback,
+    loadProductFeedback,
     replyToFeedback,
     toggleFeedbackHelpful,
     updateProduct,
@@ -73,9 +74,9 @@ export default function BuilderDashboardPage() {
     setReplyError('')
   }
 
-  const handleSendReply = (feedbackId) => {
+  const handleSendReply = async (feedbackId) => {
     if (!user) return
-    const res = replyToFeedback(feedbackId, user.email, replyDraft)
+    const res = await replyToFeedback(feedbackId, user.email, replyDraft)
     if (!res.success) {
       setReplyError(res.error)
       return
@@ -305,6 +306,15 @@ export default function BuilderDashboardPage() {
   const userProducts = useMemo(() => {
     return user ? getUserProducts(user.email) : []
   }, [user, getUserProducts])
+
+  useEffect(() => {
+    if (!userProducts || userProducts.length === 0) return
+    userProducts.forEach((p) => {
+      if (p.id) {
+        loadProductFeedback(p.id)
+      }
+    })
+  }, [userProducts, loadProductFeedback])
 
   // Aggregate metrics across all user-owned products
   const aggregateMetrics = useMemo(() => {

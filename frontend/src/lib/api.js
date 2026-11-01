@@ -126,3 +126,36 @@ export async function fetchMyEnrollments() {
   })
 }
 
+export async function submitProductFeedback(slugOrId, feedbackData) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}/feedback`, {
+    method: 'POST',
+    body: JSON.stringify(feedbackData),
+  })
+}
+
+export async function fetchProductFeedback(slugOrId) {
+  return request(`/api/products/${encodeURIComponent(slugOrId)}/feedback`, {
+    method: 'GET',
+  })
+}
+
+export async function replyToFeedbackApi(feedbackId, text) {
+  return request(`/api/feedback/${encodeURIComponent(feedbackId)}/reply`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  })
+}
+
+export async function toggleFeedbackHelpfulApi(feedbackId) {
+  return request(`/api/feedback/${encodeURIComponent(feedbackId)}/helpful`, {
+    method: 'PATCH',
+  })
+}
+
+export async function fetchMyFeedback() {
+  return request('/api/feedback/me', {
+    method: 'GET',
+  })
+}
+
+

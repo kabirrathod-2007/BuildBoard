@@ -15,6 +15,11 @@ import {
   enrollInProductApi,
   unenrollFromProductApi,
   fetchMyEnrollments,
+  submitProductFeedback,
+  fetchProductFeedback,
+  replyToFeedbackApi,
+  toggleFeedbackHelpfulApi,
+  fetchMyFeedback,
 } from '../lib/api.js'
 
 const DemoDataContext = createContext(null)
@@ -299,6 +304,33 @@ export const DemoDataProvider = ({ children }) => {
     }
 
     loadCloudEnrollments()
+
+    return () => {
+      active = false
+    }
+  }, [user?.email, user?.emailVerified])
+
+  // Synchronize authenticated user feedback with MySQL cloud API
+  useEffect(() => {
+    if (!user?.email || !user?.emailVerified) return
+    let active = true
+
+    async function loadCloudFeedback() {
+      try {
+        const res = await fetchMyFeedback()
+        if (active && Array.isArray(res?.feedback)) {
+          setFeedbackList((prev) => {
+            const incomingIds = new Set(res.feedback.map((f) => String(f.id)))
+            const remaining = prev.filter((f) => !incomingIds.has(String(f.id)))
+            return [...res.feedback, ...remaining]
+          })
+        }
+      } catch (err) {
+        console.warn('[BuildBoard] Could not load user feedback from cloud:', err.message)
+      }
+    }
+
+    loadCloudFeedback()
 
     return () => {
       active = false
@@ -597,7 +629,41 @@ export const DemoDataProvider = ({ children }) => {
   }, [reminderDismissals, enrollments])
 
   // --- Feedback Tracking ---
-  const addFeedback = ({ productId, userEmail, category, experience, likes }) => {
+  const loadProductFeedback = useCallback(async (productIdOrSlug) => {
+    if (!productIdOrSlug) return []
+    try {
+      const res = await fetchProductFeedback(productIdOrSlug)
+      if (Array.isArray(res?.feedback)) {
+        setFeedbackList((prev) => {
+          const incomingIds = new Set(res.feedback.map((f) => String(f.id)))
+          const remaining = prev.filter((f) => !incomingIds.has(String(f.id)))
+          return [...res.feedback, ...remaining]
+        })
+        return res.feedback
+      }
+    } catch (err) {
+      console.warn('[BuildBoard] Failed to fetch product feedback:', err.message)
+    }
+    return []
+  }, [])
+
+  const addFeedback = async ({ productId, userEmail, category, experience, likes }) => {
+    if (user) {
+      try {
+        const res = await submitProductFeedback(productId, { category, experience, likes })
+        if (res?.feedback) {
+          setFeedbackList((prev) => [
+            res.feedback,
+            ...prev.filter((f) => String(f.id) !== String(res.feedback.id)),
+          ])
+          return res.feedback
+        }
+      } catch (err) {
+        console.error('Failed to submit feedback to server:', err)
+        throw err
+      }
+    }
+
     const newFeedback = {
       id: `fb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       productId,
@@ -613,30 +679,29 @@ export const DemoDataProvider = ({ children }) => {
     return newFeedback
   }
 
-  const getProductFeedback = (productId) => {
-    return feedbackList.filter((fb) => fb.productId === productId)
-  }
+  const getProductFeedback = useCallback((productId) => {
+    if (!productId) return []
+    const strId = String(productId)
+    return feedbackList.filter(
+      (fb) => String(fb.productId) === strId || fb.productId === productId
+    )
+  }, [feedbackList])
 
   // --- Product Ownership Verification ---
-  const isProductOwner = (productId, userEmail) => {
+  const isProductOwner = useCallback((productId, userEmail) => {
     if (!productId || !userEmail) return false
     const normalized = userEmail.toLowerCase().trim()
-    const product = products.find((p) => p.id === productId || p.slug === productId)
+    const product = products.find(
+      (p) => String(p.id) === String(productId) || p.slug === productId
+    )
     if (!product || !product.creatorEmail) return false
     return product.creatorEmail.toLowerCase().trim() === normalized
-  }
+  }, [products])
 
   // --- Builder Reply to Feedback ---
-  const replyToFeedback = (feedbackId, userEmail, replyText) => {
+  const replyToFeedback = async (feedbackId, userEmail, replyText) => {
     if (!feedbackId || !userEmail) {
       return { success: false, error: 'User and feedback ID are required.' }
-    }
-    const targetFeedback = feedbackList.find((fb) => fb.id === feedbackId)
-    if (!targetFeedback) {
-      return { success: false, error: 'Feedback record not found.' }
-    }
-    if (!isProductOwner(targetFeedback.productId, userEmail)) {
-      return { success: false, error: 'Only the product owner can reply to this feedback.' }
     }
 
     const trimmed = (replyText || '').trim()
@@ -650,14 +715,49 @@ export const DemoDataProvider = ({ children }) => {
       return { success: false, error: 'Reply exceeds maximum length of 1,000 characters.' }
     }
 
-    const product = products.find((p) => p.id === targetFeedback.productId)
+    const isNumericId = /^\d+$/.test(String(feedbackId))
+    if (isNumericId && user) {
+      try {
+        const res = await replyToFeedbackApi(feedbackId, trimmed)
+        if (res?.success) {
+          let updatedRecord = null
+          setFeedbackList((prev) =>
+            prev.map((fb) => {
+              if (String(fb.id) === String(feedbackId)) {
+                updatedRecord = {
+                  ...fb,
+                  reply: res.reply,
+                }
+                return updatedRecord
+              }
+              return fb
+            })
+          )
+          return { success: true, feedback: updatedRecord, isServerSynced: true }
+        }
+      } catch (err) {
+        return { success: false, error: err.message || 'Failed to dispatch reply.' }
+      }
+    }
+
+    const targetFeedback = feedbackList.find((fb) => String(fb.id) === String(feedbackId))
+    if (!targetFeedback) {
+      return { success: false, error: 'Feedback record not found.' }
+    }
+    if (!isProductOwner(targetFeedback.productId, userEmail)) {
+      return { success: false, error: 'Only the product owner can reply to this feedback.' }
+    }
+
+    const product = products.find(
+      (p) => String(p.id) === String(targetFeedback.productId) || p.slug === targetFeedback.productId
+    )
     const userProfile = profiles[userEmail.toLowerCase().trim()]
     const replierName = userProfile?.displayName?.trim() || product?.maker || userEmail.split('@')[0]
 
     let updatedRecord = null
     setFeedbackList((prev) =>
       prev.map((fb) => {
-        if (fb.id === feedbackId) {
+        if (String(fb.id) === String(feedbackId)) {
           const isEdit = Boolean(fb.reply)
           const newReply = {
             text: trimmed,
@@ -679,11 +779,36 @@ export const DemoDataProvider = ({ children }) => {
   }
 
   // --- Helpful Feedback Recognition Toggle ---
-  const toggleFeedbackHelpful = (feedbackId, userEmail) => {
+  const toggleFeedbackHelpful = async (feedbackId, userEmail) => {
     if (!feedbackId || !userEmail) {
       return { success: false, error: 'User and feedback ID are required.' }
     }
-    const targetFeedback = feedbackList.find((fb) => fb.id === feedbackId)
+
+    const isNumericId = /^\d+$/.test(String(feedbackId))
+    if (isNumericId && user) {
+      try {
+        const res = await toggleFeedbackHelpfulApi(feedbackId)
+        if (res?.success) {
+          setFeedbackList((prev) =>
+            prev.map((fb) => {
+              if (String(fb.id) === String(feedbackId)) {
+                return {
+                  ...fb,
+                  isHelpful: res.isHelpful,
+                  helpfulMarkedAt: res.helpfulMarkedAt,
+                }
+              }
+              return fb
+            })
+          )
+          return { success: true, isHelpful: res.isHelpful, isServerSynced: true }
+        }
+      } catch (err) {
+        return { success: false, error: err.message || 'Failed to toggle helpful recognition.' }
+      }
+    }
+
+    const targetFeedback = feedbackList.find((fb) => String(fb.id) === String(feedbackId))
     if (!targetFeedback) {
       return { success: false, error: 'Feedback record not found.' }
     }
@@ -694,7 +819,7 @@ export const DemoDataProvider = ({ children }) => {
     let nextState = false
     setFeedbackList((prev) =>
       prev.map((fb) => {
-        if (fb.id === feedbackId) {
+        if (String(fb.id) === String(feedbackId)) {
           nextState = !fb.isHelpful
           return {
             ...fb,
@@ -710,7 +835,7 @@ export const DemoDataProvider = ({ children }) => {
   }
 
   // --- Derive Tester Recognition (Always computed from helpful marks to prevent drift) ---
-  const getTesterRecognition = (userEmail) => {
+  const getTesterRecognition = useCallback((userEmail) => {
     if (!userEmail) {
       return { totalPoints: 0, helpfulCount: 0, items: [] }
     }
@@ -721,14 +846,14 @@ export const DemoDataProvider = ({ children }) => {
       )
       .map((fb) => ({
         ...fb,
-        product: products.find((p) => p.id === fb.productId) || null,
+        product: fb.product || products.find((p) => String(p.id) === String(fb.productId) || p.slug === fb.productId) || null,
       }))
     return {
       totalPoints: helpfulItems.length,
       helpfulCount: helpfulItems.length,
       items: helpfulItems,
     }
-  }
+  }, [feedbackList, products])
 
   // --- User-specific queries for Tester Activity ---
   const getUserEnrolledProducts = (userEmail) => {
@@ -755,17 +880,17 @@ export const DemoDataProvider = ({ children }) => {
     return list.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt))
   }
 
-  const getUserFeedback = (userEmail) => {
+  const getUserFeedback = useCallback((userEmail) => {
     if (!userEmail) return []
     const normalized = userEmail.toLowerCase().trim()
     return feedbackList
       .filter((fb) => fb.userEmail && fb.userEmail.toLowerCase().trim() === normalized)
       .map((fb) => ({
         ...fb,
-        product: products.find((p) => p.id === fb.productId) || null,
+        product: fb.product || products.find((p) => String(p.id) === String(fb.productId) || p.slug === fb.productId) || null,
       }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  }
+  }, [feedbackList, products])
 
   // --- User-specific queries for Builder Dashboard ---
   const getUserProducts = (userEmail) => {
@@ -1349,6 +1474,7 @@ export const DemoDataProvider = ({ children }) => {
         reminderDismissals,
         feedbackList,
         addFeedback,
+        loadProductFeedback,
         getProductFeedback,
         getUserProducts,
         isProductOwner,

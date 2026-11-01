@@ -127,6 +127,7 @@ export default function ProductDetailsPage() {
     isFeedbackReminderDismissed,
     feedbackList,
     addFeedback,
+    loadProductFeedback,
     getProductFeedback,
     recordProductView,
     isProductOwner,
@@ -164,6 +165,12 @@ export default function ProductDetailsPage() {
     }
   }, [productId, user?.uid, user?.email])
 
+  useEffect(() => {
+    if (productId) {
+      loadProductFeedback(productId)
+    }
+  }, [productId, loadProductFeedback])
+
   const product = serverDetail || contextProduct
   const makerProfile = product?.creatorEmail ? getProfile(product.creatorEmail) : null
   const makerName =
@@ -200,9 +207,9 @@ export default function ProductDetailsPage() {
   const [replyDraft, setReplyDraft] = useState('')
   const [replyError, setReplyError] = useState('')
 
-  const handleSendReply = (feedbackId) => {
+  const handleSendReply = async (feedbackId) => {
     if (!user) return
-    const res = replyToFeedback(feedbackId, user.email, replyDraft)
+    const res = await replyToFeedback(feedbackId, user.email, replyDraft)
     if (!res.success) {
       setReplyError(res.error)
       return
@@ -280,7 +287,7 @@ export default function ProductDetailsPage() {
   // Feedback list filter
   const [feedbackFilter, setFeedbackFilter] = useState('all') // 'all' | 'helpful' | 'needs_reply'
 
-  const handleFeedbackSubmit = (e) => {
+  const handleFeedbackSubmit = async (e) => {
     e.preventDefault()
     const errors = {}
 
@@ -297,16 +304,20 @@ export default function ProductDetailsPage() {
     }
 
     setFeedbackErrors({})
-    const saved = addFeedback({
-      productId: product.id,
-      userEmail: user?.email || 'member@example.com',
-      category: feedbackCategory,
-      experience: feedbackExperience.trim(),
-      likes: feedbackLikes.trim(),
-    })
+    try {
+      const saved = await addFeedback({
+        productId: product.id,
+        userEmail: user?.email || 'member@example.com',
+        category: feedbackCategory,
+        experience: feedbackExperience.trim(),
+        likes: feedbackLikes.trim(),
+      })
 
-    setSubmittedFeedbackPreview(saved)
-    setIsFeedbackSubmitted(true)
+      setSubmittedFeedbackPreview(saved)
+      setIsFeedbackSubmitted(true)
+    } catch (err) {
+      setFeedbackErrors({ experience: err.message || 'Failed to submit feedback.' })
+    }
   }
 
   const handleResetFeedback = () => {
