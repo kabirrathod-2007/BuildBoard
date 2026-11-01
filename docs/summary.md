@@ -187,15 +187,13 @@ The previous iteration (`BuildBoard-Landing-Full`) was a single-page marketing c
 BuildBoard is currently operating in a **hybrid architecture phase**:
 - **Authentication & User Identity**: Fully migrated to production cloud infrastructure. User accounts, secure password hashing, and email verification are managed via **Firebase Authentication**. An **Express 5 API** cryptographically verifies Firebase ID tokens and maintains synchronized user records in **MySQL** keyed by the immutable `firebase_uid`.
 - **User Profile Persistence (Milestone 1 — Shipped)**: `user_profiles` table implemented in MySQL (`user_id` FK to `users`, `profile_data JSON`). Dedicated authenticated endpoints (`GET /api/profiles/me` and `PUT /api/profiles/me`) validate and persist profile data. The frontend client (`DemoDataContext.jsx` and `ProfileSetupPage.jsx`) automatically fetches cloud profiles, pre-fills from local demo profiles without overwriting server data, and persists changes directly to MySQL.
-- **Domain Modeling & Community Data**: Product listings, testing checklists, enrollment states, reviews, replies, and problem threads currently continue to execute via client-side storage (`localStorage` and `IndexedDB`) to maintain instant prototyping without database migration disruption.
+- **Product Listings Persistence (Milestone 2 — Implementation Complete, Verification in Progress)**: Normalized `products`, `product_target_criteria`, and `product_test_steps` tables designed. Full CRUD and pause/resume routes (`/api/products`) implemented with `optionalAuth` and `requireAuth`. Strictly masks `product_url` in public catalog and unlocks it for verified product owners. Frontend connected via `DemoDataContext.jsx`, `SubmitProductPage.jsx`, `BuilderDashboardPage.jsx`, and `ProductDetailsPage.jsx`.
+- **Domain Modeling & Community Data**: Testing checklists, enrollment states, reviews, replies, and problem threads currently continue to execute via client-side storage (`localStorage` and `IndexedDB`) to maintain instant prototyping without database migration disruption.
 
 ### Next Roadmap Milestones
-1. **Milestone 2 — Product Listings Migration**:
-   - Design normalized MySQL tables for product listings and targeting criteria fields.
-   - Add authenticated create/list/detail/update/pause/resume API operations.
-   - Enforce server-side ownership using internal user IDs (`users.id`).
-   - Keep sample listings distinguishable from user-submitted listings.
-   - Preserve search, category filters, and recommendations in the frontend while masking protected prototype URLs in public catalog responses.
+1. **Milestone 2 — Product Listings Migration (Verification Phase)**:
+   - Execute `003_products.sql` migration in TablePlus.
+   - Run Postman verification suite on `/api/products` endpoints.
 2. **Milestone 3 — Enrollments and Gated Prototype Access**:
    - Store enrollments by user ID and product ID with unique constraint.
    - Prevent new enrollments when paused by builder while preserving existing testers' access.

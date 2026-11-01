@@ -15,7 +15,9 @@ This document traces the exact step-by-step code execution flow between files, c
 8. [Journey 6: Time-Tiered Feedback Reminder Engine Flow](#8-journey-6-time-tiered-feedback-reminder-engine-flow)
 9. [Journey 7: Problems Forum & Problem-to-Solution Linking Flow](#9-journey-7-problems-forum--problem-to-solution-linking-flow)
 10. [Journey 8: User Authentication & Backend Identity Synchronization Flow](#10-journey-8-user-authentication--backend-identity-synchronization-flow)
-11. [End-to-End Sequence Diagram](#11-end-to-end-sequence-diagram)
+11. [Journey 9: User Profile Retrieval & Persistence (`/api/profiles/me`)](#11-journey-9-user-profile-retrieval--persistence-apiprofilesme)
+12. [Journey 10: Product Listing Lifecycle & Protected Access (`/api/products`)](#12-journey-10-product-listing-lifecycle--protected-access-apiproducts)
+13. [End-to-End Sequence Diagram](#13-end-to-end-sequence-diagram)
 
 ---
 ## 1. Application Boot & Initialization Flow
@@ -448,7 +450,54 @@ sequenceDiagram
 
 ---
 
-## 12. End-to-End Sequence Diagram
+## 12. Journey 10: Product Listing Lifecycle & Protected Access (`/api/products`)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Builder as Product Creator
+    actor Visitor as Catalog Visitor / Tester
+    participant Frontend as Frontend Client
+    participant API as Express API (/api/products)
+    participant Auth as requireAuth / optionalAuth
+    participant MySQL as MySQL Database (buildboard)
+
+    %% Product Creation
+    Builder->>Frontend: Submits new product listing
+    Frontend->>API: POST /api/products (Bearer token + product JSON)
+    API->>Auth: requireAuth: verify token & emailVerified
+    API->>MySQL: SELECT id FROM users WHERE firebase_uid = ?
+    MySQL-->>API: internal userId
+    API->>MySQL: BEGIN TRANSACTION
+    API->>MySQL: INSERT INTO products (slug, creator_id, name, product_url, ...)
+    API->>MySQL: INSERT INTO product_target_criteria (product_id, criteria_type, criteria_value)
+    API->>MySQL: INSERT INTO product_test_steps (product_id, step_order, instruction)
+    API->>MySQL: COMMIT
+    API-->>Frontend: 201 Created { product: { ...unmasked productUrl, isOwner: true } }
+    Frontend-->>Builder: Redirects to /products/:slug
+
+    %% Public Catalog Exploration (URL Masking)
+    Visitor->>Frontend: Explores catalog (/explore)
+    Frontend->>API: GET /api/products?category=Developer+Tools
+    API->>Auth: optionalAuth: verify token if provided
+    API->>MySQL: SELECT products, categories, steps
+    MySQL-->>API: product rows
+    API->>API: Mask product_url = null for all catalog listings
+    API-->>Frontend: 200 OK { products: [ { ...masked productUrl: null } ] }
+
+    %% Product Details with Owner Gate
+    Builder->>Frontend: Views own product (/products/:slug)
+    Frontend->>API: GET /api/products/:slug (Bearer token)
+    API->>Auth: optionalAuth attaches authUser
+    API->>MySQL: SELECT product WHERE slug = ?
+    MySQL-->>API: product row (creator_id === userId)
+    API-->>Frontend: 200 OK { product: { ...productUrl: "https://...", isOwner: true } }
+    Frontend-->>Builder: Unlocks "Creator Access Active" and Live Prototype button
+```
+
+---
+
+## 13. End-to-End Sequence Diagram
 
 ```
 +---------------+           +---------------+           +-----------------+          +-------------------+

@@ -31,6 +31,7 @@ This document provides a comprehensive, chronological, and thematic log of every
    - Decision 4.4: Staged Hybrid Migration Strategy (Auth/Identity in Cloud, Domain Models in Client Demo)
    - Decision 4.5: User Profile Storage via JSON in MySQL (`user_profiles`)
    - Decision 4.6: Client Profile Synchronization & Safe Local Demo Migration
+   - Decision 4.7: Normalized Product Listings & Protected URL Masking in MySQL (`products`)
 5. [Tooling & Engineering Methodology](#5-tooling--engineering-methodology)
 6. [Summary Matrix of Code Decisions](#6-summary-matrix-of-code-decisions)
 
@@ -346,6 +347,27 @@ This document provides a comprehensive, chronological, and thematic log of every
   - Connected `ProfileSetupPage.jsx` with save loaders (`isSaving`), error alerts (`saveError`), cloud-sync badges, and an initial cloud retrieval skeleton.
 - **Why It Was Changed:**
   - Seamlessly bridges existing client-side demo state with MySQL cloud persistence without risking data loss or silent server overwrite.
+
+---
+
+### Decision 4.7: Normalized Product Listings & Protected URL Masking in MySQL (`products`)
+
+- **What Changed:**
+  - Authored `backend/migrations/003_products.sql` and updated `backend/schema.sql` declaring normalized tables:
+    - `products`: core metadata (`id`, `slug`, `creator_id` referencing `users(id)`, `name`, `tagline`, `description`, `stage`, `audience`, `feedback_request`, `product_url`, `github_url`, `image_url`, `gallery`, `video_url`, `is_sample`, `enrollment_paused`, timestamps).
+    - `product_target_criteria`: normalized multi-criteria tags (`product_id`, `criteria_type ENUM('category','role','industry','technology')`, `criteria_value`).
+    - `product_test_steps`: ordered prototype testing guidance (`product_id`, `step_order`, `instruction`).
+  - Implemented complete CRUD REST operations in `backend/src/routes/products.js`:
+    - `GET /api/products`: Public catalog list with optional category filter; **strictly masks `product_url` to `null`** to preserve the Enrollment Gate.
+    - `GET /api/products/:slugOrId`: Public detail endpoint with `optionalAuth`; returns full details and unlocks `product_url` exclusively for the verified product creator.
+    - `POST /api/products`: Authenticated listing creation with transaction safety, automatic slug generation, and criteria/test steps insertion.
+    - `PUT /api/products/:slugOrId`: Authenticated listing updates restricted to verified product creator.
+    - `PATCH /api/products/:slugOrId/pause`: Authenticated enrollment pause/resume toggling.
+    - `DELETE /api/products/:slugOrId`: Authenticated listing removal with cascading cleanup.
+  - Connected frontend client (`api.js`, `DemoDataContext.jsx`, `SubmitProductPage.jsx`, `BuilderDashboardPage.jsx`, `ProductDetailsPage.jsx`) to sync cloud products while preserving local demo fallback and sample explore products.
+- **Why It Was Changed:**
+  - Normalizing targeting criteria enables performant indexing and high-precision matching across categories, industries, roles, and technologies.
+  - Enforcing prototype URL masking server-side guarantees that unauthenticated viewers or unenrolled testers cannot bypass the feedback loop by inspecting network traffic.
 
 ---
 
