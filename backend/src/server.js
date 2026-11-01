@@ -7,6 +7,7 @@ import './config/firebase.js'
 import authRoutes from './routes/auth.js'
 import profileRoutes from './routes/profiles.js'
 import productRoutes from './routes/products.js'
+import enrollmentRoutes from './routes/enrollments.js'
 
 const app = express()
 const port = Number(process.env.PORT || 3001)
@@ -41,6 +42,7 @@ app.get('/api/health', async (_req, res, next) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/profiles', profileRoutes)
 app.use('/api/products', productRoutes)
+app.use('/api/enrollments', enrollmentRoutes)
 
 app.use((error, _req, res, _next) => {
   console.error('API request failed:', error.message)

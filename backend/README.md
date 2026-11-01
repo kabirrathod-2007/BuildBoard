@@ -14,6 +14,10 @@ This service verifies Firebase Authentication ID tokens and keeps a MySQL user r
 - `PUT /api/products/:slugOrId` (Authenticated) updates listing fields, replacing criteria and test steps inside a transaction (creator-only).
 - `PATCH /api/products/:slugOrId/pause` (Authenticated) toggles or updates `enrollment_paused` (creator-only).
 - `DELETE /api/products/:slugOrId` (Authenticated) deletes product listing with cascading deletion of criteria and test steps (creator-only).
+- `POST /api/products/:slugOrId/enroll` (Authenticated) enrolls user as tester; rejects creator self-enrollment (400) and paused enrollment (409 Conflict). Unmasks `productUrl`.
+- `DELETE /api/products/:slugOrId/enroll` (Authenticated) unenrolls tester from product.
+- `GET /api/products/:slugOrId/enrollment` (Authenticated) retrieves tester enrollment status and timestamp.
+- `GET /api/enrollments/me` (Authenticated) returns array of all active prototype enrollments for the current user, each including full product detail with unlocked `productUrl`.
 
 The frontend sign-up, sign-in, and email verification pages are wired to Firebase Authentication and connect to `POST /api/auth/me` upon successful authentication. User profile setup is wired to `/api/profiles/me`. Existing product, enrollment, feedback, and problem data continue to use the local demo context; full data migration for domain models is slated for future milestones.
 

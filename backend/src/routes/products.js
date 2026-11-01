@@ -171,7 +171,7 @@ function validateProductInput(body, isUpdate = false) {
   }
 }
 
-async function attachCriteriaAndSteps(products, userId = null) {
+async function attachCriteriaAndSteps(products, userId = null, isCatalog = false) {
   if (products.length === 0) return []
 
   const productIds = products.map((p) => p.id)
@@ -185,6 +185,33 @@ async function attachCriteriaAndSteps(products, userId = null) {
     'SELECT product_id, step_order, instruction FROM product_test_steps WHERE product_id IN (?) ORDER BY step_order ASC',
     [productIds],
   )
+
+  const countsMap = new Map()
+  const userEnrollmentMap = new Map()
+
+  try {
+    const [countRows] = await database.query(
+      'SELECT product_id, COUNT(*) AS count FROM product_enrollments WHERE product_id IN (?) GROUP BY product_id',
+      [productIds],
+    )
+    for (const r of countRows) {
+      countsMap.set(r.product_id, Number(r.count))
+    }
+
+    if (userId) {
+      const [userEnrollmentRows] = await database.query(
+        'SELECT product_id, created_at FROM product_enrollments WHERE user_id = ? AND product_id IN (?)',
+        [userId, productIds],
+      )
+      for (const r of userEnrollmentRows) {
+        userEnrollmentMap.set(r.product_id, r.created_at)
+      }
+    }
+  } catch (err) {
+    if (err.code !== 'ER_NO_SUCH_TABLE') {
+      throw err
+    }
+  }
 
   const criteriaMap = new Map()
   for (const row of criteriaRows) {
@@ -212,6 +239,16 @@ async function attachCriteriaAndSteps(products, userId = null) {
 
   return products.map((row) => {
     const isOwner = Boolean(userId && Number(row.creator_id) === Number(userId))
+    const isEnrolled = Boolean(userEnrollmentMap.has(row.id))
+    const enrolledAt = userEnrollmentMap.get(row.id) || null
+    const enrollmentCount = countsMap.get(row.id) || 0
+
+    // GATED ACCESS RULE:
+    // Catalog view: product_url is ALWAYS masked to preserve the enrollment gate.
+    // Detail view: product_url is ONLY returned to verified creator OR verified enrolled tester.
+    const canAccessPrototype = !isCatalog && (isOwner || isEnrolled)
+    const productUrl = canAccessPrototype ? row.product_url : null
+
     const criteria = criteriaMap.get(row.id) || { category: [], role: [], industry: [], technology: [] }
     const steps = stepsMap.get(row.id) || []
 
@@ -237,8 +274,7 @@ async function attachCriteriaAndSteps(products, userId = null) {
       stage: row.stage,
       audience: row.audience,
       feedbackRequest: row.feedback_request,
-      // CRITICAL SECURITY RULE: product_url is masked for non-owners in catalog responses
-      productUrl: isOwner ? row.product_url : null,
+      productUrl,
       githubUrl: row.github_url || '',
       imageUrl: row.image_url || '',
       image: row.image_url || '',
@@ -246,6 +282,10 @@ async function attachCriteriaAndSteps(products, userId = null) {
       videoUrl: row.video_url || '',
       isSample: Boolean(row.is_sample),
       enrollmentPaused: Boolean(row.enrollment_paused),
+      enrollmentCount,
+      isEnrolled,
+      enrolledAt,
+      isOwner,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       creatorEmail: row.creator_email,
@@ -255,7 +295,6 @@ async function attachCriteriaAndSteps(products, userId = null) {
       targetIndustries: criteria.industry,
       targetTechnologies: criteria.technology,
       whatToTry: steps,
-      isOwner,
     }
   })
 }
@@ -317,7 +356,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
     query += ' ORDER BY p.created_at DESC LIMIT 100'
 
     const [rows] = await database.execute(query, params)
-    const list = await attachCriteriaAndSteps(rows, userId)
+    const list = await attachCriteriaAndSteps(rows, userId, true)
     return res.json({ products: list })
   } catch (error) {
     return next(error)
@@ -355,7 +394,7 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
       return res.status(404).json({ error: 'Product listing not found.' })
     }
 
-    const [product] = await attachCriteriaAndSteps(rows, userId)
+    const [product] = await attachCriteriaAndSteps(rows, userId, false)
     return res.json({ product })
   } catch (error) {
     return next(error)
@@ -657,6 +696,142 @@ router.delete('/:slugOrId', requireAuth, async (req, res, next) => {
     return res.json({
       success: true,
       message: 'Product listing deleted successfully.',
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// POST /api/products/:slugOrId/enroll (Enroll as a prototype tester)
+// ----------------------------------------------------------------------
+router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT * FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const targetProduct = rows[0]
+    if (Number(targetProduct.creator_id) === Number(userId)) {
+      return res.status(400).json({ error: 'You cannot enroll in your own product.' })
+    }
+
+    // Check existing enrollment
+    const [existing] = await database.execute(
+      'SELECT id, created_at FROM product_enrollments WHERE user_id = ? AND product_id = ? LIMIT 1',
+      [userId, targetProduct.id],
+    )
+
+    if (existing.length > 0) {
+      return res.json({
+        success: true,
+        enrolled: true,
+        enrolledAt: existing[0].created_at,
+        productUrl: targetProduct.product_url,
+        message: 'You are already enrolled in this prototype.',
+      })
+    }
+
+    // If new enrollment and builder paused enrollment:
+    if (targetProduct.enrollment_paused) {
+      return res.status(409).json({
+        error: 'Enrollment for this product is currently paused by the builder.',
+      })
+    }
+
+    await database.execute(
+      'INSERT INTO product_enrollments (user_id, product_id) VALUES (?, ?)',
+      [userId, targetProduct.id],
+    )
+
+    return res.status(201).json({
+      success: true,
+      enrolled: true,
+      enrolledAt: new Date().toISOString(),
+      productUrl: targetProduct.product_url,
+      message: 'Successfully enrolled as a prototype tester!',
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// DELETE /api/products/:slugOrId/enroll (Unenroll from testing)
+// ----------------------------------------------------------------------
+router.delete('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT id FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    await database.execute(
+      'DELETE FROM product_enrollments WHERE user_id = ? AND product_id = ?',
+      [userId, rows[0].id],
+    )
+
+    return res.json({
+      success: true,
+      enrolled: false,
+      message: 'Successfully unenrolled from prototype testing.',
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+// ----------------------------------------------------------------------
+// GET /api/products/:slugOrId/enrollment (Check tester enrollment status)
+// ----------------------------------------------------------------------
+router.get('/:slugOrId/enrollment', requireAuth, async (req, res, next) => {
+  try {
+    const userId = await findUserId(req.authUser.firebaseUid)
+    if (!userId) {
+      return res.status(404).json({ error: 'Account is not synced with BuildBoard yet.' })
+    }
+
+    const { slugOrId } = req.params
+    const isNumeric = /^\d+$/.test(slugOrId)
+    const selectQuery = `SELECT id, product_url FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+
+    const [rows] = await database.execute(selectQuery, selectParams)
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Product listing not found.' })
+    }
+
+    const [enrollmentRows] = await database.execute(
+      'SELECT created_at FROM product_enrollments WHERE user_id = ? AND product_id = ? LIMIT 1',
+      [userId, rows[0].id],
+    )
+
+    const isEnrolled = enrollmentRows.length > 0
+    return res.json({
+      enrolled: isEnrolled,
+      enrolledAt: enrollmentRows[0]?.created_at || null,
+      productUrl: isEnrolled ? rows[0].product_url : null,
     })
   } catch (error) {
     return next(error)
