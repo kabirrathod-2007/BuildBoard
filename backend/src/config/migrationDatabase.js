@@ -32,6 +32,14 @@ export function getMigrationConfig() {
     )
   }
 
+  const targetHost = host || process.env.MIGRATION_DB_HOST || process.env.DB_HOST || ''
+  const useSsl =
+    process.env.MIGRATION_DB_SSL === 'true' ||
+    process.env.DB_SSL === 'true' ||
+    Boolean(targetHost && (targetHost.includes('tidbcloud.com') || targetHost.includes('aivencloud.com')))
+
+  const sslConfig = useSsl ? { ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true } } : {}
+
   if (hasDedicatedConfig) {
     return {
       host,
@@ -41,6 +49,7 @@ export function getMigrationConfig() {
       database: dbName,
       multipleStatements: true,
       charset: 'utf8mb4',
+      ...sslConfig,
     }
   }
 
@@ -54,6 +63,7 @@ export function getMigrationConfig() {
       database: process.env.MIGRATION_DB_NAME || process.env.DB_NAME || 'buildboard_test',
       multipleStatements: true,
       charset: 'utf8mb4',
+      ...sslConfig,
     }
   }
 
@@ -73,6 +83,7 @@ export function getMigrationConfig() {
     database: process.env.MIGRATION_DB_NAME || process.env.DB_NAME,
     multipleStatements: true,
     charset: 'utf8mb4',
+    ...sslConfig,
   }
 }
 

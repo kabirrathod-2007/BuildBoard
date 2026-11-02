@@ -7,6 +7,10 @@ if (missingSettings.length > 0) {
   throw new Error(`Missing MySQL configuration: ${missingSettings.join(', ')}`)
 }
 
+const useSsl =
+  process.env.DB_SSL === 'true' ||
+  Boolean(process.env.DB_HOST && (process.env.DB_HOST.includes('tidbcloud.com') || process.env.DB_HOST.includes('aivencloud.com')))
+
 export const database = mysql.createPool({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT || 3306),
@@ -17,4 +21,5 @@ export const database = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   charset: 'utf8mb4',
+  ...(useSsl ? { ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true } } : {}),
 })
