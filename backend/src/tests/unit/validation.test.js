@@ -5,8 +5,8 @@ import {
   validateAllowedFields,
   sanitizeStringArray,
   slugify,
-} from '../utils/validation.js'
-import { isValidUsername } from '../utils/username.js'
+} from '../../utils/validation.js'
+import { isValidUsername } from '../../utils/username.js'
 
 test('Validation: isValidHttpUrl allows valid http and https URLs', () => {
   assert.equal(isValidHttpUrl('https://example.com'), true)

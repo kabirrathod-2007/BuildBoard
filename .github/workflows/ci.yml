@@ -6,17 +6,30 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   backend:
-    name: Backend Checks & Tests
+    name: Backend Checks, Unit Tests & API Integration Tests
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: buildboard_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,14 +47,54 @@ jobs:
       - name: Verify JavaScript syntax
         run: npm run check
 
-      - name: Run backend unit and integration tests
-        run: npm test
+      - name: Run backend unit tests
+        run: npm run test:unit
         env:
           NODE_ENV: test
           FIREBASE_PROJECT_ID: test-buildboard
 
+      - name: Run migrations against disposable CI database
+        run: npm run migrate
+        env:
+          NODE_ENV: test
+          MIGRATION_DB_HOST: 127.0.0.1
+          MIGRATION_DB_PORT: 3306
+          MIGRATION_DB_USER: root
+          MIGRATION_DB_PASSWORD: rootpassword
+          MIGRATION_DB_NAME: buildboard_test
+
+      - name: Provision restricted runtime test database user (DML only)
+        run: |
+          node --input-type=module -e "
+          import mysql from 'mysql2/promise';
+          const conn = await mysql.createConnection({
+            host: '127.0.0.1',
+            port: 3306,
+            user: 'root',
+            password: 'rootpassword'
+          });
+          await conn.query(\`CREATE USER IF NOT EXISTS 'test_api_runner'@'%' IDENTIFIED BY 'test_api_pass_123'\`);
+          await conn.query(\`GRANT SELECT, INSERT, UPDATE, DELETE ON buildboard_test.* TO 'test_api_runner'@'%'\`);
+          await conn.query(\`FLUSH PRIVILEGES\`);
+          await conn.end();
+          console.log('Restricted test_api_runner created with SELECT, INSERT, UPDATE, DELETE permissions only.');
+          "
+
+      - name: Run genuine API integration tests against disposable MySQL database
+        run: npm run test:integration
+        env:
+          NODE_ENV: test
+          RUN_INTEGRATION_TESTS: 'true'
+          ENABLE_TEST_AUTH: 'true'
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: test_api_runner
+          DB_PASSWORD: test_api_pass_123
+          DB_NAME: buildboard_test
+          FIREBASE_PROJECT_ID: test-buildboard
+
   frontend:
-    name: Frontend Lint, Test & Build
+    name: Frontend Lint, Unit Tests & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -76,4 +129,3 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: buildboard-ci.firebasestorage.app
           VITE_FIREBASE_MESSAGING_SENDER_ID: '1234567890'
           VITE_FIREBASE_APP_ID: 1:1234567890:web:abcdef123456
-

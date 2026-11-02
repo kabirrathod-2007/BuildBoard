@@ -1,5 +1,7 @@
 import 'dotenv/config'
 import crypto from 'node:crypto'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import cors from 'cors'
 import express from 'express'
 import helmet from 'helmet'
@@ -16,6 +18,14 @@ import notificationRoutes from './routes/notifications.js'
 
 const app = express()
 const port = Number(process.env.PORT || 3001)
+
+// Security Guard: Prevent test auth enablement outside explicit test processes
+if (process.env.ENABLE_TEST_AUTH === 'true' && process.env.NODE_ENV !== 'test') {
+  throw new Error(
+    '[FATAL SECURITY CONFIGURATION] ENABLE_TEST_AUTH is set to true, but NODE_ENV is not "test". Server startup aborted to prevent unauthorized authentication bypass.'
+  )
+}
+
 const allowedOrigins = new Set(
   (process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
     .split(',')
@@ -141,6 +151,11 @@ app.use((error, req, res, _next) => {
   return res.status(500).json({ error: 'The server could not complete the request.', requestId: reqId })
 })
 
-app.listen(port, () => {
-  console.log(`BuildBoard API listening on port ${port}`)
-})
+export { app }
+
+const isDirectExecution = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+if (isDirectExecution || (process.env.NODE_ENV !== 'test' && !process.env.TEST_APP)) {
+  app.listen(port, () => {
+    console.log(`BuildBoard API listening on port ${port}`)
+  })
+}

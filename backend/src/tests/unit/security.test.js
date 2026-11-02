@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { requireAuth } from '../middleware/requireAuth.js'
+import { requireAuth } from '../../middleware/requireAuth.js'
 
 test('Security Middleware: requireAuth rejects missing or malformed Authorization header', async () => {
   const reqNoAuth = {
@@ -160,3 +160,54 @@ test('Authorization Enforcement: Users cannot mutate resources owned by others',
   assert.equal(verifyAction('delete').status, 403)
 })
 
+test('Test Auth Isolation: setTokenVerifierForTesting throws when NODE_ENV is production', async () => {
+  const { setTokenVerifierForTesting, resetTokenVerifierForTesting } = await import('../../middleware/requireAuth.js')
+  const originalEnv = process.env.NODE_ENV
+  try {
+    process.env.NODE_ENV = 'production'
+    assert.throws(() => {
+      setTokenVerifierForTesting(() => ({ uid: '123' }))
+    }, /Custom token verifiers can only be registered in NODE_ENV=test/)
+  } finally {
+    process.env.NODE_ENV = originalEnv
+    resetTokenVerifierForTesting()
+  }
+})
+
+test('Test Auth Isolation: requireAuth in production configuration unconditionally rejects test tokens', async () => {
+  const { requireAuth, setTokenVerifierForTesting, resetTokenVerifierForTesting } = await import('../../middleware/requireAuth.js')
+  const originalEnv = process.env.NODE_ENV
+  const originalEnable = process.env.ENABLE_TEST_AUTH
+
+  try {
+    process.env.NODE_ENV = 'production'
+    process.env.ENABLE_TEST_AUTH = 'true' // Malicious or accidental env variable in production
+
+    let statusCode = null
+    let responseData = null
+    const req = {
+      get: (h) => (h.toLowerCase() === 'authorization' ? 'Bearer test-auth:eyJ1aWQiOiIxMjMifQ==' : undefined),
+    }
+    const res = {
+      status(code) {
+        statusCode = code
+        return {
+          json(data) {
+            responseData = data
+          },
+        }
+      },
+    }
+
+    await requireAuth(req, res, () => {
+      assert.fail('Should not authenticate test token in production')
+    })
+
+    // In production without live Firebase token, it must be rejected with 401 or 503, never allowed
+    assert.ok(statusCode === 401 || statusCode === 503)
+  } finally {
+    process.env.NODE_ENV = originalEnv
+    process.env.ENABLE_TEST_AUTH = originalEnable
+    resetTokenVerifierForTesting()
+  }
+})
