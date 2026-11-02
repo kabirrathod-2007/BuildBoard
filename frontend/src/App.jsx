@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from 'react'
 import { Route, Routes, Navigate } from 'react-router'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import LandingPage from './pages/LandingPage.jsx'
 import SkipToContent from './components/SkipToContent.jsx'
 import OpeningIntro from './components/OpeningIntro.jsx'
@@ -35,6 +36,7 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <SpeedInsights />
       {introActive && (
         <OpeningIntro onDone={() => setIntroActive(false)} />
       )}
