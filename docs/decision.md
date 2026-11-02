@@ -33,6 +33,8 @@ This document provides a comprehensive, chronological, and thematic log of every
    - Decision 4.6: Client Profile Synchronization & Safe Local Demo Migration
    - Decision 4.7: Normalized Product Listings & Protected URL Masking in MySQL (`products`)
    - Decision 4.8: Enforced Enrollment Gates & Tester Access Control (`product_enrollments`)
+   - Decision 4.9: State Management Optimization with Redux Toolkit (RTK)
+   - Decision 4.10: 1-Click Google Authentication & Configurable Tester Capacity Quotas
 5. [Tooling & Engineering Methodology](#5-tooling--engineering-methodology)
 6. [Summary Matrix of Code Decisions](#6-summary-matrix-of-code-decisions)
 
@@ -422,10 +424,64 @@ This document provides a comprehensive, chronological, and thematic log of every
 
 ---
 
+### Decision 4.9: State Management Optimization with Redux Toolkit (RTK)
+
+- **What Changed:**
+  - Integrated `@reduxjs/toolkit` and `react-redux` into the frontend architecture.
+  - Decomposed the monolithic ~1500-line `DemoDataContext.jsx` state into dedicated, modular domain slices under `frontend/src/store/slices/`:
+    - `productsSlice.js`: Product catalog, views tracking, search/tag filters, async thunks for API CRUD, and memoized selectors.
+    - `problemsSlice.js`: Problem hub items, validation upvotes, tester signups, nested comments, solution linking, and filtering.
+    - `feedbackSlice.js`: Product critiques, builder replies, helpful endorsements, and derived recognition calculations.
+    - `enrollmentsSlice.js`: Prototype access enrollment records and time-tiered reminder dismissals.
+    - `notificationsSlice.js`: System notifications, live unread counter, and mark-as-read mutations.
+    - `profilesSlice.js`: User profiles by email, active authenticated profile, and public profile lookups.
+    - `uiSlice.js`: Global UI layout state, explore directory view mode (`grid` vs `list`), and modal/toast registries.
+  - Implemented custom hooks `useAppDispatch` and `useAppSelector` with standard bindings in `frontend/src/store/hooks.js`.
+  - Refactored `main.jsx` to wrap the application in `<Provider store={store}>`.
+  - Upgraded `DemoDataContext.jsx` into a zero-breaking-change facade that delegates to and synchronizes with the Redux Toolkit store.
+  - Upgraded performance-critical components (such as `NotificationBell.jsx` and `ExplorePage.jsx`) to consume fine-grained Redux selectors directly, eliminating unnecessary re-renders.
+- **Why It Was Changed:**
+  - In React's default Context API, any update to a single state variable within a large context causes every component consuming that context to re-render, even if the component only needed a single value (e.g., updating a product view count triggered re-renders across the entire notification bell, feedback feed, and navbar).
+  - Redux Toolkit provides strict immutability (via Immer), predictable action dispatching, fine-grained selector memoization (`createSelector`), and centralized asynchronous handling (`createAsyncThunk`).
+- **Approach & Alternatives Considered:**
+  - *Alternative Considered:* Migrating completely and deleting `DemoDataContext.jsx` at once.
+  - *Why the Facade Pattern:* Rewriting all 15+ pages and 12+ components in a single step carried high regression risk. The facade pattern preserves 100% backward compatibility for all existing pages while establishing Redux Toolkit as the authoritative single source of truth.
+- **Tools Used:**
+  - `@reduxjs/toolkit` (`configureStore`, `createSlice`, `createAsyncThunk`, `createSelector`).
+  - `react-redux` (`Provider`, `useDispatch`, `useSelector`).
+
+---
+
+### Decision 4.10: 1-Click Google Authentication & Configurable Tester Capacity Quotas
+
+- **What Changed:**
+  - **Google Authentication:**
+    - Integrated Firebase `signInWithPopup(GoogleAuthProvider)` in `AuthContext.jsx`.
+    - Added branded "Continue with Google" buttons and seamless redirect handling in `SignInPage.jsx` and `SignUpPage.jsx`.
+    - Automatically provisions or links user accounts in the MySQL `users` and `user_profiles` database on first login.
+  - **Configurable Tester Enrollment Quota:**
+    - Added optional `enrollment_limit INT UNSIGNED NULL DEFAULT NULL` column to MySQL `products` table via migration `009_enrollment_limit.sql`.
+    - Updated backend API in `routes/products.js`:
+      - Validates optional positive integers (1 to 100,000) or `null` (unlimited).
+      - `POST /api/products/:slugOrId/enroll` counts active enrollments and blocks with `409 Conflict` (`quotaFull: true`) once the capacity is reached.
+    - Added tester quota input in `SubmitProductPage.jsx` with quick "Set to unlimited" control.
+    - Made tester quota editable at any time via the "Edit listing" modal in `BuilderDashboardPage.jsx`.
+    - Added quota badge indicators, spots remaining counts, and quota progress bars in `BuilderDashboardPage.jsx`, `ProductDetailsPage.jsx`, and `ProductCard.jsx`.
+- **Why It Was Changed:**
+  - Builders frequently need to conduct limited, private testing cohorts (e.g., admitting only the first 10 or 25 testers) before opening prototypes widely.
+  - Google Authentication eliminates signup friction for technical developers and founders who prefer one-click OAuth login over email/password verification.
+- **Tools Used:**
+  - Firebase Authentication (`GoogleAuthProvider`, `signInWithPopup`).
+  - MySQL DDL `ALTER TABLE products ADD COLUMN enrollment_limit INT UNSIGNED NULL DEFAULT NULL;`.
+
+---
+
 ## 5. Tooling & Engineering Methodology
 
 | Category | Tool / Choice | Rationale |
 | :--- | :--- | :--- |
+| **Frontend Framework** | React 19 (JSX) | Modern hooks, functional components, concurrent rendering |
+| **State Management** | Redux Toolkit (`@reduxjs/toolkit ^2.13.0`, `react-redux ^9.3.1`) | Sliced domain state, memoized selectors, async thunks, and predictable mutations |
 | **Frontend Framework** | React 19 (JSX) | Modern hooks, functional components, concurrent rendering |
 | **Bundler** | Vite 8 | Near-instant startup, ESM native modules, hot module replacement in <50ms. |
 | **Router** | React Router 8 (`react-router ^8.4.0`) | Client-side routing with deep-link support and code-splitting. |

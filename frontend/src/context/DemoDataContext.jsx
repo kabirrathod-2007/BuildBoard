@@ -3,6 +3,17 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback, u
 import { deleteMediaFile } from '../utils/indexedDB'
 import { useAuth } from './AuthContext.jsx'
 import {
+  useAppDispatch,
+  setProducts as setReduxProducts,
+  setProblems as setReduxProblems,
+  setFeedbackList as setReduxFeedbackList,
+  setEnrollments as setReduxEnrollments,
+  setNotifications as setReduxNotifications,
+  setProfileLocal as setReduxProfileLocal,
+  dismissReminderLocal as setReduxDismissReminderLocal,
+  incrementViewLocal as setReduxIncrementViewLocal,
+} from '../store/index.js'
+import {
   fetchUserProfile,
   saveUserProfile,
   fetchProducts,
@@ -70,6 +81,7 @@ function slugify(text) {
 
 export const DemoDataProvider = ({ children }) => {
   const { user } = useAuth()
+  const dispatch = useAppDispatch()
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState(null)
 
@@ -524,6 +536,7 @@ export const DemoDataProvider = ({ children }) => {
       ...prev,
       [productId]: (prev[productId] || 0) + 1,
     }))
+    dispatch(setReduxIncrementViewLocal(productId))
 
     if (viewedSessionSet.current.has(key)) return
     viewedSessionSet.current.add(key)
@@ -541,7 +554,7 @@ export const DemoDataProvider = ({ children }) => {
     } catch {
       // view increment swallowed gracefully
     }
-  }, [])
+  }, [dispatch])
 
   const getProductViewCount = useCallback((productId) => {
     if (!productId) return 0
@@ -1478,6 +1491,42 @@ export const DemoDataProvider = ({ children }) => {
     const normalized = userEmail.toLowerCase().trim()
     return effectiveProblems.filter((p) => p.creatorEmail === normalized)
   }, [effectiveProblems])
+
+  // Synchronize domain state with Redux Toolkit store
+  useEffect(() => {
+    dispatch(setReduxProducts(products))
+  }, [products, dispatch])
+
+  useEffect(() => {
+    dispatch(setReduxProblems(effectiveProblems))
+  }, [effectiveProblems, dispatch])
+
+  useEffect(() => {
+    dispatch(setReduxFeedbackList(feedbackList))
+  }, [feedbackList, dispatch])
+
+  useEffect(() => {
+    dispatch(setReduxEnrollments(enrollments))
+  }, [enrollments, dispatch])
+
+  useEffect(() => {
+    dispatch(setReduxNotifications(notifications))
+  }, [notifications, dispatch])
+
+  useEffect(() => {
+    for (const [email, prof] of Object.entries(profiles)) {
+      dispatch(setReduxProfileLocal({ userEmail: email, profile: prof }))
+    }
+  }, [profiles, dispatch])
+
+  useEffect(() => {
+    for (const [key, dismissedAt] of Object.entries(reminderDismissals)) {
+      const [email, pid] = key.split(':')
+      if (email && pid) {
+        dispatch(setReduxDismissReminderLocal({ userEmail: email, productId: pid, dismissedAt }))
+      }
+    }
+  }, [reminderDismissals, dispatch])
 
   return (
     <DemoDataContext.Provider

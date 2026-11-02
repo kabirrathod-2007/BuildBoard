@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { getRecommendedProducts } from '../utils/recommendations.js'
 import { useIndexedDbMedia } from '../utils/indexedDB.js'
+import { useAppDispatch, useAppSelector, selectExploreViewMode, setExploreViewMode } from '../store/index.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 
@@ -405,8 +406,15 @@ export default function ExplorePage() {
     [setSearchParams],
   )
 
-  // View mode toggle ('grid' | 'list')
-  const [viewMode, setViewMode] = useState('grid')
+  // View mode toggle managed via Redux Toolkit ('grid' | 'list')
+  const dispatch = useAppDispatch()
+  const viewMode = useAppSelector(selectExploreViewMode)
+  const setViewMode = useCallback(
+    (mode) => {
+      dispatch(setExploreViewMode(mode))
+    },
+    [dispatch],
+  )
 
   // Keyboard shortcut: press "/" to focus search
   const [searchFocused, setSearchFocused] = useState(false)

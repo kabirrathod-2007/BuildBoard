@@ -29,34 +29,38 @@ BuildBoard is a specialized peer-testing and product-critique network designed f
 
 ## 2. High-Level Architectural Architecture
 
-BuildBoard follows a **Modular Three-Tier Client Architecture**:
+BuildBoard follows a **Modular Three-Tier Client Architecture with Redux Toolkit**:
 
 ```
 +---------------------------------------------------------------------------------------+
 |                                    PRESENTATION LAYER                                 |
 |                                                                                       |
-|   React 19 (JSX)  •  React Router ^8.4.0  •  Tailwind CSS v4 Engine  •  Framer Motion |
+|   React 19 (JSX)  •  React Router ^8.4.0  •  Tailwind CSS v4 Engine  •  Motion React  |
 |   - 15 Route Pages (/explore, /products/:id, /builder/dashboard, /problems, etc.)     |
-|   - Per-page layout rendering (<Navbar /> and <Footer /> composed per page view)      |
-|   - 12 Components in src/components/ (including standalone ProductCard,               |
-|     ShowcaseCarousel, ThemeToggle)                                                    |
+|   - Redux Toolkit integration via useAppSelector and useAppDispatch                   |
+|   - Fine-grained re-render optimization with memoized selectors (createSelector)      |
 +---------------------------------------------------------------------------------------+
                                            │
                                            ▼
 +---------------------------------------------------------------------------------------+
-|                                  BUSINESS LOGIC LAYER                                 |
+|                                  STATE & BUSINESS LAYER                               |
 |                                                                                       |
-|   Pure Utility Engines:                                                               |
-|   - src/utils/recommendations.js (getRecommendedProducts: +1 unweighted per match)   |
-|   - src/utils/feedbackReminder.js (getFeedbackReminderInfo: recent/early/followup)    |
-|   - src/utils/indexedDB.js (IndexedDB binary blob storage for media uploads)          |
+|   Redux Toolkit Store (<Provider store={store}> via src/store/):                      |
+|   - productsSlice: products catalog, views count, search/tag filters, async thunks    |
+|   - problemsSlice: problem validation, signups, nested comment threads, solutions     |
+|   - feedbackSlice: critiques, builder replies, helpful endorsements, recognition pts  |
+|   - enrollmentsSlice: prototype access gate, time-tiered reminder dismissals          |
+|   - notificationsSlice: real-time in-app notifications & unread counter               |
+|   - profilesSlice: user profiles by email, active profile, public profile lookups     |
+|   - uiSlice: explore layout mode (grid/list), active modals, global toasts            |
 |                                                                                       |
 |   Hierarchical Provider Context Tree (src/main.jsx):                                  |
-|   <BrowserRouter>                                                                     |
-|     └─► <ThemeProvider> (Dark/light mode root class & CSS variables)                  |
-|           └─► <AuthProvider> (Firebase Auth session + Express API sync)               |
-|                 └─► <DemoDataProvider> (Products, enrollments, feedback, problems)   |
-|                       └─► <App />                                                     |
+|   <Provider store={store}>                                                            |
+|     └─► <BrowserRouter>                                                               |
+|           └─► <ThemeProvider> (Dark/light mode root class & CSS variables)            |
+|                 └─► <AuthProvider> (Firebase Auth session + Express API sync)         |
+|                       └─► <DemoDataProvider> (Redux facade preserving backward compat)|
+|                             └─► <App />                                               |
 +---------------------------------------------------------------------------------------+
                                            │
                     ┌──────────────────────┴──────────────────────┐
@@ -65,18 +69,17 @@ BuildBoard follows a **Modular Three-Tier Client Architecture**:
 |        CLIENT PERSISTENCE LAYER       |     |         BACKEND API & DATABASE        |
 |                                       |     |                                       |
 |   Browser Storage (Client Sandbox):   |     |   Node.js / Express 5 API (:3001):    |
-|   - 8 LocalStorage Namespaces:        |     |   - Helmet security headers & CORS    |
-|       1. buildboard_demo_custom_prods |     |   - Firebase Admin token verification |
-|       2. buildboard_demo_enrollments  |     |   - POST /api/auth/me identity sync   |
-|       3. buildboard_demo_feedback     |     |   - GET /api/health db ping           |
-|       4. buildboard_demo_views        |     |                                       |
-|       5. buildboard_demo_profiles     |     |   MySQL 8 Database (buildboard):      |
-|       6. buildboard_demo_reminders    |     |   - users table (firebase_uid, email, |
-|       7. buildboard_demo_problems     |     |     email_verified, created_at)       |
-|       8. buildboard-theme             |     |   - Connection pooling via mysql2     |
-|   - IndexedDB (buildboard_media_db)   |     +---------------------------------------+
-|     for local screenshots & media     |
-+---------------------------------------+
+|   - IndexedDB (buildboard_media_db)   |     |   - Helmet security headers & CORS    |
+|     for local screenshots & media     |     |   - Firebase Admin token verification |
+|   - LocalStorage fallback caches      |     |   - Products, problems, feedback,     |
+|                                       |     |     enrollments, notifications routes |
+|                                       |     |                                       |
+|                                       |     |   MySQL 8 Database (buildboard):      |
+|                                       |     |   - users & user_profiles tables      |
+|                                       |     |   - products & product_enrollments    |
+|                                       |     |   - product_feedback & notifications  |
+|                                       |     |   - community_problems tables         |
++---------------------------------------+     +---------------------------------------+
 ```
 
 ---

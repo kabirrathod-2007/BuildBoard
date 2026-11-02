@@ -6,3 +6,4 @@ USE buildboard;
 
 ALTER TABLE products 
   ADD COLUMN enrollment_limit INT UNSIGNED NULL DEFAULT NULL;
+

@@ -1,6 +1,15 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router'
-import { useDemoData } from '../context/DemoDataContext.jsx'
+import {
+  useAppDispatch,
+  useAppSelector,
+  selectAllNotifications,
+  selectUnreadNotificationsCount,
+  markNotificationReadThunk,
+  markAllNotificationsReadThunk,
+  markReadLocal,
+  markAllReadLocal,
+} from '../store/index.js'
 
 function formatRelativeTime(isoString) {
   if (!isoString) return ''
@@ -88,13 +97,23 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
 
-  const {
-    notifications = [],
-    unreadNotificationsCount = 0,
-    markAsRead,
-    markAllAsRead,
-  } = useDemoData()
+  const notifications = useAppSelector(selectAllNotifications)
+  const unreadNotificationsCount = useAppSelector(selectUnreadNotificationsCount)
+
+  const markAsRead = useCallback(
+    (notificationId) => {
+      dispatch(markReadLocal(notificationId))
+      dispatch(markNotificationReadThunk(notificationId))
+    },
+    [dispatch],
+  )
+
+  const markAllAsRead = useCallback(() => {
+    dispatch(markAllReadLocal())
+    dispatch(markAllNotificationsReadThunk())
+  }, [dispatch])
 
   // Close dropdown on outside click or Esc
   useEffect(() => {

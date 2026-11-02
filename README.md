@@ -7,11 +7,12 @@
 A collaborative platform where early-stage software builders connect with relevant beta testers to test functional prototypes, gather structured critiques, and iterate before public launch.
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.13-764ABC?style=flat-square&logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![React Router](https://img.shields.io/badge/React_Router-v8-CA4245?style=flat-square&logo=reactrouter&logoColor=white)](https://reactrouter.com/)
 [![Motion](https://img.shields.io/badge/Motion-React-F08080?style=flat-square)](https://motion.dev/)
-[![Demo Mode](https://img.shields.io/badge/State-Local_Demo_Mode-orange?style=flat-square)](#-local-demo-architecture)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://www.mysql.com/)
 
 [Features](#-key-features) • [How It Works](#-how-it-works) • [Quick Start](#-quick-start) • [Tech Stack](#-technology-stack) • [Project Structure](#-project-structure) • [Documentation](#-deep-dive-documentation)
 
@@ -146,10 +147,10 @@ Run these scripts from either the root directory or targeted workspace:
 | **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) (`@tailwindcss/vite`), Custom CSS Design Tokens |
 | **Icons & Typography** | [Lucide React](https://lucide.dev/), Google Fonts (Inter) |
 | **Animations** | [Motion](https://motion.dev/) (`motion/react`) with reduced-motion support |
-| **State Management** | React Context (`AuthContext`, `DemoDataContext`, `ThemeContext`) |
-| **Authentication** | Firebase Authentication (email/password + email verification) |
-| **API & Identity** | Node.js + Express API; Firebase Admin token verification |
-| **Database** | MySQL (Firebase UID keyed identity records; app data migration is pending) |
+| **State Management** | [Redux Toolkit](https://redux-toolkit.js.org/) (`@reduxjs/toolkit ^2.13.0`, `react-redux ^9.3.1`) with domain slices & memoized selectors |
+| **Authentication** | Firebase Authentication (1-Click Google OAuth + Email/Password + Verification) |
+| **API & Backend** | Node.js (>=22) + Express 5 API; Firebase Admin token verification |
+| **Database** | MySQL 8 with connection pooling (`mysql2/promise`); 9 migrations |
 | **Demo Data** | Browser `localStorage` + `IndexedDB` for product, feedback, problem, and media demo data |
 | **External APIs** | Algolia Hacker News Search REST API (`https://hn.algolia.com/api/v1`) |
 

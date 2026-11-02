@@ -155,10 +155,10 @@ The previous iteration (`BuildBoard-Landing-Full`) was a single-page marketing c
 | **Routing** | React Router 8 (`react-router ^8.4.0`) | Declarative routing, `useNavigate`, `useParams`, `useLocation` |
 | **Styling** | Tailwind CSS v4 (`@tailwindcss/vite`) | CSS-first `@theme` declarations, custom color variables |
 | **Motion** | `motion/react` | 3D spring tilt, layout animations, exit transitions, gestures |
-| **State** | React Context API | 3 stores: `AuthContext`, `DemoDataContext`, `ThemeContext` |
-| **Provider Hierarchy** | Nested Provider Chain | `BrowserRouter > ThemeProvider > AuthProvider > DemoDataProvider` |
+| **State Management** | Redux Toolkit (`@reduxjs/toolkit ^2.13.0`, `react-redux ^9.3.1`) | Sliced state domains (`products`, `problems`, `feedback`, `enrollments`, `notifications`, `profiles`, `ui`), memoized `createSelector` hooks, `createAsyncThunk` API actions, and `DemoDataContext` compatibility facade |
+| **Provider Hierarchy** | Nested Provider Chain | `Provider (Redux) > BrowserRouter > ThemeProvider > AuthProvider > DemoDataProvider` |
 | **Client Storage** | LocalStorage + IndexedDB | 9 persistent LocalStorage namespaces + IndexedDB media storage (`buildboard_media_db`) |
-| **Client Authentication** | Firebase Web SDK (`firebase ^13.1.0`) | Client-side email/password authentication, persistent sessions, and verification emails |
+| **Client Authentication** | Firebase Web SDK (`firebase ^13.1.0`) | 1-Click Google OAuth (`signInWithPopup`), Email/Password with mandatory verification, and persistent sessions |
 | **Backend API** | Node.js (>=22) + Express 5 | REST API (`:3001`) with Helmet security headers, CORS origin protection, and health check |
 | **Server Authentication** | Firebase Admin (`firebase-admin ^13.5.0`) | Cryptographic verification of Firebase ID tokens, claims validation, and revocation checks |
 | **Database** | MySQL 8 (`mysql2/promise`) | Relational persistence with connection pooling; `users` table synchronized via Firebase UID |
