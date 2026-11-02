@@ -171,17 +171,19 @@ test('Integration Test Suite (Disposable MySQL Container)', { skip: !shouldRun }
         tagline: 'Should be forbidden',
         description: 'Should be forbidden',
         audience: 'Anyone',
+        feedbackRequest: 'Verify forbidden',
+        productUrl: 'https://attacker.example.com',
         stage: 'Working prototype',
       },
     })
     assert.equal(editRes.status, 403)
-    assert.match(editRes.data?.error, /permission/)
+    assert.match(editRes.data?.error, /creator can edit/i)
 
     // Intruder tries to pause Maker's product
     const pauseRes = await api(`/api/products/${testProductSlug}/pause`, {
       method: 'PATCH',
       token: intruderToken,
-      body: { paused: true },
+      body: { enrollmentPaused: true },
     })
     assert.equal(pauseRes.status, 403)
 
@@ -225,7 +227,7 @@ test('Integration Test Suite (Disposable MySQL Container)', { skip: !shouldRun }
     const pauseRes = await api(`/api/products/${testProductSlug}/pause`, {
       method: 'PATCH',
       token: makerToken,
-      body: { paused: true },
+      body: { enrollmentPaused: true },
     })
     assert.equal(pauseRes.status, 200)
 
@@ -239,13 +241,13 @@ test('Integration Test Suite (Disposable MySQL Container)', { skip: !shouldRun }
       token: testerTwoToken,
     })
     assert.equal(pausedEnroll.status, 409)
-    assert.equal(pausedEnroll.data?.code, 'ENROLLMENT_PAUSED')
+    assert.match(pausedEnroll.data?.error, /paused/i)
 
     // Maker unpauses enrollment
     await api(`/api/products/${testProductSlug}/pause`, {
       method: 'PATCH',
       token: makerToken,
-      body: { paused: false },
+      body: { enrollmentPaused: false },
     })
 
     // Tester Two attempts to enroll when quota is full (limit = 1, current = 1) (rejected 409)
@@ -254,7 +256,7 @@ test('Integration Test Suite (Disposable MySQL Container)', { skip: !shouldRun }
       token: testerTwoToken,
     })
     assert.equal(fullEnroll.status, 409)
-    assert.equal(fullEnroll.data?.code, 'ENROLLMENT_FULL')
+    assert.equal(fullEnroll.data?.quotaFull, true)
   })
 
   await t.test('5. Concurrent requests competing for the final enrollment slot cannot overbook', async () => {
@@ -304,10 +306,10 @@ test('Integration Test Suite (Disposable MySQL Container)', { skip: !shouldRun }
     )
 
     const successes = raceResponses.filter((r) => r.status === 201)
-    const rejectedFull = raceResponses.filter((r) => r.status === 409 && r.data?.code === 'ENROLLMENT_FULL')
+    const rejectedFull = raceResponses.filter((r) => r.status === 409 && r.data?.quotaFull === true)
 
     assert.equal(successes.length, 1, 'Exactly 1 concurrent request must win the final slot')
-    assert.equal(rejectedFull.length, 3, 'The remaining 3 concurrent requests must receive 409 ENROLLMENT_FULL')
+    assert.equal(rejectedFull.length, 3, 'The remaining 3 concurrent requests must receive 409 quota full')
 
     // Verify database row count is strictly 1
     const [dbRows] = await database.execute(
