@@ -2,7 +2,7 @@
 
 **Version:** 1.0.0 (Pre-Deployment Staging)
 **Classification:** Internal Technical Reference
-**Readiness Status:** **Staging-Ready** *(Production Blocked until Shared Cloud Object Storage is Selected)*
+**Readiness Status:** **Staging & Production Ready** *(Shared Cloud Object Storage Integrated via Firebase Cloud Storage)*
 
 ---
 
@@ -30,23 +30,13 @@
 
 ---
 
-## 2. Media Storage Blocker Analysis (IndexedDB vs. Shared Storage)
+## 2. Media Storage Architecture (Firebase Cloud Storage + Local Fallback)
 
-### Current Implementation & Limitation
-- In the current checkout, uploaded media files (cover images, gallery screenshots, demo videos) are stored in the client browser's local **IndexedDB** (`buildboard_media_db` via `frontend/src/utils/indexedDB.js`).
-- When a builder creates a prototype listing on their device, the media blob remains physically stored in their browser's local storage.
-- When another tester opens the product on a different device or browser, the media cannot be resolved and falls back to a placeholder image.
-
-### Provider-Independent Requirements for Shared Storage
-To transition from local staging to full multi-user production, a shared cloud object storage provider must be selected (e.g., Firebase Cloud Storage, AWS S3, Cloudflare R2, Google Cloud Storage, or Cloudinary). The implementation must adhere to these vendor-independent standards:
-1. **Authenticated Presigned Uploads:** The backend API authenticates the caller and generates a short-lived presigned upload URL with strict constraints. The client uploads directly to object storage; binary files never transit through the Node.js API process.
-2. **Strict MIME & File Size Verification:** Upload authorizations must enforce allowed MIME types (`image/png`, `image/jpeg`, `image/webp`, `video/mp4`) and maximum payload sizes (e.g., 5 MB for images, 50 MB for videos).
-3. **Deterministic Object Ownership:** File paths must be scoped to verified resource IDs (`products/<productId>/cover/<uuid>.<ext>`) to prevent file collisions or overwriting another builder's assets.
-4. **Public Read / CDN Distribution:** Uploaded media must be served via a secure CDN with immutable caching headers.
-
-### Staging Workaround
-- Direct file uploads remain marked with in-app warnings as **"Local Device Preview Only"**.
-- For multi-user staging testing, builders should supply hosted public image URLs (e.g., Unsplash, Cloudinary, or public GitHub raw links) in the URL input fields.
+### Implementation & Cross-Device Sharing
+- **Cloud-First Uploads:** Uploaded media (covers, gallery screenshots, demo videos) are uploaded directly to **Firebase Cloud Storage** via `frontend/src/utils/mediaStorage.js` under user-scoped paths (`products/{userId}/{folder}/{timestamp}_{filename}`).
+- **Cross-Device Availability:** Once uploaded, the asset's public HTTPS download URL (`https://firebasestorage.googleapis.com/...`) is stored in the MySQL database (`image_url`, `gallery`, `video_url`). Testers and builders across all devices and browsers can view media seamlessly.
+- **Offline / Local Dev Fallback:** When Firebase Storage is not configured (e.g., offline local development), the application automatically falls back to client **IndexedDB** (`buildboard_media_db`) without breaking the creation flow.
+- **Security Rules:** Declarative storage rules (`storage.rules`) enforce public read, user-scoped write authorization, and strict file size limits (<= 10MB images, <= 50MB videos).
 
 ---
 
@@ -130,6 +120,9 @@ FLUSH PRIVILEGES;
    - Securely store this on your staging backend hosting platform as a secret file or environment variable.
 5. In **Google Cloud Console > APIs & Services > Credentials**:
    - Locate the staging Browser API Key and add an HTTP referrer restriction for `https://staging.buildboard.yourdomain.com/*`.
+6. In **Firebase Console > Build > Storage**:
+   - Click **Get started**, select standard storage and choose your default bucket region.
+   - In the **Rules** tab, paste the rules defined in [`storage.rules`](file:///Users/yash/Developer/Personal/BuildBoard/storage.rules) and click **Publish**.
 
 ### Step 4.3: Running Initial Staging Migrations
 From your deployment pipeline or staging terminal (using migration credentials):
