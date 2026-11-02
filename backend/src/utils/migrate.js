@@ -177,7 +177,14 @@ export async function runMigrations({ statusOnly = false, customPool = null } = 
         .map((s) => s.trim())
         .filter((s) => {
           const cleaned = s.replace(/--.*$/gm, '').trim()
-          return cleaned.length > 0 && !cleaned.toUpperCase().startsWith('USE ')
+          const upper = cleaned.toUpperCase()
+          // Filter out environment-specific commands (database selection or legacy grant statements)
+          return (
+            cleaned.length > 0 &&
+            !upper.startsWith('USE ') &&
+            !upper.startsWith('GRANT ') &&
+            !upper.startsWith('FLUSH ')
+          )
         })
 
       const connection = await pool.getConnection()
