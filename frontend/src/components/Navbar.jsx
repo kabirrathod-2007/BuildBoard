@@ -26,7 +26,7 @@ export default function Navbar({ className = '' }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
         {/* Brand Logo */}
         <Link to="/" className="no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1f3a6b] dark:focus-visible:outline-[#dbbf95] rounded-lg" aria-label="BuildBoard Home">
-          <Logo size="md" showBadge={true} />
+          <Logo size="md" />
         </Link>
 
         {/* Desktop Navigation */}

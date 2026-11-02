@@ -17,7 +17,7 @@ export default function Footer({ className = '' }) {
           {/* Brand Info */}
           <div className="flex flex-col gap-3.5 lg:col-span-2">
             <Link to="/" aria-label="BuildBoard Home" className="no-underline">
-              <Logo size="sm" showBadge={true} />
+              <Logo size="sm" />
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-[var(--text-muted)]">
               The direct testing ground for independent software builders, student hackers, and curious early adopters.
