@@ -1,0 +1,79 @@
+name: BuildBoard CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend Checks & Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Verify JavaScript syntax
+        run: npm run check
+
+      - name: Run backend unit and integration tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          FIREBASE_PROJECT_ID: test-buildboard
+
+  frontend:
+    name: Frontend Lint, Test & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run frontend unit tests
+        run: npm test
+
+      - name: Verify production Vite build
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:3001
+          VITE_FIREBASE_API_KEY: ci-placeholder-key
+          VITE_FIREBASE_AUTH_DOMAIN: buildboard-ci.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: buildboard-ci
+          VITE_FIREBASE_STORAGE_BUCKET: buildboard-ci.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: '1234567890'
+          VITE_FIREBASE_APP_ID: 1:1234567890:web:abcdef123456
+
