@@ -90,7 +90,7 @@ export function getAuthErrorMessage(error) {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    if (!isFirebaseConfigured) {
+    if (import.meta.env.DEV && !isFirebaseConfigured) {
       try {
         const saved = localStorage.getItem(DEMO_STORAGE_KEY)
         return saved ? JSON.parse(saved) : null
@@ -101,6 +101,21 @@ export function AuthProvider({ children }) {
     return null
   })
   const [loading, setLoading] = useState(() => Boolean(isFirebaseConfigured && firebaseAuth))
+  const [apiError, setApiError] = useState(null)
+
+  const retrySync = async () => {
+    if (!firebaseAuth?.currentUser) return
+    try {
+      setLoading(true)
+      const databaseUser = await syncUserWithApi(firebaseAuth.currentUser)
+      setUser(toAppUser(firebaseAuth.currentUser, databaseUser))
+      setApiError(null)
+    } catch (err) {
+      setApiError(err.message || 'BuildBoard API is currently unavailable.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (!isFirebaseConfigured || !firebaseAuth) return
@@ -111,6 +126,7 @@ export function AuthProvider({ children }) {
       if (!active) return
       if (!firebaseUser) {
         setUser(null)
+        setApiError(null)
         setLoading(false)
         return
       }
@@ -120,17 +136,32 @@ export function AuthProvider({ children }) {
         if (!firebaseUser.emailVerified) {
           if (active) {
             setUser(null)
+            setApiError(null)
             setLoading(false)
           }
           return
         }
 
-        const databaseUser = await syncUserWithApi(firebaseUser)
-        if (active) setUser(toAppUser(firebaseUser, databaseUser))
+        try {
+          const databaseUser = await syncUserWithApi(firebaseUser)
+          if (active) {
+            setUser(toAppUser(firebaseUser, databaseUser))
+            setApiError(null)
+          }
+        } catch (apiErr) {
+          console.warn('[BuildBoard Auth] API sync failed during session restore:', apiErr.message)
+          // Do NOT sign the user out on network or temporary API outages; preserve Firebase session
+          if (active) {
+            setUser(toAppUser(firebaseUser, null))
+            setApiError(apiErr.message || 'BuildBoard API is temporarily unreachable. Some cloud features may be limited.')
+          }
+        }
       } catch (error) {
         console.error('Could not restore BuildBoard account session:', error)
-        await firebaseSignOut(firebaseAuth).catch(() => {})
-        if (active) setUser(null)
+        if (active) {
+          setUser(null)
+          setApiError(null)
+        }
       } finally {
         if (active) setLoading(false)
       }
@@ -144,6 +175,9 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     if (!isFirebaseConfigured || !firebaseAuth) {
+      if (!import.meta.env.DEV) {
+        throw new Error('Authentication service is not configured. Demo authentication is disabled in production.')
+      }
       const trimmed = (email || '').trim() || 'member@example.com'
       const appUser = {
         uid: 'demo-' + Date.now(),
@@ -179,16 +213,23 @@ export function AuthProvider({ children }) {
       const databaseUser = await syncUserWithApi(credential.user)
       const appUser = toAppUser(credential.user, databaseUser)
       setUser(appUser)
+      setApiError(null)
       return appUser
     } catch (error) {
-      await firebaseSignOut(firebaseAuth)
-      throw error
+      // Allow sign-in with Firebase session, but surface API sync failure
+      const appUser = toAppUser(credential.user, null)
+      setUser(appUser)
+      setApiError(error.message || 'BuildBoard API is currently unreachable.')
+      return appUser
     }
   }
 
   const signUp = async (email, password, displayName = '') => {
     const trimmedDisplayName = (displayName || '').trim()
     if (!isFirebaseConfigured || !firebaseAuth) {
+      if (!import.meta.env.DEV) {
+        throw new Error('Authentication service is not configured. Demo authentication is disabled in production.')
+      }
       const trimmed = (email || '').trim() || 'member@example.com'
       const baseSlug = (trimmedDisplayName || trimmed.split('@')[0])
         .toLowerCase()
@@ -230,6 +271,9 @@ export function AuthProvider({ children }) {
 
   const signInWithGoogle = async () => {
     if (!isFirebaseConfigured || !firebaseAuth) {
+      if (!import.meta.env.DEV) {
+        throw new Error('Authentication service is not configured. Demo authentication is disabled in production.')
+      }
       const mockEmail = 'builder.google@example.com'
       const appUser = {
         uid: 'demo-google-' + Date.now(),
@@ -257,10 +301,13 @@ export function AuthProvider({ children }) {
       const databaseUser = await syncUserWithApi(credential.user)
       const appUser = toAppUser(credential.user, databaseUser)
       setUser(appUser)
+      setApiError(null)
       return appUser
     } catch (error) {
-      await firebaseSignOut(firebaseAuth).catch(() => {})
-      throw error
+      const appUser = toAppUser(credential.user, null)
+      setUser(appUser)
+      setApiError(error.message || 'BuildBoard API is currently unreachable.')
+      return appUser
     }
   }
 
@@ -330,6 +377,8 @@ export function AuthProvider({ children }) {
         confirmReset,
         signOut,
         isFirebaseConfigured,
+        apiError,
+        retrySync,
       }}
     >
       {children}

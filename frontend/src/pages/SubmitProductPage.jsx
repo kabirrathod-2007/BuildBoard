@@ -742,6 +742,18 @@ export default function SubmitProductPage() {
                       <span className="text-xs font-normal text-[var(--text-subtle)]">(Required: upload photo or provide image link)</span>
                     </label>
 
+                    {/* Multi-user Media Notice */}
+                    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-[var(--text-main)] flex items-start gap-2.5">
+                      <svg className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <div>
+                        <span className="font-semibold text-amber-600 dark:text-amber-400">Multi-User Media Notice:</span> Direct file uploads are stored in this device&apos;s browser IndexedDB for local preview. To ensure other testers across different devices and browsers can see your media, enter hosted public URLs (e.g., Cloudinary, Imgur, S3, or Firebase Storage).
+                      </div>
+                    </div>
+
                     <div className="grid gap-4 sm:grid-cols-2 items-start">
                       {/* Upload box */}
                       <div>

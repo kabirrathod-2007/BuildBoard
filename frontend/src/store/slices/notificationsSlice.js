@@ -127,3 +127,4 @@ export const selectUnreadNotificationsCount = (state) => state.notifications.unr
 export const selectNotificationsLoading = (state) => state.notifications.loading
 
 export default notificationsSlice.reducer
+

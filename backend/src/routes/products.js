@@ -3,30 +3,14 @@ import { database } from '../config/database.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { optionalAuth } from '../middleware/optionalAuth.js'
 import { createNotification } from '../utils/notifications.js'
+import {
+  isValidHttpUrl,
+  validateAllowedFields,
+  sanitizeStringArray,
+  slugify,
+} from '../utils/validation.js'
 
 const router = Router()
-
-function slugify(text) {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .replace(/--+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '')
-}
-
-function isValidUrl(string) {
-  if (!string || typeof string !== 'string') return false
-  try {
-    const parsed = new URL(string.trim())
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-  } catch {
-    return false
-  }
-}
 
 async function findUserId(firebaseUid) {
   const [rows] = await database.execute(
@@ -34,16 +18,6 @@ async function findUserId(firebaseUid) {
     [firebaseUid],
   )
   return rows[0]?.id ?? null
-}
-
-function sanitizeStringArray(arr, maxItems = 50, maxLength = 100) {
-  if (!Array.isArray(arr)) return []
-  return [...new Set(
-    arr
-      .filter((item) => typeof item === 'string')
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0 && item.length <= maxLength)
-  )].slice(0, maxItems)
 }
 
 function validateProductInput(body, isUpdate = false) {
@@ -83,7 +57,7 @@ function validateProductInput(body, isUpdate = false) {
   }
 
   const rawProductUrl = body.productUrl || body.prototypeUrl
-  if (!rawProductUrl || !isValidUrl(rawProductUrl)) {
+  if (!rawProductUrl || !isValidHttpUrl(rawProductUrl)) {
     return { error: 'A valid prototype URL starting with http:// or https:// is required.' }
   }
   const productUrl = rawProductUrl.trim()
@@ -93,7 +67,7 @@ function validateProductInput(body, isUpdate = false) {
 
   let githubUrl = null
   if (body.githubUrl && typeof body.githubUrl === 'string' && body.githubUrl.trim()) {
-    if (!isValidUrl(body.githubUrl)) {
+    if (!isValidHttpUrl(body.githubUrl)) {
       return { error: 'GitHub URL must be a valid URL starting with http:// or https://' }
     }
     githubUrl = body.githubUrl.trim().slice(0, 500)
@@ -102,7 +76,7 @@ function validateProductInput(body, isUpdate = false) {
   let imageUrl = null
   const rawImage = body.imageUrl || body.image
   if (rawImage && typeof rawImage === 'string' && rawImage.trim()) {
-    if (!isValidUrl(rawImage)) {
+    if (!isValidHttpUrl(rawImage)) {
       return { error: 'Cover image URL must be a valid URL starting with http:// or https://' }
     }
     imageUrl = rawImage.trim().slice(0, 500)
@@ -110,7 +84,7 @@ function validateProductInput(body, isUpdate = false) {
 
   let videoUrl = null
   if (body.videoUrl && typeof body.videoUrl === 'string' && body.videoUrl.trim()) {
-    if (!isValidUrl(body.videoUrl)) {
+    if (!isValidHttpUrl(body.videoUrl)) {
       return { error: 'Video URL must be a valid URL starting with http:// or https://' }
     }
     videoUrl = body.videoUrl.trim().slice(0, 500)
@@ -119,7 +93,7 @@ function validateProductInput(body, isUpdate = false) {
   let gallery = null
   if (Array.isArray(body.gallery)) {
     gallery = body.gallery
-      .filter((url) => typeof url === 'string' && isValidUrl(url))
+      .filter((url) => typeof url === 'string' && isValidHttpUrl(url))
       .map((url) => url.trim().slice(0, 500))
       .slice(0, 20)
   }
@@ -304,9 +278,9 @@ async function attachCriteriaAndSteps(products, userId = null, isCatalog = false
       isOwner,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
-      creatorEmail: row.creator_email,
+      creatorEmail: isOwner ? row.creator_email : undefined,
       creatorUsername: row.creator_username || '',
-      maker: row.maker_name || row.creator_email.split('@')[0],
+      maker: row.maker_name || row.creator_username || 'Builder',
       categories: criteria.category.length > 0 ? criteria.category : ['Other'],
       targetRoles: criteria.role,
       targetIndustries: criteria.industry,
@@ -457,6 +431,15 @@ router.post('/:slugOrId/view', optionalAuth, async (req, res, next) => {
 // POST /api/products (Create product listing)
 // ----------------------------------------------------------------------
 router.post('/', requireAuth, async (req, res, next) => {
+  const allowed = new Set([
+    'name', 'tagline', 'description', 'stage', 'audience', 'feedbackRequest',
+    'productUrl', 'prototypeUrl', 'githubUrl', 'imageUrl', 'image', 'gallery',
+    'videoUrl', 'categories', 'targetRoles', 'targetIndustries',
+    'targetTechnologies', 'whatToTry', 'enrollmentLimit',
+  ])
+  const fieldErr = validateAllowedFields(req.body, allowed, 'product listing')
+  if (fieldErr) return res.status(400).json({ error: fieldErr })
+
   const { data, error } = validateProductInput(req.body)
   if (error) return res.status(400).json({ error })
 
@@ -598,6 +581,15 @@ router.post('/', requireAuth, async (req, res, next) => {
 // PUT /api/products/:slugOrId (Update product listing by creator)
 // ----------------------------------------------------------------------
 router.put('/:slugOrId', requireAuth, async (req, res, next) => {
+  const allowed = new Set([
+    'name', 'tagline', 'description', 'stage', 'audience', 'feedbackRequest',
+    'productUrl', 'prototypeUrl', 'githubUrl', 'imageUrl', 'image', 'gallery',
+    'videoUrl', 'categories', 'targetRoles', 'targetIndustries',
+    'targetTechnologies', 'whatToTry', 'enrollmentLimit',
+  ])
+  const fieldErr = validateAllowedFields(req.body, allowed, 'product update')
+  if (fieldErr) return res.status(400).json({ error: fieldErr })
+
   const { data, error } = validateProductInput(req.body, true)
   if (error) return res.status(400).json({ error })
 
@@ -741,6 +733,10 @@ router.put('/:slugOrId', requireAuth, async (req, res, next) => {
 // PATCH /api/products/:slugOrId/pause (Toggle enrollment pause by creator)
 // ----------------------------------------------------------------------
 router.patch('/:slugOrId/pause', requireAuth, async (req, res, next) => {
+  const allowed = new Set(['enrollmentPaused'])
+  const fieldErr = validateAllowedFields(req.body, allowed, 'pause toggle')
+  if (fieldErr) return res.status(400).json({ error: fieldErr })
+
   try {
     const userId = await findUserId(req.authUser.firebaseUid)
     if (!userId) {
@@ -818,9 +814,10 @@ router.delete('/:slugOrId', requireAuth, async (req, res, next) => {
 })
 
 // ----------------------------------------------------------------------
-// POST /api/products/:slugOrId/enroll (Enroll as a prototype tester)
+// POST /api/products/:slugOrId/enroll (Atomic Enrollment with Row-Level Lock)
 // ----------------------------------------------------------------------
 router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
+  const connection = await database.getConnection()
   try {
     const userId = await findUserId(req.authUser.firebaseUid)
     if (!userId) {
@@ -829,26 +826,40 @@ router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
 
     const { slugOrId } = req.params
     const isNumeric = /^\d+$/.test(slugOrId)
-    const selectQuery = `SELECT * FROM products WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`
-    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
 
-    const [rows] = await database.execute(selectQuery, selectParams)
+    await connection.beginTransaction()
+
+    // Select and lock the product row to serialize concurrent enrollment requests
+    const selectQuery = `
+      SELECT id, creator_id, name, slug, product_url, enrollment_paused, enrollment_limit 
+      FROM products 
+      WHERE ${isNumeric ? 'id = ? OR slug = ?' : 'slug = ?'} 
+      LIMIT 1 
+      FOR UPDATE
+    `
+    const selectParams = isNumeric ? [Number(slugOrId), slugOrId] : [slugOrId]
+    const [rows] = await connection.execute(selectQuery, selectParams)
+
     if (rows.length === 0) {
+      await connection.rollback()
       return res.status(404).json({ error: 'Product listing not found.' })
     }
 
     const targetProduct = rows[0]
     if (Number(targetProduct.creator_id) === Number(userId)) {
+      await connection.rollback()
       return res.status(400).json({ error: 'You cannot enroll in your own product.' })
     }
 
-    // Check existing enrollment
-    const [existing] = await database.execute(
-      'SELECT id, created_at FROM product_enrollments WHERE user_id = ? AND product_id = ? LIMIT 1',
+    // Check existing enrollment inside the lock
+    const [existing] = await connection.execute(
+      'SELECT id, created_at FROM product_enrollments WHERE user_id = ? AND product_id = ? LIMIT 1 FOR UPDATE',
       [userId, targetProduct.id],
     )
 
+    // Existing testers retain access even if paused or quota reached
     if (existing.length > 0) {
+      await connection.commit()
       return res.json({
         success: true,
         enrolled: true,
@@ -860,19 +871,21 @@ router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
 
     // If new enrollment and builder paused enrollment:
     if (targetProduct.enrollment_paused) {
+      await connection.rollback()
       return res.status(409).json({
         error: 'Enrollment for this product is currently paused by the builder.',
       })
     }
 
-    // If quota / enrollment limit is set and reached:
+    // If quota / enrollment limit is set, check current count within transaction
     if (targetProduct.enrollment_limit !== null && targetProduct.enrollment_limit !== undefined) {
-      const [countRows] = await database.execute(
-        'SELECT COUNT(*) AS total FROM product_enrollments WHERE product_id = ?',
+      const [countRows] = await connection.execute(
+        'SELECT COUNT(*) AS total FROM product_enrollments WHERE product_id = ? FOR UPDATE',
         [targetProduct.id],
       )
       const currentCount = Number(countRows[0]?.total || 0)
       if (currentCount >= Number(targetProduct.enrollment_limit)) {
+        await connection.rollback()
         return res.status(409).json({
           error: `Testing quota reached for this prototype (${targetProduct.enrollment_limit} tester spots are full).`,
           quotaFull: true,
@@ -880,11 +893,14 @@ router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
       }
     }
 
-    await database.execute(
+    await connection.execute(
       'INSERT INTO product_enrollments (user_id, product_id) VALUES (?, ?)',
       [userId, targetProduct.id],
     )
 
+    await connection.commit()
+
+    // Dispatch notification outside transaction
     createNotification(database, {
       userId: targetProduct.creator_id,
       actorId: userId,
@@ -902,7 +918,10 @@ router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
       message: 'Successfully enrolled as a prototype tester!',
     })
   } catch (error) {
+    await connection.rollback()
     return next(error)
+  } finally {
+    connection.release()
   }
 })
 
@@ -991,6 +1010,10 @@ function parseFeedbackReply(raw) {
 // POST /api/products/:slugOrId/feedback (Submit feedback on product)
 // ----------------------------------------------------------------------
 router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
+  const allowed = new Set(['category', 'experience', 'likes'])
+  const fieldErr = validateAllowedFields(req.body, allowed, 'feedback submission')
+  if (fieldErr) return res.status(400).json({ error: fieldErr })
+
   try {
     const userId = await findUserId(req.authUser.firebaseUid)
     if (!userId) {
@@ -1049,10 +1072,9 @@ router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
 
     const insertId = insertResult.insertId
 
-    // Fetch author info to return complete feedback item
+    // Fetch author info to return complete feedback item (without email)
     const [userRows] = await database.execute(
       `SELECT 
-         u.email,
          up.profile_data->>'$.displayName' AS display_name,
          up.profile_data->>'$.username' AS username,
          up.profile_data->>'$.roles[0]' AS primary_role
@@ -1063,7 +1085,7 @@ router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
     )
 
     const author = userRows[0] || {}
-    const authorName = author.display_name || (author.email ? author.email.split('@')[0] : 'A tester')
+    const authorName = author.display_name || author.username || 'A tester'
 
     createNotification(database, {
       userId: product.creator_id,
@@ -1086,8 +1108,7 @@ router.post('/:slugOrId/feedback', requireAuth, async (req, res, next) => {
         helpfulMarkedAt: null,
         reply: null,
         createdAt: new Date().toISOString(),
-        userEmail: author.email || req.authUser.email || '',
-        testerName: author.display_name || (author.email ? author.email.split('@')[0] : 'Community Tester'),
+        testerName: author.display_name || author.username || 'Community Tester',
         testerUsername: author.username || '',
         testerRole: author.primary_role || 'Community Tester',
       },
@@ -1117,7 +1138,6 @@ router.get('/:slugOrId/feedback', async (req, res, next) => {
     const [feedbackRows] = await database.execute(
       `SELECT 
          pf.*,
-         u.email AS user_email,
          up.profile_data->>'$.displayName' AS display_name,
          up.profile_data->>'$.username' AS username,
          up.profile_data->>'$.roles[0]' AS primary_role,
@@ -1141,8 +1161,7 @@ router.get('/:slugOrId/feedback', async (req, res, next) => {
       reply: parseFeedbackReply(r.builder_reply),
       createdAt: r.created_at,
       updatedAt: r.updated_at,
-      userEmail: r.user_email,
-      testerName: r.display_name || (r.user_email ? r.user_email.split('@')[0] : 'Community Tester'),
+      testerName: r.display_name || r.username || 'Community Tester',
       testerUsername: r.username || '',
       testerRole: r.primary_role || 'Community Tester',
     }))

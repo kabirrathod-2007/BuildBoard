@@ -1,6 +1,10 @@
 import { firebaseAuth } from '../config/firebase.js'
 
 export async function optionalAuth(req, _res, next) {
+  if (!firebaseAuth) {
+    return next()
+  }
+
   const authorization = req.get('authorization') || ''
   const [scheme, token] = authorization.split(' ')
 

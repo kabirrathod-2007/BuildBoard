@@ -18,11 +18,11 @@ function ProblemItem({ problem, index }) {
   const makerName = makerProfile?.displayName?.trim() || problem.maker || (problem.creatorEmail ? problem.creatorEmail.split('@')[0] : 'Independent Builder')
 
   const userEmail = user?.email?.toLowerCase().trim()
-  const hasValidated = Boolean(userEmail && problem.validatedBy?.includes(userEmail))
-  const validationCount = problem.validatedBy?.length || 0
-  const commentsCount = problem.comments?.length || 0
-  const testerSignupCount = problem.testerSignups?.length || 0
-  const solutionsCount = problem.solutions?.length || 0
+  const hasValidated = Boolean(problem.hasValidated ?? (userEmail && problem.validatedBy?.includes(userEmail)))
+  const validationCount = problem.validationCount ?? (problem.validatedBy?.length || 0)
+  const commentsCount = problem.commentCount ?? (problem.comments?.length || 0)
+  const testerSignupCount = problem.testerSignupCount ?? (problem.testerSignups?.length || 0)
+  const solutionsCount = problem.solutionCount ?? (problem.solutions?.length || 0)
 
   const handleVote = (e) => {
     e.preventDefault()
@@ -319,12 +319,12 @@ export default function ProblemsPage() {
 
     // Tab filter
     if (filterTab === 'most_validated') {
-      list.sort((a, b) => (b.validatedBy?.length || 0) - (a.validatedBy?.length || 0))
+      list.sort((a, b) => (b.validationCount ?? b.validatedBy?.length ?? 0) - (a.validationCount ?? a.validatedBy?.length ?? 0))
     } else if (filterTab === 'needs_validation') {
-      list = list.filter((p) => (p.validatedBy?.length || 0) < 5)
+      list = list.filter((p) => (p.validationCount ?? p.validatedBy?.length ?? 0) < 5)
     } else if (filterTab === 'my_hypotheses') {
       const userEmail = user?.email?.toLowerCase().trim()
-      list = list.filter((p) => p.creatorEmail === userEmail)
+      list = list.filter((p) => p.isOwner || (userEmail && p.creatorEmail === userEmail))
     }
 
     // Text search

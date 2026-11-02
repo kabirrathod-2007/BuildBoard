@@ -1,6 +1,10 @@
 import { firebaseAuth } from '../config/firebase.js'
 
 export async function requireAuth(req, res, next) {
+  if (!firebaseAuth) {
+    return res.status(503).json({ error: 'Authentication service is not configured on the server.' })
+  }
+
   const authorization = req.get('authorization') || ''
   const [scheme, token] = authorization.split(' ')
 

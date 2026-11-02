@@ -733,6 +733,11 @@ export default function ProductDetailsPage() {
                       transition={{ duration: 0.2 }}
                       className="h-64 w-full object-cover object-top sm:h-[400px]"
                     />
+                    {activeImage?.startsWith('blob:') && (
+                      <span className="absolute top-3 left-3 z-10 rounded-md bg-amber-500/90 px-2 py-0.5 text-[10px] font-semibold text-white shadow-xs backdrop-blur-xs">
+                        Local Browser Preview
+                      </span>
+                    )}
                   </AnimatePresence>
                 ) : (
                   <div className="flex h-56 sm:h-72 w-full flex-col items-center justify-center bg-[var(--bg-surface-subtle)] p-6 text-center">

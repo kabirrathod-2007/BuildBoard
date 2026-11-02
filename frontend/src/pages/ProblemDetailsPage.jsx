@@ -488,13 +488,13 @@ export default function ProblemDetailsPage() {
   const userEmail = user?.email?.toLowerCase().trim()
   const currentUserProfile = userEmail ? getProfile(userEmail) : null
   const currentUserName = currentUserProfile?.displayName?.trim() || (userEmail ? userEmail.split('@')[0] : 'Contributor')
-  const isMaker = Boolean(userEmail && problem.creatorEmail?.toLowerCase() === userEmail)
-  const hasValidated = Boolean(userEmail && problem.validatedBy?.includes(userEmail))
+  const isMaker = Boolean(problem.isOwner || (userEmail && problem.creatorEmail?.toLowerCase() === userEmail))
+  const hasValidated = Boolean(problem.hasValidated ?? (userEmail && problem.validatedBy?.includes(userEmail)))
   const hasSubscribed = Boolean(userEmail && (problem.subscribers || []).includes(userEmail))
-  const hasSignedUpAsTester = Boolean(userEmail && (problem.testerSignups || []).includes(userEmail))
-  const validationCount = problem.validatedBy?.length || 0
+  const hasSignedUpAsTester = Boolean(problem.hasSignedUp ?? (userEmail && (problem.testerSignups || []).includes(userEmail)))
+  const validationCount = problem.validationCount ?? (problem.validatedBy?.length || 0)
   const subscribersCount = (problem.subscribers || []).length
-  const testerSignupCount = (problem.testerSignups || []).length
+  const testerSignupCount = problem.testerSignupCount ?? (problem.testerSignups?.length || 0)
   const comments = problem.comments || []
   const solutions = problem.solutions || []
   const userProducts = user ? getUserProducts(user.email) : []

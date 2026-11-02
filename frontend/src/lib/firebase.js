@@ -17,8 +17,13 @@ const missingConfig = requiredConfig.filter((key) => !firebaseConfig[key])
 export const isFirebaseConfigured = missingConfig.length === 0
 
 if (!isFirebaseConfigured) {
+  if (import.meta.env.PROD) {
+    throw new Error(
+      `[BuildBoard Production Error] Firebase configuration is missing: ${missingConfig.join(', ')}. Deployment requires valid Firebase environment variables.`
+    )
+  }
   console.warn(
-    `[BuildBoard] Firebase configuration is incomplete (${missingConfig.join(', ')}). Running in demo auth mode.`
+    `[BuildBoard] Firebase configuration is incomplete (${missingConfig.join(', ')}). Running in demo auth mode (development only).`
   )
 }
 

@@ -159,10 +159,12 @@ export const problemsSlice = createSlice({
           prob.validations = validates.filter((e) => e !== normalized)
           prob.validationCount = Math.max(0, (prob.validationCount || 1) - 1)
           prob.isValidated = false
+          prob.hasValidated = false
         } else {
           prob.validations = [...validates, normalized]
           prob.validationCount = (prob.validationCount || 0) + 1
           prob.isValidated = true
+          prob.hasValidated = true
         }
       }
     },
@@ -179,10 +181,12 @@ export const problemsSlice = createSlice({
           prob.testerSignups = signups.filter((e) => e !== normalized)
           prob.testerSignupCount = Math.max(0, (prob.testerSignupCount || 1) - 1)
           prob.hasTesterSignedUp = false
+          prob.hasSignedUp = false
         } else {
           prob.testerSignups = [...signups, normalized]
           prob.testerSignupCount = (prob.testerSignupCount || 0) + 1
           prob.hasTesterSignedUp = true
+          prob.hasSignedUp = true
         }
       }
     },
@@ -373,3 +377,4 @@ export const selectUserProblems = createSelector(
 )
 
 export default problemsSlice.reducer
+

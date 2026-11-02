@@ -3,30 +3,14 @@ import { database } from '../config/database.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { optionalAuth } from '../middleware/optionalAuth.js'
 import { createNotification } from '../utils/notifications.js'
+import {
+  isValidHttpUrl,
+  validateAllowedFields,
+  sanitizeStringArray,
+  slugify,
+} from '../utils/validation.js'
 
 const router = Router()
-
-function slugify(text) {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .replace(/--+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '')
-}
-
-function isValidUrl(string) {
-  if (!string || typeof string !== 'string') return false
-  try {
-    const parsed = new URL(string.trim())
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-  } catch {
-    return false
-  }
-}
 
 async function findUserId(firebaseUid) {
   const [rows] = await database.execute(
@@ -34,16 +18,6 @@ async function findUserId(firebaseUid) {
     [firebaseUid],
   )
   return rows[0]?.id ?? null
-}
-
-function sanitizeStringArray(arr, maxItems = 30, maxLength = 100) {
-  if (!Array.isArray(arr)) return []
-  return [...new Set(
-    arr
-      .filter((item) => typeof item === 'string')
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0 && item.length <= maxLength)
-  )].slice(0, maxItems)
 }
 
 // ----------------------------------------------------------------------
@@ -81,7 +55,6 @@ router.get('/', optionalAuth, async (req, res, next) => {
     const [rows] = await database.execute(
       `SELECT 
          p.*,
-         u.email AS creator_email,
          up.profile_data->>'$.displayName' AS creator_name,
          up.profile_data->>'$.username' AS creator_username,
          (SELECT COUNT(*) FROM problem_validations WHERE problem_id = p.id) AS validation_count,
@@ -154,8 +127,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
         createdAt: r.created_at,
         updatedAt: r.updated_at,
         creatorId: String(r.creator_id),
-        creatorEmail: r.creator_email,
-        maker: r.creator_name || (r.creator_email ? r.creator_email.split('@')[0] : 'Independent Builder'),
+        maker: r.creator_name || r.creator_username || 'Independent Builder',
         creatorUsername: r.creator_username || '',
         isOwner: Boolean(currentUserId && Number(r.creator_id) === Number(currentUserId)),
         targetRoles: crit.roles,
@@ -196,7 +168,6 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
     const selectQuery = `
       SELECT 
         p.*,
-        u.email AS creator_email,
         up.profile_data->>'$.displayName' AS creator_name,
         up.profile_data->>'$.username' AS creator_username
       FROM problems p
@@ -222,24 +193,18 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
     const targetRoles = criteriaRows.filter((c) => c.criteria_type === 'role').map((c) => c.criteria_value)
     const targetIndustries = criteriaRows.filter((c) => c.criteria_type === 'industry').map((c) => c.criteria_value)
 
-    // Fetch validations & tester signups
-    const [validationRows] = await database.execute(
-      `SELECT u.email, up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
-       FROM problem_validations pv
-       JOIN users u ON u.id = pv.user_id
-       LEFT JOIN user_profiles up ON up.user_id = pv.user_id
-       WHERE pv.problem_id = ?`,
+    // Check counts
+    const [valCountRows] = await database.execute(
+      'SELECT COUNT(*) AS total FROM problem_validations WHERE problem_id = ?',
       [p.id],
     )
+    const validationCount = Number(valCountRows[0]?.total || 0)
 
-    const [signupRows] = await database.execute(
-      `SELECT u.email, up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
-       FROM problem_tester_signups pts
-       JOIN users u ON u.id = pts.user_id
-       LEFT JOIN user_profiles up ON up.user_id = pts.user_id
-       WHERE pts.problem_id = ?`,
+    const [signCountRows] = await database.execute(
+      'SELECT COUNT(*) AS total FROM problem_tester_signups WHERE problem_id = ?',
       [p.id],
     )
+    const testerSignupCount = Number(signCountRows[0]?.total || 0)
 
     // Check current user status
     let hasValidated = false
@@ -258,11 +223,10 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
       hasSignedUp = userSign.length > 0
     }
 
-    // Fetch nested comments
+    // Fetch nested comments (without exposing private emails)
     const [commentRows] = await database.execute(
       `SELECT 
          pc.*,
-         u.email AS author_email,
          up.profile_data->>'$.displayName' AS author_name,
          up.profile_data->>'$.username' AS author_username
        FROM problem_comments pc
@@ -279,21 +243,21 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
       replyToAuthor: c.reply_to_author || null,
       text: c.text,
       createdAt: c.created_at,
-      authorEmail: c.author_email,
-      authorName: c.author_name || (c.author_email ? c.author_email.split('@')[0] : 'Contributor'),
+      authorName: c.author_name || c.author_username || 'Contributor',
       authorUsername: c.author_username || '',
       isMakerReply: Number(c.user_id) === Number(p.creator_id),
     }))
 
-    // Fetch solutions attached
+    // Fetch solutions attached with gated URL access
     const [solutionRows] = await database.execute(
       `SELECT 
          ps.*,
-         u.email AS author_email,
          up.profile_data->>'$.displayName' AS author_name,
          up.profile_data->>'$.username' AS author_username,
          prod.slug AS product_slug,
-         prod.name AS product_name
+         prod.name AS product_name,
+         prod.creator_id AS product_creator_id,
+         prod.product_url AS original_product_url
        FROM problem_solutions ps
        JOIN users u ON u.id = ps.user_id
        LEFT JOIN user_profiles up ON up.user_id = ps.user_id
@@ -303,20 +267,45 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
       [p.id],
     )
 
-    const solutions = solutionRows.map((s) => ({
-      id: String(s.id),
-      title: s.title,
-      description: s.description || '',
-      productId: s.product_id ? String(s.product_id) : null,
-      productSlug: s.product_slug || null,
-      productName: s.product_name || null,
-      productUrl: s.product_url || '',
-      authorEmail: s.author_email,
-      authorName: s.author_name || (s.author_email ? s.author_email.split('@')[0] : 'Maker'),
-      authorUsername: s.author_username || '',
-      isMaker: Number(s.user_id) === Number(p.creator_id),
-      createdAt: s.created_at,
-    }))
+    // Verify prototype-link access for each solution
+    const solutions = await Promise.all(
+      solutionRows.map(async (s) => {
+        let safeProductUrl = null
+        if (s.product_id) {
+          // Internal BuildBoard product: only visible to owner or verified enrolled tester
+          let canAccess = false
+          if (currentUserId) {
+            if (Number(s.product_creator_id) === Number(currentUserId)) {
+              canAccess = true
+            } else {
+              const [enrRows] = await database.execute(
+                'SELECT id FROM product_enrollments WHERE user_id = ? AND product_id = ? LIMIT 1',
+                [currentUserId, s.product_id],
+              )
+              canAccess = enrRows.length > 0
+            }
+          }
+          safeProductUrl = canAccess ? (s.original_product_url || s.product_url) : null
+        } else {
+          // External standalone demo/link
+          safeProductUrl = s.product_url || null
+        }
+
+        return {
+          id: String(s.id),
+          title: s.title,
+          description: s.description || '',
+          productId: s.product_id ? String(s.product_id) : null,
+          productSlug: s.product_slug || null,
+          productName: s.product_name || null,
+          productUrl: safeProductUrl,
+          authorName: s.author_name || s.author_username || 'Maker',
+          authorUsername: s.author_username || '',
+          isMaker: Number(s.user_id) === Number(p.creator_id),
+          createdAt: s.created_at,
+        }
+      }),
+    )
 
     return res.json({
       problem: {
@@ -332,20 +321,17 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
         createdAt: p.created_at,
         updatedAt: p.updated_at,
         creatorId: String(p.creator_id),
-        creatorEmail: p.creator_email,
-        maker: p.creator_name || (p.creator_email ? p.creator_email.split('@')[0] : 'Independent Builder'),
+        maker: p.creator_name || p.creator_username || 'Independent Builder',
         creatorUsername: p.creator_username || '',
         isOwner: Boolean(currentUserId && Number(p.creator_id) === Number(currentUserId)),
         targetRoles,
         targetIndustries,
-        validationCount: validationRows.length,
-        testerSignupCount: signupRows.length,
+        validationCount,
+        testerSignupCount,
         commentCount: comments.length,
         solutionCount: solutions.length,
         hasValidated,
         hasSignedUp,
-        validatedBy: validationRows.map((v) => v.email),
-        testerSignups: signupRows.map((s) => s.email),
         comments,
         solutions,
       },
@@ -362,6 +348,19 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
 // POST /api/problems (Create problem hypothesis)
 // ----------------------------------------------------------------------
 router.post('/', requireAuth, async (req, res, next) => {
+  const allowed = new Set([
+    'title',
+    'statement',
+    'workarounds',
+    'targetAudience',
+    'proposedConcept',
+    'category',
+    'targetRoles',
+    'targetIndustries',
+  ])
+  const fieldError = validateAllowedFields(req.body, allowed, 'problem hypothesis')
+  if (fieldError) return res.status(400).json({ error: fieldError })
+
   const connection = await database.getConnection()
   try {
     const userId = await findUserId(req.authUser.firebaseUid)
@@ -460,7 +459,7 @@ router.post('/', requireAuth, async (req, res, next) => {
 
     // Fetch creator profile
     const [userRows] = await database.execute(
-      `SELECT u.email, up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
+      `SELECT up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
        FROM users u
        LEFT JOIN user_profiles up ON up.user_id = u.id
        WHERE u.id = ? LIMIT 1`,
@@ -483,8 +482,7 @@ router.post('/', requireAuth, async (req, res, next) => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         creatorId: String(userId),
-        creatorEmail: author.email || req.authUser.email,
-        maker: author.display_name || (author.email ? author.email.split('@')[0] : 'Independent Builder'),
+        maker: author.display_name || author.username || 'Independent Builder',
         creatorUsername: author.username || '',
         isOwner: true,
         targetRoles: cleanRoles,
@@ -495,8 +493,6 @@ router.post('/', requireAuth, async (req, res, next) => {
         solutionCount: 0,
         hasValidated: true,
         hasSignedUp: false,
-        validatedBy: [author.email || req.authUser.email],
-        testerSignups: [],
         comments: [],
         solutions: [],
       },
@@ -605,7 +601,7 @@ router.post('/:slugOrId/validate', requireAuth, async (req, res, next) => {
     return res.json({
       success: true,
       hasValidated,
-      validationCount: Number(countRows[0].total || 0),
+      validationCount: Number(countRows[0]?.total || 0),
     })
   } catch (error) {
     return next(error)
@@ -672,7 +668,7 @@ router.post('/:slugOrId/tester-signup', requireAuth, async (req, res, next) => {
     return res.json({
       success: true,
       hasSignedUp,
-      signupCount: Number(countRows[0].total || 0),
+      signupCount: Number(countRows[0]?.total || 0),
     })
   } catch (error) {
     return next(error)
@@ -683,6 +679,10 @@ router.post('/:slugOrId/tester-signup', requireAuth, async (req, res, next) => {
 // POST /api/problems/:slugOrId/comments (Add nested comment or reply)
 // ----------------------------------------------------------------------
 router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
+  const allowed = new Set(['text', 'parentId'])
+  const fieldError = validateAllowedFields(req.body, allowed, 'comment')
+  if (fieldError) return res.status(400).json({ error: fieldError })
+
   try {
     const userId = await findUserId(req.authUser.firebaseUid)
     if (!userId) {
@@ -700,7 +700,7 @@ router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
     }
 
     const problem = rows[0]
-    const { text, parentId, replyToAuthor } = req.body || {}
+    const { text, parentId } = req.body || {}
     const trimmedText = typeof text === 'string' ? text.trim() : ''
 
     if (!trimmedText || trimmedText.length < 2 || trimmedText.length > 5000) {
@@ -709,35 +709,41 @@ router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
 
     let validParentId = null
     let parentAuthorUserId = null
+    let derivedReplyToAuthor = null
+
     if (parentId) {
       const [parentRows] = await database.execute(
-        'SELECT id, user_id FROM problem_comments WHERE id = ? AND problem_id = ? LIMIT 1',
+        `SELECT pc.id, pc.user_id, up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
+         FROM problem_comments pc
+         LEFT JOIN user_profiles up ON up.user_id = pc.user_id
+         WHERE pc.id = ? AND pc.problem_id = ? LIMIT 1`,
         [Number(parentId), problem.id],
       )
       if (parentRows.length > 0) {
         validParentId = parentRows[0].id
         parentAuthorUserId = parentRows[0].user_id
+        derivedReplyToAuthor = parentRows[0].display_name || parentRows[0].username || 'Contributor'
       }
     }
 
     const [insertResult] = await database.execute(
       `INSERT INTO problem_comments (problem_id, user_id, parent_id, reply_to_author, text)
        VALUES (?, ?, ?, ?, ?)`,
-      [problem.id, userId, validParentId, replyToAuthor || null, trimmedText],
+      [problem.id, userId, validParentId, derivedReplyToAuthor, trimmedText],
     )
 
     const commentId = insertResult.insertId
 
-    // Fetch author info
+    // Fetch author info (without exposing email)
     const [userRows] = await database.execute(
-      `SELECT u.email, up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
+      `SELECT up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
        FROM users u
        LEFT JOIN user_profiles up ON up.user_id = u.id
        WHERE u.id = ? LIMIT 1`,
       [userId],
     )
     const author = userRows[0] || {}
-    const authorName = author.display_name || (author.email ? author.email.split('@')[0] : 'A contributor')
+    const authorName = author.display_name || author.username || 'Contributor'
 
     // Dispatch notifications
     createNotification(database, {
@@ -765,11 +771,10 @@ router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
       comment: {
         id: String(commentId),
         parentId: validParentId ? String(validParentId) : null,
-        replyToAuthor: replyToAuthor || null,
+        replyToAuthor: derivedReplyToAuthor,
         text: trimmedText,
         createdAt: new Date().toISOString(),
-        authorEmail: author.email || req.authUser.email,
-        authorName: author.display_name || (author.email ? author.email.split('@')[0] : 'Contributor'),
+        authorName,
         authorUsername: author.username || '',
         isMakerReply: Number(userId) === Number(problem.creator_id),
       },
@@ -786,6 +791,10 @@ router.post('/:slugOrId/comments', requireAuth, async (req, res, next) => {
 // POST /api/problems/:slugOrId/solutions (Attach prototype solution)
 // ----------------------------------------------------------------------
 router.post('/:slugOrId/solutions', requireAuth, async (req, res, next) => {
+  const allowed = new Set(['title', 'description', 'productId', 'productUrl'])
+  const fieldError = validateAllowedFields(req.body, allowed, 'solution')
+  if (fieldError) return res.status(400).json({ error: fieldError })
+
   try {
     const userId = await findUserId(req.authUser.firebaseUid)
     if (!userId) {
@@ -812,22 +821,28 @@ router.post('/:slugOrId/solutions', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'Solution title is required (between 2 and 255 characters).' })
     }
 
-    if (trimmedUrl && !isValidUrl(trimmedUrl)) {
-      return res.status(400).json({ error: 'Please enter a valid URL (e.g. https://example.com).' })
+    if (trimmedUrl && !isValidHttpUrl(trimmedUrl)) {
+      return res.status(400).json({ error: 'Please enter a valid URL (starting with http:// or https://).' })
     }
 
     let linkedProductId = null
     let productDetails = null
     if (productId) {
+      const isNum = /^\d+$/.test(String(productId))
       const [prodRows] = await database.execute(
-        'SELECT id, slug, name, product_url FROM products WHERE id = ? OR slug = ? LIMIT 1',
-        [/^\d+$/.test(productId) ? Number(productId) : 0, productId],
+        `SELECT id, slug, name, product_url, creator_id FROM products WHERE ${isNum ? 'id = ? OR slug = ?' : 'slug = ?'} LIMIT 1`,
+        isNum ? [Number(productId), String(productId)] : [String(productId)],
       )
       if (prodRows.length > 0) {
         linkedProductId = prodRows[0].id
         productDetails = prodRows[0]
       }
     }
+
+    // Gated Access Security Rule:
+    // If solution is linked to a BuildBoard product, NEVER copy its private product_url into problem_solutions!
+    // Prototype links must remain gated by product enrollment/ownership.
+    const externalSolutionUrl = linkedProductId ? null : (trimmedUrl || null)
 
     const [insertResult] = await database.execute(
       `INSERT INTO problem_solutions (problem_id, user_id, product_id, title, description, product_url)
@@ -838,7 +853,7 @@ router.post('/:slugOrId/solutions', requireAuth, async (req, res, next) => {
         linkedProductId,
         trimmedTitle,
         trimmedDescription || null,
-        trimmedUrl || (productDetails?.product_url || null),
+        externalSolutionUrl,
       ],
     )
 
@@ -849,15 +864,22 @@ router.post('/:slugOrId/solutions', requireAuth, async (req, res, next) => {
       await database.execute('UPDATE problems SET stage = ? WHERE id = ?', ['Prototyping', problem.id])
     }
 
-    // Fetch author info
+    // Fetch author info (without exposing email)
     const [userRows] = await database.execute(
-      `SELECT u.email, up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
+      `SELECT up.profile_data->>'$.displayName' AS display_name, up.profile_data->>'$.username' AS username
        FROM users u
        LEFT JOIN user_profiles up ON up.user_id = u.id
        WHERE u.id = ? LIMIT 1`,
       [userId],
     )
     const author = userRows[0] || {}
+
+    // Check if the current user can view the prototype link (owner or enrolled)
+    let safeProductUrl = externalSolutionUrl
+    if (linkedProductId) {
+      const canAccess = Number(productDetails.creator_id) === Number(userId)
+      safeProductUrl = canAccess ? productDetails.product_url : null
+    }
 
     return res.status(201).json({
       success: true,
@@ -868,9 +890,8 @@ router.post('/:slugOrId/solutions', requireAuth, async (req, res, next) => {
         productId: linkedProductId ? String(linkedProductId) : null,
         productSlug: productDetails?.slug || null,
         productName: productDetails?.name || null,
-        productUrl: trimmedUrl || productDetails?.product_url || '',
-        authorEmail: author.email || req.authUser.email,
-        authorName: author.display_name || (author.email ? author.email.split('@')[0] : 'Maker'),
+        productUrl: safeProductUrl,
+        authorName: author.display_name || author.username || 'Maker',
         authorUsername: author.username || '',
         isMaker: Number(userId) === Number(problem.creator_id),
         createdAt: new Date().toISOString(),
@@ -885,3 +906,4 @@ router.post('/:slugOrId/solutions', requireAuth, async (req, res, next) => {
 })
 
 export default router
+

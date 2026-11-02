@@ -42,9 +42,14 @@ function validateProfile(value) {
     return { error: 'Send a profile object.' }
   }
 
+  for (const key of Object.keys(value)) {
+    if (!PROFILE_FIELDS.has(key)) {
+      return { error: `Field '${key}' is not allowed in profile.` }
+    }
+  }
+
   const profile = {}
   for (const [key, fieldValue] of Object.entries(value)) {
-    if (!PROFILE_FIELDS.has(key)) continue
 
     if (['participation', 'interests', 'roles', 'industries', 'technologies', 'testingDevices', 'feedbackFocus'].includes(key)) {
       if (!Array.isArray(fieldValue) || fieldValue.length > 100 || fieldValue.some((item) => typeof item !== 'string' || item.length > 120)) {
@@ -160,6 +165,13 @@ router.get('/me', requireAuth, async (req, res, next) => {
 // PUT /api/profiles/me (Update signed-in user's profile with unique username check)
 // ----------------------------------------------------------------------
 router.put('/me', requireAuth, async (req, res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    const invalidKeys = Object.keys(req.body).filter((k) => k !== 'profile')
+    if (invalidKeys.length > 0) {
+      return res.status(400).json({ error: `Unexpected field(s): ${invalidKeys.join(', ')}` })
+    }
+  }
+
   const { profile, error } = validateProfile(req.body?.profile)
   if (error) return res.status(400).json({ error })
 

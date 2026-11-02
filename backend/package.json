@@ -9,12 +9,15 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/config/firebase.js && node --check src/config/database.js && node --check src/middleware/requireAuth.js && node --check src/middleware/optionalAuth.js && node --check src/routes/auth.js && node --check src/routes/profiles.js && node --check src/routes/products.js && node --check src/routes/enrollments.js && node --check src/routes/feedback.js && node --check src/routes/problems.js && node --check src/routes/notifications.js"
+    "migrate": "node src/utils/migrate.js",
+    "test": "NODE_ENV=test node --test src/tests/**/*.test.js",
+    "check": "node --check src/server.js && node --check src/config/firebase.js && node --check src/config/database.js && node --check src/middleware/requireAuth.js && node --check src/middleware/optionalAuth.js && node --check src/routes/auth.js && node --check src/routes/profiles.js && node --check src/routes/products.js && node --check src/routes/enrollments.js && node --check src/routes/feedback.js && node --check src/routes/problems.js && node --check src/routes/notifications.js && node --check src/utils/validation.js && node --check src/utils/migrate.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.7.2",
     "firebase-admin": "^13.5.0",
     "helmet": "^8.1.0",
     "mysql2": "^3.15.0"

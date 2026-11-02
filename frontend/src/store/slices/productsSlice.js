@@ -287,3 +287,4 @@ export const selectProductViewCount = (state, productId) => {
 }
 
 export default productsSlice.reducer
+

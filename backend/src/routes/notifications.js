@@ -54,9 +54,8 @@ router.get('/', requireAuth, async (req, res, next) => {
         createdAt: r.created_at,
         actor: {
           id: r.actor_id ? String(r.actor_id) : null,
-          name: r.actor_name || (r.actor_email ? r.actor_email.split('@')[0] : 'Community Member'),
+          name: r.actor_name || r.actor_username || 'Community Member',
           username: r.actor_username || '',
-          email: r.actor_email || '',
         },
       }))
 

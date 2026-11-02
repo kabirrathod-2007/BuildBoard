@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { database } from '../config/database.js'
 import { requireAuth } from '../middleware/requireAuth.js'
 import { createNotification } from '../utils/notifications.js'
+import { validateAllowedFields } from '../utils/validation.js'
 
 const router = Router()
 
@@ -102,6 +103,10 @@ router.get('/me', requireAuth, async (req, res, next) => {
 // POST /api/feedback/:id/reply (Product owner replies to feedback)
 // ----------------------------------------------------------------------
 router.post('/:id/reply', requireAuth, async (req, res, next) => {
+  const allowed = new Set(['text'])
+  const fieldErr = validateAllowedFields(req.body, allowed, 'feedback reply')
+  if (fieldErr) return res.status(400).json({ error: fieldErr })
+
   try {
     const userId = await findUserId(req.authUser.firebaseUid)
     if (!userId) {
@@ -125,7 +130,7 @@ router.post('/:id/reply', requireAuth, async (req, res, next) => {
          p.name AS product_name,
          p.slug AS product_slug,
          up.profile_data->>'$.displayName' AS maker_name,
-         u.email AS creator_email
+         up.profile_data->>'$.username' AS creator_username
        FROM product_feedback pf
        JOIN products p ON p.id = pf.product_id
        JOIN users u ON u.id = p.creator_id
@@ -148,7 +153,7 @@ router.post('/:id/reply', requireAuth, async (req, res, next) => {
 
     const reply = {
       text: replyText,
-      repliedBy: feedbackRecord.maker_name || feedbackRecord.creator_email.split('@')[0],
+      repliedBy: feedbackRecord.maker_name || feedbackRecord.creator_username || 'Maker',
       repliedAt: isEdit ? existingReply.repliedAt : new Date().toISOString(),
       ...(isEdit ? { updatedAt: new Date().toISOString() } : {}),
     }
