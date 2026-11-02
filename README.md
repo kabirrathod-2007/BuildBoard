@@ -156,15 +156,15 @@ Run these scripts from either the root directory or targeted workspace:
 
 ---
 
-## Current Architecture: Firebase Auth + Local Demo Data
+## Current Architecture: Firebase Auth + Server-Backed MySQL
 
-BuildBoard is in a staged migration from a browser-only prototype to a Node API and MySQL. Authentication is connected to Firebase; product and community data are still local demo data.
+BuildBoard utilizes a full-stack, server-backed architecture combining Firebase Authentication with an Express 5 API and MySQL 8:
 
-- **Authentication**: Firebase handles email/password accounts and verification emails. The frontend sends Firebase ID tokens to the Express API, which verifies them with Firebase Admin and requires a verified email.
-- **MySQL identity table**: `GET /api/health` checks the API/database connection. `POST /api/auth/me` upserts the signed-in identity by Firebase UID into `backend/schema.sql`'s `users` table.
-- **App data is still local**: Product listings, profiles, enrollments, feedback, and problem threads still use the browser's demo storage. They are not yet synchronized through MySQL.
-- **Media via IndexedDB**: Prototype screenshots and video uploads remain in the browser's `IndexedDB` storage.
-- **Local setup**: Configure `frontend/.env.local` from `frontend/.env.example` and `backend/.env` from `backend/.env.example`. Keep the Firebase service-account JSON outside the repository. Run `npm run dev` and `npm run dev:api` in separate terminals.
+- **Authentication**: Firebase handles email/password accounts, Google OAuth, and email verification. The frontend transmits Firebase ID tokens to the Express API, which verifies them server-side via Firebase Admin SDK.
+- **Server-Backed Data Persistence**: Product listings, profiles, enrollments, feedback, Problem Hub topics, nested discussions, and notifications are fully persisted in MySQL 8 across 9 tracked migrations.
+- **Prototype Link Gating & Privacy**: Private prototype URLs are gated server-side and exposed exclusively to verified owners and enrolled testers. Public views omit user email addresses.
+- **Media Storage (Staging Limitation)**: File uploads (cover images, gallery screenshots, demo videos) currently store blobs in browser `IndexedDB` (`buildboard_media_db`). Because IndexedDB does not sync across devices or users, staging builders should supply public hosted image URLs for multi-user preview until a shared cloud object storage provider is selected.
+- **Staging Guide**: Detailed setup instructions for Firebase staging projects, MySQL migration/runtime user separation, and deployment smoke tests are documented in [`docs/staging_deployment.md`](./docs/staging_deployment.md).
 
 ---
 
