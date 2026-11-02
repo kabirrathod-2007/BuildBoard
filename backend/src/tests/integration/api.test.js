@@ -174,6 +174,8 @@ test('Integration Test Suite (Disposable MySQL Container)', { skip: !shouldRun }
         feedbackRequest: 'Verify forbidden',
         productUrl: 'https://attacker.example.com',
         stage: 'Working prototype',
+        categories: ['Developer Tools'],
+        whatToTry: ['Attempt unauthorized update'],
       },
     })
     assert.equal(editRes.status, 403)
