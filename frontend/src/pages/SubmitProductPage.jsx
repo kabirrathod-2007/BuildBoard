@@ -10,7 +10,7 @@ import {
 import { useDemoData } from '../context/DemoDataContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { saveMediaFile } from '../utils/indexedDB.js'
+import { uploadProductMedia, validateMediaFile } from '../utils/mediaStorage.js'
 import Navbar from '../components/Navbar.jsx'
 import Footer from '../components/Footer.jsx'
 
@@ -133,8 +133,9 @@ export default function SubmitProductPage() {
   const handleCoverFileChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        setErrors((prev) => ({ ...prev, cover: 'Please select a valid image file (PNG, JPG, WebP, SVG).' }))
+      const validation = validateMediaFile(file)
+      if (!validation.valid) {
+        setErrors((prev) => ({ ...prev, cover: validation.error }))
         return
       }
       setCoverFile(file)
@@ -152,14 +153,21 @@ export default function SubmitProductPage() {
 
   const handleGalleryFilesChange = (e) => {
     const files = Array.from(e.target.files || [])
-    const imageFiles = files.filter((f) => f.type.startsWith('image/'))
-    if (imageFiles.length === 0) return
-    const newItems = imageFiles.map((f) => ({
-      file: f,
-      preview: URL.createObjectURL(f),
-      name: f.name,
-    }))
-    setGalleryFiles((prev) => [...prev, ...newItems].slice(0, 8))
+    const validItems = []
+    for (const f of files) {
+      const validation = validateMediaFile(f)
+      if (!validation.valid) {
+        setErrors((prev) => ({ ...prev, cover: validation.error }))
+        return
+      }
+      validItems.push({
+        file: f,
+        preview: URL.createObjectURL(f),
+        name: f.name,
+      })
+    }
+    if (validItems.length === 0) return
+    setGalleryFiles((prev) => [...prev, ...validItems].slice(0, 8))
     if (errors.cover) setErrors((prev) => ({ ...prev, cover: undefined }))
   }
 
@@ -170,8 +178,9 @@ export default function SubmitProductPage() {
   const handleVideoFileChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      if (!file.type.startsWith('video/')) {
-        setErrors((prev) => ({ ...prev, video: 'Please select a valid video file (MP4, WebM, MOV).' }))
+      const validation = validateMediaFile(file)
+      if (!validation.valid) {
+        setErrors((prev) => ({ ...prev, video: validation.error }))
         return
       }
       setVideoFile(file)
@@ -273,34 +282,63 @@ export default function SubmitProductPage() {
 
     setIsSavingMedia(true)
 
-    // Save media to IndexedDB
+    // Save media to Cloud Storage (with IndexedDB fallback)
+    const userId = user.id || user.uid || 'anonymous'
+
+    let coverUrl = imageUrl.trim()
     let coverMediaId = null
     if (coverFile) {
       try {
-        const saved = await saveMediaFile(coverFile)
-        coverMediaId = saved.id
+        const saved = await uploadProductMedia({
+          file: coverFile,
+          userId,
+          folder: 'covers',
+        })
+        if (saved.isCloud && saved.url) {
+          coverUrl = saved.url
+        } else if (saved.mediaId) {
+          coverMediaId = saved.mediaId
+        }
       } catch (err) {
-        console.error('Failed to save cover file to IndexedDB:', err)
+        console.error('Failed to save cover file:', err)
       }
     }
 
+    const galleryUrls = []
     const galleryMediaIds = []
     for (const item of galleryFiles) {
       try {
-        const saved = await saveMediaFile(item.file)
-        galleryMediaIds.push(saved.id)
+        const saved = await uploadProductMedia({
+          file: item.file,
+          userId,
+          folder: 'gallery',
+        })
+        if (saved.isCloud && saved.url) {
+          galleryUrls.push(saved.url)
+        } else if (saved.mediaId) {
+          galleryMediaIds.push(saved.mediaId)
+        }
       } catch (err) {
-        console.error('Failed to save gallery screenshot to IndexedDB:', err)
+        console.error('Failed to save gallery screenshot:', err)
       }
     }
 
+    let finalVideoUrl = videoUrl.trim()
     let videoMediaId = null
     if (videoFile) {
       try {
-        const saved = await saveMediaFile(videoFile)
-        videoMediaId = saved.id
+        const saved = await uploadProductMedia({
+          file: videoFile,
+          userId,
+          folder: 'videos',
+        })
+        if (saved.isCloud && saved.url) {
+          finalVideoUrl = saved.url
+        } else if (saved.mediaId) {
+          videoMediaId = saved.mediaId
+        }
       } catch (err) {
-        console.error('Failed to save demo video file to IndexedDB:', err)
+        console.error('Failed to save demo video file:', err)
       }
     }
 
@@ -308,12 +346,12 @@ export default function SubmitProductPage() {
     setErrors({})
 
     let finalCoverMediaId = coverMediaId
-    if (!finalCoverMediaId && galleryMediaIds.length > 0) {
+    if (!coverUrl && !finalCoverMediaId && galleryMediaIds.length > 0) {
       finalCoverMediaId = galleryMediaIds[0]
     }
 
-    const finalImage = imageUrl.trim()
-    const finalGallery = finalImage ? [finalImage] : []
+    const finalImage = coverUrl || (galleryUrls.length > 0 ? galleryUrls[0] : '')
+    const finalGallery = galleryUrls.length > 0 ? galleryUrls : (finalImage ? [finalImage] : [])
 
     const newProduct = await addProduct({
       name: formData.name.trim(),
@@ -333,7 +371,7 @@ export default function SubmitProductPage() {
       mediaId: finalCoverMediaId,
       gallery: finalGallery,
       galleryMediaIds,
-      videoUrl: videoUrl.trim(),
+      videoUrl: finalVideoUrl,
       videoMediaId,
     })
 
@@ -774,7 +812,7 @@ export default function SubmitProductPage() {
                             {coverFile ? coverFile.name : 'Choose cover photo file'}
                           </span>
                           <span className="text-[11px] text-[var(--text-subtle)] mt-0.5">
-                            PNG, JPG, WebP, SVG (IndexedDB)
+                            PNG, JPG, WebP, SVG (Max 10MB)
                           </span>
                           <input
                             id="cover-file-upload"
@@ -860,7 +898,7 @@ export default function SubmitProductPage() {
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
-                      <span>Add screenshots to gallery (IndexedDB)</span>
+                      <span>Add screenshots to gallery (Max 10MB each)</span>
                       <input
                         id="gallery-files-upload"
                         type="file"
@@ -914,7 +952,7 @@ export default function SubmitProductPage() {
                             {videoFile ? videoFile.name : 'Upload video file'}
                           </span>
                           <span className="text-[11px] text-[var(--text-subtle)] mt-0.5">
-                            MP4, WebM, MOV
+                            MP4, WebM (Max 50MB)
                           </span>
                           <input
                             id="video-file-upload"

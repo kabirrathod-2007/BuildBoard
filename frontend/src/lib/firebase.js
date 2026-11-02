@@ -1,14 +1,19 @@
 import { getApp, getApps, initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
+import { getStorage } from 'firebase/storage'
+
+const env = (typeof import.meta !== 'undefined' && import.meta.env)
+  ? import.meta.env
+  : (typeof globalThis !== 'undefined' && globalThis.process?.env ? globalThis.process.env : {})
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: env.VITE_FIREBASE_API_KEY,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.VITE_FIREBASE_APP_ID,
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID,
 }
 
 const requiredConfig = ['apiKey', 'authDomain', 'projectId', 'appId']
@@ -17,14 +22,16 @@ const missingConfig = requiredConfig.filter((key) => !firebaseConfig[key])
 export const isFirebaseConfigured = missingConfig.length === 0
 
 if (!isFirebaseConfigured) {
-  if (import.meta.env.PROD) {
+  if (env.PROD) {
     throw new Error(
       `[BuildBoard Production Error] Firebase configuration is missing: ${missingConfig.join(', ')}. Deployment requires valid Firebase environment variables.`
     )
   }
-  console.warn(
-    `[BuildBoard] Firebase configuration is incomplete (${missingConfig.join(', ')}). Running in demo auth mode (development only).`
-  )
+  if (!env.NODE_ENV || env.NODE_ENV !== 'test') {
+    console.warn(
+      `[BuildBoard] Firebase configuration is incomplete (${missingConfig.join(', ')}). Running in demo auth mode (development only).`
+    )
+  }
 }
 
 export const firebaseApp = isFirebaseConfigured
@@ -32,3 +39,5 @@ export const firebaseApp = isFirebaseConfigured
   : null
 
 export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null
+export const firebaseStorage = (firebaseApp && firebaseConfig.storageBucket) ? getStorage(firebaseApp) : null
+export const isStorageConfigured = Boolean(isFirebaseConfigured && firebaseStorage)
