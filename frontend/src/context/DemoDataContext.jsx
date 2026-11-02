@@ -440,6 +440,7 @@ export const DemoDataProvider = ({ children }) => {
           stage: formData.stage || 'Working prototype',
           audience: formData.audience.trim(),
           feedbackRequest: formData.feedbackRequest.trim(),
+          enrollmentLimit: formData.enrollmentLimit ? Number(formData.enrollmentLimit) : null,
           productUrl: formData.prototypeUrl ? formData.prototypeUrl.trim() : '',
           githubUrl: formData.githubUrl ? formData.githubUrl.trim() : '',
           imageUrl: formData.image ? formData.image.trim() : '',
@@ -502,6 +503,7 @@ export const DemoDataProvider = ({ children }) => {
       videoMediaId: formData.videoMediaId || null,
       githubUrl: formData.githubUrl ? formData.githubUrl.trim() : '',
       productUrl: formData.prototypeUrl ? formData.prototypeUrl.trim() : '',
+      enrollmentLimit: formData.enrollmentLimit ? Number(formData.enrollmentLimit) : null,
       isLocalDemo: true,
       enrollmentPaused: false,
       createdAt: new Date().toISOString(),
@@ -560,6 +562,16 @@ export const DemoDataProvider = ({ children }) => {
     }
     if (product?.enrollmentPaused && !isEnrolledInProduct(productId, userEmail)) {
       return { success: false, error: 'Enrollment for this product is currently paused by the builder.' }
+    }
+    if (product?.enrollmentLimit && !isEnrolledInProduct(productId, userEmail)) {
+      const currentCount = getProductEnrollmentCount(productId)
+      if (currentCount >= product.enrollmentLimit) {
+        return {
+          success: false,
+          error: `Testing quota reached for this prototype (${product.enrollmentLimit} tester spots are full).`,
+          quotaFull: true,
+        }
+      }
     }
 
     // If authenticated & verified, sync with cloud API
@@ -1019,6 +1031,18 @@ export const DemoDataProvider = ({ children }) => {
       return { success: false, error: 'Feedback request is required.' }
     }
 
+    let enrollmentLimit = null
+    if (updatedFields.enrollmentLimit !== undefined && updatedFields.enrollmentLimit !== null && updatedFields.enrollmentLimit !== '') {
+      const parsedLimit = Number(updatedFields.enrollmentLimit)
+      if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+        return { success: false, error: 'Tester quota must be a whole number of at least 1 tester.' }
+      }
+      if (parsedLimit > 100000) {
+        return { success: false, error: 'Tester quota cannot exceed 100,000 testers.' }
+      }
+      enrollmentLimit = parsedLimit
+    }
+
     // If product is synced with server, persist via API
     if (user?.email && user?.emailVerified && targetProduct.isServerSynced) {
       try {
@@ -1029,6 +1053,7 @@ export const DemoDataProvider = ({ children }) => {
           productUrl: prototypeUrl,
           audience,
           feedbackRequest,
+          enrollmentLimit,
           categories,
           targetRoles,
           targetIndustries,
@@ -1043,6 +1068,7 @@ export const DemoDataProvider = ({ children }) => {
           const updatedRecord = {
             ...targetProduct,
             ...res.product,
+            enrollmentLimit,
             isServerSynced: true,
           }
           setServerProducts((prev) => prev.map((p) => p.id === updatedRecord.id ? updatedRecord : p))
@@ -1065,6 +1091,7 @@ export const DemoDataProvider = ({ children }) => {
       audience,
       categories,
       feedbackRequest,
+      enrollmentLimit,
       targetRoles,
       targetIndustries,
       targetTechnologies,

@@ -103,6 +103,7 @@ export default function BuilderDashboardPage() {
     targetRoles: [],
     targetIndustries: [],
     targetTechnologies: [],
+    enrollmentLimit: '',
   })
   const [editErrors, setEditErrors] = useState({})
   const [actionNotice, setActionNotice] = useState(() => {
@@ -128,6 +129,7 @@ export default function BuilderDashboardPage() {
       targetRoles: Array.isArray(product.targetRoles) ? [...product.targetRoles] : [],
       targetIndustries: Array.isArray(product.targetIndustries) ? [...product.targetIndustries] : [],
       targetTechnologies: Array.isArray(product.targetTechnologies) ? [...product.targetTechnologies] : [],
+      enrollmentLimit: product.enrollmentLimit !== null && product.enrollmentLimit !== undefined ? String(product.enrollmentLimit) : '',
     })
     setEditErrors({})
   }
@@ -225,12 +227,26 @@ export default function BuilderDashboardPage() {
       errors.feedbackRequest = 'Feedback request is required.'
     }
 
+    if (editFormData.enrollmentLimit !== undefined && editFormData.enrollmentLimit !== null && editFormData.enrollmentLimit !== '') {
+      const parsed = Number(editFormData.enrollmentLimit)
+      if (!Number.isInteger(parsed) || parsed < 1) {
+        errors.enrollmentLimit = 'Tester quota must be a whole number of at least 1 tester.'
+      } else if (parsed > 100000) {
+        errors.enrollmentLimit = 'Tester quota cannot exceed 100,000 testers.'
+      }
+    }
+
     if (Object.keys(errors).length > 0) {
       setEditErrors(errors)
       return
     }
 
-    const res = await updateProduct(editingProduct.id, user.email, editFormData)
+    const payload = {
+      ...editFormData,
+      enrollmentLimit: editFormData.enrollmentLimit ? Number(editFormData.enrollmentLimit) : null,
+    }
+
+    const res = await updateProduct(editingProduct.id, user.email, payload)
     if (!res.success) {
       setEditErrors({ form: res.error })
       return
@@ -670,6 +686,17 @@ export default function BuilderDashboardPage() {
                                   Enrollment open
                                 </span>
                               )}
+                              {product.enrollmentLimit !== null && product.enrollmentLimit !== undefined && (
+                                enrollmentsCount >= product.enrollmentLimit ? (
+                                  <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-sm font-semibold text-rose-800 dark:text-rose-300">
+                                    Quota Full ({enrollmentsCount}/{product.enrollmentLimit})
+                                  </span>
+                                ) : (
+                                  <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-sm font-semibold text-sky-800 dark:text-sky-300">
+                                    Quota: {enrollmentsCount}/{product.enrollmentLimit} ({Math.max(0, product.enrollmentLimit - enrollmentsCount)} spots open)
+                                  </span>
+                                )
+                              )}
                               {product.categories.slice(0, 2).map((cat) => (
                                 <span
                                   key={cat}
@@ -770,7 +797,9 @@ export default function BuilderDashboardPage() {
                               <div>
                                 <div className="flex justify-between text-[11px] font-semibold text-[var(--text-muted)] mb-1">
                                   <span>2. Unlocked Testers (Enrolled)</span>
-                                  <span className="font-mono">{enrollmentsCount} ({enrollRate}%)</span>
+                                  <span className="font-mono">
+                                    {enrollmentsCount}{product.enrollmentLimit ? ` / ${product.enrollmentLimit}` : ''} ({enrollRate}% views{product.enrollmentLimit ? `, ${Math.min(100, Math.round((enrollmentsCount / product.enrollmentLimit) * 100))}% cap` : ''})
+                                  </span>
                                 </div>
                                 <div className="h-2 w-full rounded-full bg-[var(--border-main)] overflow-hidden">
                                   <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${Math.max(viewsCount > 0 ? 4 : 0, enrollRate)}%` }} />
@@ -1304,6 +1333,48 @@ export default function BuilderDashboardPage() {
                   {editErrors.feedbackRequest && (
                     <p className="mt-1 text-sm font-semibold text-rose-500">
                       {editErrors.feedbackRequest}
+                    </p>
+                  )}
+                </div>
+
+                {/* Tester Enrollment Limit / Quota */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="edit-enrollmentLimit" className="block text-sm font-bold uppercase tracking-wider text-[var(--text-main)]">
+                      Tester Enrollment Limit (Quota) <span className="text-xs font-normal text-[var(--text-subtle)]">(Optional)</span>
+                    </label>
+                    {editFormData.enrollmentLimit && (
+                      <button
+                        type="button"
+                        onClick={() => handleEditInputChange('enrollmentLimit', '')}
+                        className="text-xs font-semibold text-[var(--text-subtle)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors cursor-pointer"
+                      >
+                        Set to unlimited
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-[var(--text-subtle)]">
+                    Maximum number of testers allowed to enroll in this prototype. Leave empty for unlimited.
+                  </p>
+                  <div className="relative mt-1.5 max-w-xs">
+                    <input
+                      id="edit-enrollmentLimit"
+                      type="number"
+                      min="1"
+                      max="100000"
+                      step="1"
+                      value={editFormData.enrollmentLimit}
+                      onChange={(e) => handleEditInputChange('enrollmentLimit', e.target.value)}
+                      placeholder="e.g. 10 (or empty for unlimited)"
+                      className="w-full rounded-xl border border-[var(--border-main)] bg-[var(--bg-page)] px-4 py-2 text-sm font-mono text-[var(--text-main)] outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20"
+                    />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-xs text-[var(--text-subtle)]">
+                      testers max
+                    </div>
+                  </div>
+                  {editErrors.enrollmentLimit && (
+                    <p className="mt-1 text-sm font-semibold text-rose-500">
+                      {editErrors.enrollmentLimit}
                     </p>
                   )}
                 </div>

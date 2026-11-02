@@ -150,6 +150,18 @@ function validateProductInput(body, isUpdate = false) {
     ]
   }
 
+  let enrollmentLimit = null
+  if (body.enrollmentLimit !== undefined && body.enrollmentLimit !== null && body.enrollmentLimit !== '') {
+    const parsedLimit = Number(body.enrollmentLimit)
+    if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+      return { error: 'Tester quota must be a positive integer of at least 1 tester (or leave blank for unlimited).' }
+    }
+    if (parsedLimit > 100000) {
+      return { error: 'Tester quota cannot exceed 100,000 testers.' }
+    }
+    enrollmentLimit = parsedLimit
+  }
+
   return {
     data: {
       name,
@@ -168,6 +180,7 @@ function validateProductInput(body, isUpdate = false) {
       targetIndustries,
       targetTechnologies,
       whatToTry,
+      enrollmentLimit,
     },
   }
 }
@@ -283,6 +296,7 @@ async function attachCriteriaAndSteps(products, userId = null, isCatalog = false
       videoUrl: row.video_url || '',
       isSample: Boolean(row.is_sample),
       enrollmentPaused: Boolean(row.enrollment_paused),
+      enrollmentLimit: row.enrollment_limit !== null && row.enrollment_limit !== undefined ? Number(row.enrollment_limit) : null,
       enrollmentCount,
       viewsCount: Number(row.views_count || 0),
       isEnrolled,
@@ -466,28 +480,61 @@ router.post('/', requireAuth, async (req, res, next) => {
 
     await connection.beginTransaction()
 
-    const [insertResult] = await connection.execute(
-      `INSERT INTO products (
-         slug, creator_id, name, tagline, description, stage,
-         audience, feedback_request, product_url, github_url,
-         image_url, gallery, video_url, is_sample, enrollment_paused
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE, FALSE)`,
-      [
-        slug,
-        userId,
-        data.name,
-        data.tagline,
-        data.description,
-        data.stage,
-        data.audience,
-        data.feedbackRequest,
-        data.productUrl,
-        data.githubUrl,
-        data.imageUrl,
-        data.gallery ? JSON.stringify(data.gallery) : null,
-        data.videoUrl,
-      ],
-    )
+    let insertResult
+    try {
+      const [res] = await connection.execute(
+        `INSERT INTO products (
+           slug, creator_id, name, tagline, description, stage,
+           audience, feedback_request, product_url, github_url,
+           image_url, gallery, video_url, is_sample, enrollment_paused, enrollment_limit
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE, FALSE, ?)`,
+        [
+          slug,
+          userId,
+          data.name,
+          data.tagline,
+          data.description,
+          data.stage,
+          data.audience,
+          data.feedbackRequest,
+          data.productUrl,
+          data.githubUrl,
+          data.imageUrl,
+          data.gallery ? JSON.stringify(data.gallery) : null,
+          data.videoUrl,
+          data.enrollmentLimit ?? null,
+        ],
+      )
+      insertResult = res
+    } catch (insertErr) {
+      if (insertErr.code === 'ER_BAD_FIELD_ERROR') {
+        const [res] = await connection.execute(
+          `INSERT INTO products (
+             slug, creator_id, name, tagline, description, stage,
+             audience, feedback_request, product_url, github_url,
+             image_url, gallery, video_url, is_sample, enrollment_paused
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, FALSE, FALSE)`,
+          [
+            slug,
+            userId,
+            data.name,
+            data.tagline,
+            data.description,
+            data.stage,
+            data.audience,
+            data.feedbackRequest,
+            data.productUrl,
+            data.githubUrl,
+            data.imageUrl,
+            data.gallery ? JSON.stringify(data.gallery) : null,
+            data.videoUrl,
+          ],
+        )
+        insertResult = res
+      } else {
+        throw insertErr
+      }
+    }
 
     const productId = insertResult.insertId
 
@@ -578,27 +625,57 @@ router.put('/:slugOrId', requireAuth, async (req, res, next) => {
 
     await connection.beginTransaction()
 
-    await connection.execute(
-      `UPDATE products 
-       SET name = ?, tagline = ?, description = ?, stage = ?,
-           audience = ?, feedback_request = ?, product_url = ?,
-           github_url = ?, image_url = ?, gallery = ?, video_url = ?
-       WHERE id = ?`,
-      [
-        data.name,
-        data.tagline,
-        data.description,
-        data.stage,
-        data.audience,
-        data.feedbackRequest,
-        data.productUrl,
-        data.githubUrl,
-        data.imageUrl,
-        data.gallery ? JSON.stringify(data.gallery) : null,
-        data.videoUrl,
-        targetProduct.id,
-      ],
-    )
+    try {
+      await connection.execute(
+        `UPDATE products 
+         SET name = ?, tagline = ?, description = ?, stage = ?,
+             audience = ?, feedback_request = ?, product_url = ?,
+             github_url = ?, image_url = ?, gallery = ?, video_url = ?,
+             enrollment_limit = ?
+         WHERE id = ?`,
+        [
+          data.name,
+          data.tagline,
+          data.description,
+          data.stage,
+          data.audience,
+          data.feedbackRequest,
+          data.productUrl,
+          data.githubUrl,
+          data.imageUrl,
+          data.gallery ? JSON.stringify(data.gallery) : null,
+          data.videoUrl,
+          data.enrollmentLimit ?? null,
+          targetProduct.id,
+        ],
+      )
+    } catch (err) {
+      if (err.code === 'ER_BAD_FIELD_ERROR') {
+        await connection.execute(
+          `UPDATE products 
+           SET name = ?, tagline = ?, description = ?, stage = ?,
+               audience = ?, feedback_request = ?, product_url = ?,
+               github_url = ?, image_url = ?, gallery = ?, video_url = ?
+           WHERE id = ?`,
+          [
+            data.name,
+            data.tagline,
+            data.description,
+            data.stage,
+            data.audience,
+            data.feedbackRequest,
+            data.productUrl,
+            data.githubUrl,
+            data.imageUrl,
+            data.gallery ? JSON.stringify(data.gallery) : null,
+            data.videoUrl,
+            targetProduct.id,
+          ],
+        )
+      } else {
+        throw err
+      }
+    }
 
     // Replace criteria
     await connection.execute('DELETE FROM product_target_criteria WHERE product_id = ?', [targetProduct.id])
@@ -786,6 +863,21 @@ router.post('/:slugOrId/enroll', requireAuth, async (req, res, next) => {
       return res.status(409).json({
         error: 'Enrollment for this product is currently paused by the builder.',
       })
+    }
+
+    // If quota / enrollment limit is set and reached:
+    if (targetProduct.enrollment_limit !== null && targetProduct.enrollment_limit !== undefined) {
+      const [countRows] = await database.execute(
+        'SELECT COUNT(*) AS total FROM product_enrollments WHERE product_id = ?',
+        [targetProduct.id],
+      )
+      const currentCount = Number(countRows[0]?.total || 0)
+      if (currentCount >= Number(targetProduct.enrollment_limit)) {
+        return res.status(409).json({
+          error: `Testing quota reached for this prototype (${targetProduct.enrollment_limit} tester spots are full).`,
+          quotaFull: true,
+        })
+      }
     }
 
     await database.execute(

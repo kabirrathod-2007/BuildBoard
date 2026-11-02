@@ -56,6 +56,7 @@ export default function SubmitProductPage() {
     targetIndustries: [],
     targetTechnologies: [],
     feedbackRequest: '',
+    enrollmentLimit: '',
   })
 
   // Media upload states (IndexedDB powered)
@@ -225,6 +226,15 @@ export default function SubmitProductPage() {
         'Describe what you want testers to try or provide feedback on.'
     }
 
+    if (formData.enrollmentLimit !== undefined && formData.enrollmentLimit !== null && formData.enrollmentLimit !== '') {
+      const parsedLimit = Number(formData.enrollmentLimit)
+      if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+        validationErrors.enrollmentLimit = 'Tester quota must be a whole number of at least 1 tester.'
+      } else if (parsedLimit > 100000) {
+        validationErrors.enrollmentLimit = 'Tester quota cannot exceed 100,000 testers.'
+      }
+    }
+
     // Mandatory Photo Validation: at least one photo file or image URL must be provided
     const hasPhoto = Boolean(
       coverFile ||
@@ -316,6 +326,7 @@ export default function SubmitProductPage() {
       targetIndustries: formData.targetIndustries,
       targetTechnologies: formData.targetTechnologies,
       feedbackRequest: formData.feedbackRequest.trim(),
+      enrollmentLimit: formData.enrollmentLimit ? Number(formData.enrollmentLimit) : null,
       maker: (normalizedEmail ? getProfile(normalizedEmail)?.displayName?.trim() : null) || (normalizedEmail ? normalizedEmail.split('@')[0] : 'Builder'),
       creatorEmail: normalizedEmail,
       image: finalImage,
@@ -341,6 +352,7 @@ export default function SubmitProductPage() {
       targetIndustries: [],
       targetTechnologies: [],
       feedbackRequest: '',
+      enrollmentLimit: '',
     })
     setCoverFile(null)
     setCoverPreview('')
@@ -1172,6 +1184,57 @@ export default function SubmitProductPage() {
                   {errors.feedbackRequest && (
                     <p id="feedbackRequest-error" className="mt-1 text-sm font-semibold text-rose-500">
                       {errors.feedbackRequest}
+                    </p>
+                  )}
+                </div>
+
+                {/* Tester Capacity / Quota Limit (Optional) */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="product-enrollment-limit"
+                      className="block text-sm font-semibold text-[var(--text-main)]"
+                    >
+                      Tester enrollment limit / capacity <span className="text-sm font-normal text-[var(--text-subtle)]">(Optional)</span>
+                    </label>
+                    {formData.enrollmentLimit && (
+                      <button
+                        type="button"
+                        onClick={() => handleInputChange('enrollmentLimit', '')}
+                        className="text-xs font-semibold text-[var(--text-subtle)] hover:text-[#1f3a6b] dark:hover:text-[#dbbf95] transition-colors cursor-pointer"
+                      >
+                        Set to unlimited
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
+                    Cap the maximum number of testers who can unlock this prototype. Leave empty for unlimited tester enrollments. You can adjust this limit anytime in your Builder Dashboard.
+                  </p>
+                  <div className="relative mt-1.5 max-w-xs">
+                    <input
+                      id="product-enrollment-limit"
+                      type="number"
+                      min="1"
+                      max="100000"
+                      step="1"
+                      value={formData.enrollmentLimit}
+                      onChange={(e) => handleInputChange('enrollmentLimit', e.target.value)}
+                      placeholder="e.g. 10 (or leave empty)"
+                      aria-invalid={Boolean(errors.enrollmentLimit)}
+                      aria-describedby={errors.enrollmentLimit ? 'enrollmentLimit-error' : undefined}
+                      className={`w-full rounded-xl border bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-mono text-[var(--text-main)] placeholder:text-[var(--text-subtle)] transition outline-none focus:border-[#1f3a6b] focus:ring-2 focus:ring-[#1f3a6b]/20 dark:focus:border-[#dbbf95] dark:focus:ring-[#dbbf95]/20 ${
+                        errors.enrollmentLimit
+                          ? 'border-rose-500 bg-rose-50/30 dark:bg-rose-950/20'
+                          : 'border-[var(--border-main)]'
+                      }`}
+                    />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-xs text-[var(--text-subtle)]">
+                      testers max
+                    </div>
+                  </div>
+                  {errors.enrollmentLimit && (
+                    <p id="enrollmentLimit-error" className="mt-1 text-sm font-semibold text-rose-500">
+                      {errors.enrollmentLimit}
                     </p>
                   )}
                 </div>

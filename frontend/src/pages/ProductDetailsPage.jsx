@@ -131,6 +131,7 @@ export default function ProductDetailsPage() {
     loadProductFeedback,
     getProductFeedback,
     recordProductView,
+    getProductEnrollmentCount,
     isProductOwner,
     replyToFeedback,
     toggleFeedbackHelpful,
@@ -195,6 +196,12 @@ export default function ProductDetailsPage() {
   const isOwner = user && product
     ? (Boolean(product?.isOwner) || isProductOwner(product.id, user.email) || isProductOwner(product.slug, user.email))
     : false
+
+  // Tester Quota & Capacity calculations
+  const enrollmentLimit = product?.enrollmentLimit || null
+  const currentEnrollmentCount = product ? getProductEnrollmentCount(product.id) : 0
+  const isQuotaFull = enrollmentLimit !== null && currentEnrollmentCount >= enrollmentLimit
+  const spotsRemaining = enrollmentLimit !== null ? Math.max(0, enrollmentLimit - currentEnrollmentCount) : null
 
   // IndexedDB media integration
   const { url: coverDbUrl } = useIndexedDbMedia(product?.mediaId, product?.image || '')
@@ -630,6 +637,14 @@ export default function ProductDetailsPage() {
                   <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:text-amber-300">
                     Enrollment paused
                   </span>
+                ) : isQuotaFull ? (
+                  <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-0.5 text-xs font-semibold text-rose-800 dark:text-rose-300">
+                    Quota full ({currentEnrollmentCount}/{enrollmentLimit})
+                  </span>
+                ) : enrollmentLimit !== null ? (
+                  <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-xs font-semibold text-sky-800 dark:text-sky-300">
+                    {spotsRemaining} {spotsRemaining === 1 ? 'spot' : 'spots'} left ({currentEnrollmentCount}/{enrollmentLimit})
+                  </span>
                 ) : (
                   <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                     Enrollment open
@@ -894,6 +909,14 @@ export default function ProductDetailsPage() {
                     <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-800 dark:text-amber-300">
                       Enrollment Paused
                     </span>
+                  ) : isQuotaFull ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-800 dark:text-rose-300">
+                      Quota Full ({enrollmentLimit})
+                    </span>
+                  ) : enrollmentLimit !== null ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-800 dark:text-sky-300">
+                      {spotsRemaining} {spotsRemaining === 1 ? 'Spot' : 'Spots'} Left
+                    </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)]">
                       Gate Active
@@ -990,10 +1013,40 @@ export default function ProductDetailsPage() {
                     product.enrollmentPaused ? (
                       <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-sm leading-relaxed text-amber-900 dark:text-amber-200">
                         <strong className="block font-semibold">New enrollments paused:</strong>
-                        The creator has reached their testing quota or is addressing initial feedback. If you were already enrolled, you can still submit notes.
+                        The creator has paused tester sign-ups or is addressing initial feedback. If you were already enrolled, you can still submit notes.
+                      </div>
+                    ) : isQuotaFull ? (
+                      <div className="space-y-4">
+                        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-sm leading-relaxed text-rose-900 dark:text-rose-200">
+                          <strong className="block font-semibold">Tester Quota Reached:</strong>
+                          This prototype has reached its capacity limit of {enrollmentLimit} testers. All tester spots are currently claimed.
+                        </div>
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full rounded-2xl border border-[var(--border-main)] bg-[var(--bg-surface-subtle)] px-6 py-4 text-base font-bold text-[var(--text-subtle)] cursor-not-allowed opacity-60 flex items-center justify-center gap-2.5 min-h-[48px]"
+                        >
+                          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                          </svg>
+                          <span>Tester Quota Full ({enrollmentLimit}/{enrollmentLimit})</span>
+                        </button>
+                        <p className="text-center text-xs text-[var(--text-subtle)]">
+                          The builder may increase the tester capacity in their dashboard if more slots become available.
+                        </p>
                       </div>
                     ) : (
                       <div>
+                        {enrollmentLimit !== null && (
+                          <div className="mb-3.5 flex items-center justify-between rounded-xl border border-sky-500/25 bg-sky-500/10 px-3.5 py-2 text-xs font-semibold text-sky-800 dark:text-sky-300">
+                            <span className="flex items-center gap-1.5">
+                              <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
+                              Limited tester cohort
+                            </span>
+                            <span>{spotsRemaining} of {enrollmentLimit} spots left</span>
+                          </div>
+                        )}
                         <button
                           type="button"
                           onClick={handleEnroll}

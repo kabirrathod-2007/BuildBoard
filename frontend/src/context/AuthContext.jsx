@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from 'react'
 import {
+  GoogleAuthProvider,
   browserLocalPersistence,
   createUserWithEmailAndPassword,
   confirmPasswordReset,
@@ -9,6 +10,7 @@ import {
   sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseSignOut,
   updateProfile,
   verifyPasswordResetCode,
@@ -73,6 +75,10 @@ function authError(code, fallback) {
     'auth/email-not-verified': 'We sent a verification link. Verify your email, then sign in again.',
     'auth/invalid-action-code': 'This password reset link is invalid or has expired. Please request a new one.',
     'auth/expired-action-code': 'This password reset link has expired. Please request a new one.',
+    'auth/popup-closed-by-user': 'Sign-in cancelled. The Google popup was closed before completing.',
+    'auth/popup-blocked': 'Sign-in popup was blocked by your browser. Please allow popups for BuildBoard.',
+    'auth/account-exists-with-different-credential': 'An account already exists with this email address using another sign-in method.',
+    'auth/cancelled-popup-request': 'Only one popup request is allowed at a time.',
   }
 
   return messages[code] || fallback || 'Authentication failed. Please try again.'
@@ -222,6 +228,42 @@ export function AuthProvider({ children }) {
     return { email: credential.user.email || email.trim(), displayName: trimmedDisplayName }
   }
 
+  const signInWithGoogle = async () => {
+    if (!isFirebaseConfigured || !firebaseAuth) {
+      const mockEmail = 'builder.google@example.com'
+      const appUser = {
+        uid: 'demo-google-' + Date.now(),
+        id: 'demo-user-google',
+        email: mockEmail,
+        emailVerified: true,
+        displayName: 'Google Builder',
+        username: `googlebuilder${Math.floor(1000 + Math.random() * 9000)}`,
+      }
+      setUser(appUser)
+      try {
+        localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(appUser))
+      } catch {
+        // ignore
+      }
+      return appUser
+    }
+
+    await setPersistence(firebaseAuth, browserLocalPersistence)
+    const provider = new GoogleAuthProvider()
+    provider.setCustomParameters({ prompt: 'select_account' })
+    const credential = await signInWithPopup(firebaseAuth, provider)
+
+    try {
+      const databaseUser = await syncUserWithApi(credential.user)
+      const appUser = toAppUser(credential.user, databaseUser)
+      setUser(appUser)
+      return appUser
+    } catch (error) {
+      await firebaseSignOut(firebaseAuth).catch(() => {})
+      throw error
+    }
+  }
+
   const resendVerificationEmail = async (email, password) => {
     if (!isFirebaseConfigured || !firebaseAuth) return
 
@@ -281,6 +323,7 @@ export function AuthProvider({ children }) {
         loading,
         signIn,
         signUp,
+        signInWithGoogle,
         resendVerificationEmail,
         resetPassword,
         verifyResetCode,

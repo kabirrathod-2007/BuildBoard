@@ -27,6 +27,9 @@ export default function ProductCard({
   const image = mediaUrl || product.image
   const stage = product.stage || 'Working prototype'
   const enrollmentPaused = product.enrollmentPaused
+  const enrollmentLimit = product.enrollmentLimit !== null && product.enrollmentLimit !== undefined ? Number(product.enrollmentLimit) : null
+  const enrollmentCount = product.enrollmentCount || 0
+  const isQuotaFull = enrollmentLimit !== null && enrollmentCount >= enrollmentLimit
   const isLocalDemo = product.isLocalDemo
   const creatorProfile = product.creatorEmail ? getProfile(product.creatorEmail) : null
   const authorName =
@@ -116,6 +119,14 @@ export default function ProductCard({
                 <span className="font-mono text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
                   Enrollment paused
                 </span>
+              ) : isQuotaFull ? (
+                <span className="font-mono text-xs font-semibold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+                  Quota full ({enrollmentLimit})
+                </span>
+              ) : enrollmentLimit !== null ? (
+                <span className="font-mono text-xs font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-400">
+                  {enrollmentCount}/{enrollmentLimit} claimed
+                </span>
               ) : (
                 <span className="font-mono text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                   Open for testing
@@ -179,6 +190,14 @@ export default function ProductCard({
           {enrollmentPaused ? (
             <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
               Paused
+            </span>
+          ) : isQuotaFull ? (
+            <span className="rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-rose-800 dark:text-rose-300">
+              Quota Full
+            </span>
+          ) : enrollmentLimit !== null ? (
+            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-sky-800 dark:text-sky-300">
+              {enrollmentCount}/{enrollmentLimit}
             </span>
           ) : (
             <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
