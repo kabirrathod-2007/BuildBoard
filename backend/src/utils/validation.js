@@ -46,3 +46,81 @@ export function slugify(text) {
     .replace(/-+$/, '')
 }
 
+export const PROFILE_FIELDS = new Set([
+  'displayName',
+  'username',
+  'participation',
+  'experienceLevel',
+  'interests',
+  'roles',
+  'industries',
+  'technologies',
+  'testingDevices',
+  'feedbackFocus',
+  'availability',
+  'handle',
+  'bio',
+  'location',
+  'website',
+  'github',
+  'twitter',
+  'linkedin',
+  'defaultLandingView',
+  'reminderCadence',
+  'notifyBuilderReplies',
+  'notifyHelpfulNotes',
+  'notifyWeeklyDigest',
+  'soundEffects',
+  'cardDensity',
+])
+
+export const IGNORED_METADATA_FIELDS = new Set([
+  'email',
+  'updatedAt',
+  'createdAt',
+  'isServerSynced',
+  'id',
+  'userId',
+  'user_id',
+])
+
+export function validateProfile(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { error: 'Send a profile object.' }
+  }
+
+  for (const key of Object.keys(value)) {
+    if (IGNORED_METADATA_FIELDS.has(key)) continue
+    if (!PROFILE_FIELDS.has(key)) {
+      return { error: `Field '${key}' is not allowed in profile.` }
+    }
+  }
+
+  const profile = {}
+  for (const [key, fieldValue] of Object.entries(value)) {
+    if (IGNORED_METADATA_FIELDS.has(key)) continue
+
+    if (['participation', 'interests', 'roles', 'industries', 'technologies', 'testingDevices', 'feedbackFocus'].includes(key)) {
+      if (!Array.isArray(fieldValue) || fieldValue.length > 100 || fieldValue.some((item) => typeof item !== 'string' || item.length > 120)) {
+        return { error: `${key} must be an array of up to 100 short text values.` }
+      }
+      profile[key] = [...new Set(fieldValue.map((item) => item.trim()).filter(Boolean))]
+      continue
+    }
+
+    if (['notifyBuilderReplies', 'notifyHelpfulNotes', 'notifyWeeklyDigest', 'soundEffects'].includes(key)) {
+      if (typeof fieldValue !== 'boolean') return { error: `${key} must be true or false.` }
+      profile[key] = fieldValue
+      continue
+    }
+
+    if (typeof fieldValue !== 'string' || fieldValue.length > 2000) {
+      return { error: `${key} must be text with at most 2,000 characters.` }
+    }
+    profile[key] = fieldValue.trim()
+  }
+
+  return { profile }
+}
+
+

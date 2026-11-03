@@ -48,13 +48,49 @@ export async function fetchUserProfile() {
   return request('/api/profiles/me', { method: 'GET' })
 }
 
+const ALLOWED_PROFILE_KEYS = new Set([
+  'displayName',
+  'username',
+  'participation',
+  'experienceLevel',
+  'interests',
+  'roles',
+  'industries',
+  'technologies',
+  'testingDevices',
+  'feedbackFocus',
+  'availability',
+  'handle',
+  'bio',
+  'location',
+  'website',
+  'github',
+  'twitter',
+  'linkedin',
+  'defaultLandingView',
+  'reminderCadence',
+  'notifyBuilderReplies',
+  'notifyHelpfulNotes',
+  'notifyWeeklyDigest',
+  'soundEffects',
+  'cardDensity',
+])
+
 export async function saveUserProfile(profile) {
   if (!isFirebaseConfigured || !firebaseAuth?.currentUser) {
     return { profile, updatedAt: new Date().toISOString(), isLocalDemo: true }
   }
+  const cleanProfile = {}
+  if (profile && typeof profile === 'object') {
+    for (const [key, val] of Object.entries(profile)) {
+      if (ALLOWED_PROFILE_KEYS.has(key) && val !== undefined) {
+        cleanProfile[key] = val
+      }
+    }
+  }
   return request('/api/profiles/me', {
     method: 'PUT',
-    body: JSON.stringify({ profile }),
+    body: JSON.stringify({ profile: cleanProfile }),
   })
 }
 

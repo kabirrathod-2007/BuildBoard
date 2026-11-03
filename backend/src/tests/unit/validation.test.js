@@ -5,6 +5,7 @@ import {
   validateAllowedFields,
   sanitizeStringArray,
   slugify,
+  validateProfile,
 } from '../../utils/validation.js'
 import { isValidUsername } from '../../utils/username.js'
 
@@ -96,5 +97,40 @@ test('Validation: isValidUsername enforces strict format constraints', () => {
   assert.equal(isValidUsername('user.name'), false)
   assert.equal(isValidUsername('<script>'), false)
   assert.equal(isValidUsername(''), false)
+})
+
+test('Validation: validateProfile ignores client metadata and validates allowed fields', () => {
+  // Ignored metadata should not trigger "Field 'email' is not allowed" error
+  const profileWithMeta = {
+    displayName: 'Builder Jane',
+    username: 'builder_jane',
+    bio: 'Building open-source tools',
+    interests: ['AI & Machine Learning'],
+    email: 'jane@example.com',
+    updatedAt: '2026-11-03T20:00:00Z',
+    createdAt: '2026-11-01T10:00:00Z',
+    isServerSynced: true,
+    id: 123,
+    userId: 123,
+    user_id: 123,
+  }
+
+  const { profile, error } = validateProfile(profileWithMeta)
+  assert.equal(error, undefined)
+  assert.equal(profile.displayName, 'Builder Jane')
+  assert.equal(profile.username, 'builder_jane')
+  assert.equal(profile.bio, 'Building open-source tools')
+  assert.deepEqual(profile.interests, ['AI & Machine Learning'])
+  assert.equal(profile.email, undefined)
+  assert.equal(profile.updatedAt, undefined)
+  assert.equal(profile.isServerSynced, undefined)
+
+  // Truly invalid fields must still be rejected
+  const malicious = {
+    displayName: 'Attacker',
+    unauthorizedField: 'malicious-payload',
+  }
+  const result = validateProfile(malicious)
+  assert.match(result.error, /Field 'unauthorizedField' is not allowed in profile/)
 })
 
