@@ -27,25 +27,69 @@ if (process.env.ENABLE_TEST_AUTH === 'true' && process.env.NODE_ENV !== 'test') 
   )
 }
 
+const defaultFrontendOrigin =
+  process.env.NODE_ENV === 'production'
+    ? 'https://buildboard-one.vercel.app'
+    : 'http://localhost:5173'
+
 const allowedOrigins = new Set(
-  (process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
+  (process.env.FRONTEND_ORIGIN || defaultFrontendOrigin)
     .split(',')
     .map((origin) => origin.trim().replace(/\/$/, ''))
-    .filter(Boolean),
+    .filter((origin) => Boolean(origin) && origin !== '*'), // Strip wildcard '*' unconditionally
 )
 
-function isOriginAllowed(origin) {
+const allowedPreviewOrigins = new Set(
+  (process.env.ALLOWED_PREVIEW_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/$/, ''))
+    .filter((origin) => Boolean(origin) && origin !== '*'),
+)
+
+export function isOriginAllowed(origin, nodeEnv = process.env.NODE_ENV, customPreviewOrigins = null) {
+  // Allow requests without Origin header (same-origin, curl, mobile apps, server-to-server)
   if (!origin) return true
   const cleanOrigin = origin.trim().replace(/\/$/, '')
-  if (allowedOrigins.has('*')) return true
-  if (allowedOrigins.has(cleanOrigin)) return true
+
+  // Reject wildcard string explicitly
+  if (cleanOrigin === '*') return false
+
+  let url
   try {
-    const url = new URL(origin)
-    if (url.hostname.endsWith('.vercel.app')) return true
-    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true
+    url = new URL(cleanOrigin)
   } catch {
     return false
   }
+
+  // Only allow standard web protocols
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return false
+
+  if (nodeEnv === 'production') {
+    // In production, HTTPS is strictly mandatory
+    if (url.protocol !== 'https:') return false
+
+    // In production, reject non-standard ports (e.g. :8443, :8080)
+    if (url.port !== '' && url.port !== '443') return false
+
+    // In production, reject localhost/127.0.0.1
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return false
+  } else {
+    // In non-production, allow localhost/127.0.0.1
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+      return true
+    }
+  }
+
+  // Canonical production frontend
+  if (cleanOrigin === 'https://buildboard-one.vercel.app') return true
+
+  // Configured frontend origins from FRONTEND_ORIGIN
+  if (allowedOrigins.has(cleanOrigin)) return true
+
+  // Explicit configurable preview origins (via env ALLOWED_PREVIEW_ORIGINS or passed parameter)
+  const previewSet = customPreviewOrigins || allowedPreviewOrigins
+  if (previewSet.has(cleanOrigin)) return true
+
   return false
 }
 
@@ -167,9 +211,25 @@ app.use('/api/notifications', notificationRoutes)
 
 // Safe Structured Error Handler
 app.use((error, req, res, _next) => {
-  if (error.message === 'Origin is not allowed by CORS.') {
+  // CORS Rejection (HTTP 403 Forbidden)
+  if (error.message && error.message.includes('not allowed by CORS')) {
     return res.status(403).json({ error: 'Origin is not allowed by CORS.' })
   }
+
+  // Request Body Exceeds Limit (HTTP 413 Payload Too Large)
+  if (error.status === 413 || error.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Request payload exceeds 32KB limit.' })
+  }
+
+  // Malformed JSON Payload (HTTP 400 Bad Request)
+  if (
+    (error.status === 400 || error.statusCode === 400) &&
+    (error.type === 'entity.parse.failed' || error instanceof SyntaxError)
+  ) {
+    return res.status(400).json({ error: 'Invalid JSON payload format.' })
+  }
+
+  // Fallback 500: Server errors masked and logged with request ID
   const reqId = req?.id || 'unknown'
   console.error(`[${reqId}] API request failed:`, error.message)
   return res.status(500).json({ error: 'The server could not complete the request.', requestId: reqId })
@@ -177,21 +237,114 @@ app.use((error, req, res, _next) => {
 
 export { app }
 
-async function purgeLegacySampleData() {
+export const EXACT_SEED_USER_PAIRS = [
+  ['seed_builder_elena_rostova', 'elena.rostova@buildboard.dev'],
+  ['seed_builder_marcus_chen', 'marcus.chen@buildboard.dev'],
+  ['seed_builder_sarah_jenkins', 'sarah.jenkins@buildboard.dev'],
+  ['seed_builder_kavita_rao', 'kavita.rao@buildboard.dev'],
+  ['seed_builder_devon_park', 'devon.park@buildboard.dev'],
+]
+
+export const EXACT_SEED_USER_UIDS = EXACT_SEED_USER_PAIRS.map(([uid]) => uid)
+export const EXACT_SEED_USER_EMAILS = EXACT_SEED_USER_PAIRS.map(([, email]) => email)
+
+export const EXACT_SEED_PRODUCT_SLUGS = [
+  'weeknote',
+  'token-sync',
+  'prompt-bench',
+  'query-lens',
+  'focus-orbit',
+]
+
+export const EXACT_SEED_PROBLEM_SLUGS = [
+  'student-internship-portfolio-feedback',
+  'unstructured-user-interview-synthesis',
+  'figma-to-tailwind-variables',
+  'cross-browser-extension-manifest-v3',
+]
+
+export async function purgeLegacySampleData() {
+  let connection = null
   try {
-    await database.execute('DELETE FROM products WHERE is_sample = 1')
-    await database.execute(
-      "DELETE FROM problems WHERE slug IN ('student-internship-portfolio-feedback', 'unstructured-user-interview-synthesis', 'figma-to-tailwind-variables', 'cross-browser-extension-manifest-v3')"
+    connection = await database.getConnection()
+    await connection.beginTransaction()
+
+    // 1. Delete verified sample products owned by verified seed builders (strictly paired UID + email)
+    const [productResult] = await connection.query(
+      `DELETE FROM products 
+       WHERE is_sample = 1 
+         AND slug IN (?)
+         AND creator_id IN (
+           SELECT id FROM users 
+           WHERE LEFT(firebase_uid, 13) = 'seed_builder_'
+             AND email LIKE '%@buildboard.dev'
+             AND (firebase_uid, email) IN (?)
+         )`,
+      [EXACT_SEED_PRODUCT_SLUGS, EXACT_SEED_USER_PAIRS],
     )
-    await database.execute("DELETE FROM users WHERE firebase_uid LIKE 'seed_builder_%'")
+
+    // 2. Delete verified sample community problems created by seed builders (strictly paired UID + email)
+    const [problemResult] = await connection.query(
+      `DELETE FROM problems 
+       WHERE slug IN (?)
+         AND creator_id IN (
+           SELECT id FROM users 
+           WHERE LEFT(firebase_uid, 13) = 'seed_builder_'
+             AND email LIKE '%@buildboard.dev'
+             AND (firebase_uid, email) IN (?)
+         )`,
+      [EXACT_SEED_PROBLEM_SLUGS, EXACT_SEED_USER_PAIRS],
+    )
+
+    // 3. Delete verified seed builder user accounts (strictly paired UID + email)
+    const [userResult] = await connection.query(
+      `DELETE FROM users 
+       WHERE LEFT(firebase_uid, 13) = 'seed_builder_'
+         AND email LIKE '%@buildboard.dev'
+         AND (firebase_uid, email) IN (?)`,
+      [EXACT_SEED_USER_PAIRS],
+    )
+
+    await connection.commit()
+
+    const totalAffected =
+      (productResult?.affectedRows || 0) +
+      (problemResult?.affectedRows || 0) +
+      (userResult?.affectedRows || 0)
+
+    if (totalAffected > 0) {
+      console.log(
+        `[CLEANUP] Successfully purged legacy sample data (${productResult?.affectedRows || 0} products, ${problemResult?.affectedRows || 0} problems, ${userResult?.affectedRows || 0} users).`
+      )
+    }
+
+    return {
+      success: true,
+      affected: {
+        products: productResult?.affectedRows || 0,
+        problems: problemResult?.affectedRows || 0,
+        users: userResult?.affectedRows || 0,
+      },
+    }
   } catch (err) {
-    // Non-blocking cleanup: table might not exist yet during initial setup
+    if (connection) {
+      try {
+        await connection.rollback()
+      } catch (rollbackErr) {
+        console.error('[CLEANUP TRANSACTION ROLLBACK FAILED]:', rollbackErr.message)
+      }
+    }
+    console.error('[CLEANUP TRANSACTION FAILED]:', err.message)
+    throw err
+  } finally {
+    if (connection) {
+      connection.release()
+    }
   }
 }
 
 const isDirectExecution = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
-if (isDirectExecution || (process.env.NODE_ENV !== 'test' && !process.env.TEST_APP)) {
-  purgeLegacySampleData().catch(() => {})
+if (isDirectExecution) {
   app.listen(port, () => {
     console.log(`BuildBoard API listening on port ${port}`)
   })
