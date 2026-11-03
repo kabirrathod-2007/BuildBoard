@@ -2,6 +2,16 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { requireAuth } from '../../middleware/requireAuth.js'
 
+// Supply harmless, test-only placeholder database configuration for unit tests
+// to ensure determinism in CI/CD environments where no local .env exists.
+// Tests in this suite that exercise the server or cleanup logic mock all database
+// operations and never establish real database connections.
+process.env.DB_HOST = process.env.DB_HOST || '127.0.0.1'
+process.env.DB_USER = process.env.DB_USER || 'test_unit_user'
+process.env.DB_PASSWORD = process.env.DB_PASSWORD || 'test_unit_pass'
+process.env.DB_NAME = process.env.DB_NAME || 'test_unit_db'
+process.env.DB_PORT = process.env.DB_PORT || '3306'
+
 test('Security Middleware: requireAuth rejects missing or malformed Authorization header', async () => {
   const reqNoAuth = {
     get: (_header) => undefined,
@@ -609,6 +619,11 @@ test('Startup Safety (Child Process): server startup completely ignores RUN_LEGA
         env: {
           ...process.env,
           PORT: testPort,
+          DB_HOST: process.env.DB_HOST || '127.0.0.1',
+          DB_USER: process.env.DB_USER || 'test_unit_user',
+          DB_PASSWORD: process.env.DB_PASSWORD || 'test_unit_pass',
+          DB_NAME: process.env.DB_NAME || 'test_unit_db',
+          DB_PORT: process.env.DB_PORT || '3306',
           ...extraEnv,
         },
       })
