@@ -320,15 +320,15 @@ function ProfilePageContent({
     if (savedProfile) {
       setDisplayName(savedProfile.displayName || '')
       setUsername(savedProfile.username || savedProfile.handle?.replace(/^@/, '') || '')
-      setParticipation(savedProfile.participation || ['tester'])
+      setParticipation(savedProfile.participation || [])
       setExperienceLevel(savedProfile.experienceLevel || '')
       setInterests(savedProfile.interests || [])
       setRoles(savedProfile.roles || [])
       setIndustries(savedProfile.industries || [])
       setTechnologies(savedProfile.technologies || [])
-      setTestingDevices(savedProfile.testingDevices || ['Chrome / Web Browser', 'macOS (Apple Silicon / Intel)'])
-      setFeedbackFocus(savedProfile.feedbackFocus || ['UI & Visual Polish', 'UX Flows & Navigation'])
-      setAvailability(savedProfile.availability || '3-5 hours / week')
+      setTestingDevices(savedProfile.testingDevices || [])
+      setFeedbackFocus(savedProfile.feedbackFocus || [])
+      setAvailability(savedProfile.availability || '')
     }
     setIsEditingPreferences(false)
   }
@@ -362,15 +362,15 @@ function ProfilePageContent({
     if (window.confirm('Reset your profile preferences and settings back to clean state?')) {
       const reset = {
         displayName: userEmail ? userEmail.split('@')[0] : 'Member',
-        participation: ['tester'],
+        participation: [],
         experienceLevel: '',
         interests: [],
         roles: [],
         industries: [],
         technologies: [],
-        testingDevices: ['Chrome / Web Browser'],
-        feedbackFocus: ['UI & Visual Polish'],
-        availability: '1-2 hours / week',
+        testingDevices: [],
+        feedbackFocus: [],
+        availability: '',
         username: savedProfile?.username || '',
         handle: savedProfile?.username || '',
         bio: '',

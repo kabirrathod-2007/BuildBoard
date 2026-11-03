@@ -177,8 +177,21 @@ app.use((error, req, res, _next) => {
 
 export { app }
 
+async function purgeLegacySampleData() {
+  try {
+    await database.execute('DELETE FROM products WHERE is_sample = 1')
+    await database.execute(
+      "DELETE FROM problems WHERE slug IN ('student-internship-portfolio-feedback', 'unstructured-user-interview-synthesis', 'figma-to-tailwind-variables', 'cross-browser-extension-manifest-v3')"
+    )
+    await database.execute("DELETE FROM users WHERE firebase_uid LIKE 'seed_builder_%'")
+  } catch (err) {
+    // Non-blocking cleanup: table might not exist yet during initial setup
+  }
+}
+
 const isDirectExecution = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
 if (isDirectExecution || (process.env.NODE_ENV !== 'test' && !process.env.TEST_APP)) {
+  purgeLegacySampleData().catch(() => {})
   app.listen(port, () => {
     console.log(`BuildBoard API listening on port ${port}`)
   })

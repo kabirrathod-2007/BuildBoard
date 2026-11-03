@@ -506,9 +506,9 @@ function HeroPrototypeLoopPreview() {
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--border-strong)]" />
           </div>
           <div className="flex items-center gap-2 rounded-full border border-[var(--border-main)] bg-[var(--bg-surface)] px-3 py-0.5 text-xs font-mono text-[var(--text-muted)]">
-            <span className="text-[#c9a271] dark:text-[#d8b98c]">weeknote.app</span>
+            <span className="text-[#c9a271] dark:text-[#d8b98c]">buildboard.dev</span>
             <span className="text-[var(--text-subtle)]">/</span>
-            <span>sprint-42</span>
+            <span>prototype-preview</span>
           </div>
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 font-mono">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
@@ -520,7 +520,7 @@ function HeroPrototypeLoopPreview() {
         <div className="relative overflow-hidden rounded-b-2xl bg-[var(--bg-surface-subtle)]">
           <img
             src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&w=1200&q=80"
-            alt="Preview of Weeknote, a structured weekly planning prototype"
+            alt="Preview of an early-stage prototype"
             className="aspect-[1.65] w-full object-cover pointer-events-none select-none"
             draggable={false}
             fetchPriority="high"
