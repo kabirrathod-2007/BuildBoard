@@ -9,11 +9,12 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "seed": "node -e 'import(\"./src/config/database.js\").then(d => import(\"./src/utils/seedData.js\").then(s => s.seedDatabaseIfEmpty(d.database).then(() => process.exit(0))))'",
     "migrate": "node src/utils/migrate.js",
     "test:unit": "NODE_ENV=test node --test src/tests/unit/**/*.test.js",
     "test:integration": "NODE_ENV=test ENABLE_TEST_AUTH=true node --test src/tests/integration/**/*.test.js",
     "test": "npm run test:unit && npm run test:integration",
-    "check": "node --check src/server.js && node --check src/config/firebase.js && node --check src/config/database.js && node --check src/config/migrationDatabase.js && node --check src/middleware/requireAuth.js && node --check src/middleware/optionalAuth.js && node --check src/routes/auth.js && node --check src/routes/profiles.js && node --check src/routes/products.js && node --check src/routes/enrollments.js && node --check src/routes/feedback.js && node --check src/routes/problems.js && node --check src/routes/notifications.js && node --check src/utils/validation.js && node --check src/utils/migrate.js"
+    "check": "node --check src/server.js && node --check src/config/firebase.js && node --check src/config/database.js && node --check src/config/migrationDatabase.js && node --check src/middleware/requireAuth.js && node --check src/middleware/optionalAuth.js && node --check src/routes/auth.js && node --check src/routes/profiles.js && node --check src/routes/products.js && node --check src/routes/enrollments.js && node --check src/routes/feedback.js && node --check src/routes/problems.js && node --check src/routes/notifications.js && node --check src/utils/validation.js && node --check src/utils/migrate.js && node --check src/utils/seedData.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

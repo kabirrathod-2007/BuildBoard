@@ -2,6 +2,8 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { deleteMediaFile } from '../utils/indexedDB'
 import { useAuth } from './AuthContext.jsx'
+import { products as initialProducts } from '../data/products.js'
+import { seedProblems as initialProblems } from '../data/problems.js'
 import {
   useAppDispatch,
   setProducts as setReduxProducts,
@@ -85,8 +87,8 @@ export const DemoDataProvider = ({ children }) => {
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState(null)
 
-  // Server products synchronized from MySQL API
-  const [serverProducts, setServerProducts] = useState([])
+  // Server products synchronized from MySQL API (with instant initial fallback)
+  const [serverProducts, setServerProducts] = useState(initialProducts || [])
   const [productsLoading, setProductsLoading] = useState(false)
   const [productsError, setProductsError] = useState(null)
 
@@ -95,7 +97,7 @@ export const DemoDataProvider = ({ children }) => {
       setProductsLoading(true)
       setProductsError(null)
       const res = await fetchProducts()
-      if (Array.isArray(res?.products)) {
+      if (Array.isArray(res?.products) && res.products.length > 0) {
         setServerProducts(res.products.map((p) => ({ ...p, isServerSynced: true })))
       }
     } catch (err) {
@@ -114,7 +116,7 @@ export const DemoDataProvider = ({ children }) => {
         setProductsLoading(true)
         setProductsError(null)
         const res = await fetchProducts()
-        if (active && Array.isArray(res?.products)) {
+        if (active && Array.isArray(res?.products) && res.products.length > 0) {
           setServerProducts(res.products.map((p) => ({ ...p, isServerSynced: true })))
         }
       } catch (err) {
@@ -151,8 +153,8 @@ export const DemoDataProvider = ({ children }) => {
   // Profiles mapping: key is normalized email, value is profile object (cloud authoritative)
   const [profiles, setProfiles] = useState({})
 
-  // Problems state synchronized from MySQL cloud API
-  const [problems, setProblems] = useState([])
+  // Problems state synchronized from MySQL cloud API (with instant initial fallback)
+  const [problems, setProblems] = useState(initialProblems || [])
   const [problemsLoading, setProblemsLoading] = useState(false)
   const [problemsError, setProblemsError] = useState(null)
 
@@ -348,7 +350,7 @@ export const DemoDataProvider = ({ children }) => {
       setProblemsLoading(true)
       setProblemsError(null)
       const res = await fetchProblems(params)
-      if (Array.isArray(res?.problems)) {
+      if (Array.isArray(res?.problems) && res.problems.length > 0) {
         setProblems(res.problems)
         return res.problems
       }
@@ -369,7 +371,7 @@ export const DemoDataProvider = ({ children }) => {
         setProblemsLoading(true)
         setProblemsError(null)
         const res = await fetchProblems()
-        if (active && Array.isArray(res?.problems)) {
+        if (active && Array.isArray(res?.problems) && res.problems.length > 0) {
           setProblems(res.problems)
         }
       } catch (err) {
