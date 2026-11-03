@@ -29,9 +29,24 @@ if (process.env.ENABLE_TEST_AUTH === 'true' && process.env.NODE_ENV !== 'test') 
 const allowedOrigins = new Set(
   (process.env.FRONTEND_ORIGIN || 'http://localhost:5173')
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => origin.trim().replace(/\/$/, ''))
     .filter(Boolean),
 )
+
+function isOriginAllowed(origin) {
+  if (!origin) return true
+  const cleanOrigin = origin.trim().replace(/\/$/, '')
+  if (allowedOrigins.has('*')) return true
+  if (allowedOrigins.has(cleanOrigin)) return true
+  try {
+    const url = new URL(origin)
+    if (url.hostname.endsWith('.vercel.app')) return true
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true
+  } catch {
+    return false
+  }
+  return false
+}
 
 app.disable('x-powered-by')
 
@@ -52,11 +67,14 @@ app.use((req, res, next) => {
 // CORS Whitelist Configuration
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.has(origin)) return callback(null, true)
-    return callback(new Error('Origin is not allowed by CORS.'))
+    if (isOriginAllowed(origin)) {
+      return callback(null, true)
+    }
+    return callback(new Error(`Origin ${origin} is not allowed by CORS.`))
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-Id'],
+  credentials: true,
 }))
 
 // Request Body Limits
@@ -97,6 +115,11 @@ const viewLimiter = rateLimit({
 
 // Global limiter for all /api routes
 app.use('/api', standardLimiter)
+
+// Root Status Endpoint
+app.get('/', (_req, res) => {
+  return res.json({ status: 'ok', service: 'BuildBoard API', message: 'BuildBoard API is running' })
+})
 
 // Health Endpoints
 app.get('/api/health/live', (_req, res) => {
