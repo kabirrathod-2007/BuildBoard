@@ -314,7 +314,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
            up.profile_data->>'$.displayName' AS maker_name,
            up.profile_data->>'$.username' AS creator_username
          FROM products p
-         JOIN users u ON u.id = p.creator_id
+         LEFT JOIN users u ON u.id = p.creator_id
          LEFT JOIN user_profiles up ON up.user_id = p.creator_id
          WHERE p.creator_id = ?
          ORDER BY p.created_at DESC`,
@@ -331,7 +331,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
         up.profile_data->>'$.displayName' AS maker_name,
         up.profile_data->>'$.username' AS creator_username
       FROM products p
-      JOIN users u ON u.id = p.creator_id
+      LEFT JOIN users u ON u.id = p.creator_id
       LEFT JOIN user_profiles up ON up.user_id = p.creator_id
     `
     const params = []
@@ -376,7 +376,7 @@ router.get('/:slugOrId', optionalAuth, async (req, res, next) => {
         up.profile_data->>'$.displayName' AS maker_name,
         up.profile_data->>'$.username' AS creator_username
       FROM products p
-      JOIN users u ON u.id = p.creator_id
+      LEFT JOIN users u ON u.id = p.creator_id
       LEFT JOIN user_profiles up ON up.user_id = p.creator_id
       WHERE ${isNumeric ? 'p.id = ? OR p.slug = ?' : 'p.slug = ?'}
       LIMIT 1

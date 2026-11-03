@@ -15,7 +15,6 @@ import enrollmentRoutes from './routes/enrollments.js'
 import feedbackRoutes from './routes/feedback.js'
 import problemsRoutes from './routes/problems.js'
 import notificationRoutes from './routes/notifications.js'
-import { seedDatabaseIfEmpty } from './utils/seedData.js'
 
 const app = express()
 app.set('trust proxy', 1)
@@ -128,16 +127,6 @@ app.get('/api/health/live', (_req, res) => {
   return res.json({ status: 'live' })
 })
 
-// Seed Endpoint (Idempotent: populates sample prototypes and problems if empty)
-app.all('/api/seed', async (_req, res, next) => {
-  try {
-    const result = await seedDatabaseIfEmpty(database)
-    return res.json({ status: 'ok', ...result })
-  } catch (error) {
-    return next(error)
-  }
-})
-
 app.get('/api/health/ready', async (_req, res) => {
   try {
     await database.query('SELECT 1')
@@ -190,12 +179,7 @@ export { app }
 
 const isDirectExecution = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
 if (isDirectExecution || (process.env.NODE_ENV !== 'test' && !process.env.TEST_APP)) {
-  app.listen(port, async () => {
+  app.listen(port, () => {
     console.log(`BuildBoard API listening on port ${port}`)
-    try {
-      await seedDatabaseIfEmpty(database)
-    } catch (err) {
-      console.warn('[Seed] Notice on startup:', err.message)
-    }
   })
 }
