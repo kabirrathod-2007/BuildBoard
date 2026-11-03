@@ -17,6 +17,7 @@ import problemsRoutes from './routes/problems.js'
 import notificationRoutes from './routes/notifications.js'
 
 const app = express()
+app.set('trust proxy', 1)
 const port = Number(process.env.PORT || 3001)
 
 // Security Guard: Prevent test auth enablement outside explicit test processes

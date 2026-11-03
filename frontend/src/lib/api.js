@@ -24,8 +24,9 @@ export async function request(endpoint, options = {}) {
       ...options,
       headers,
     })
-  } catch {
-    throw new Error('Could not reach the BuildBoard API. Make sure the backend server is running.')
+  } catch (err) {
+    console.error(`[BuildBoard API] Network request failed to ${API_BASE_URL}${endpoint}:`, err)
+    throw new Error('Could not reach the BuildBoard API. Make sure the backend server is running.', { cause: err })
   }
 
   const data = await response.json().catch(() => ({}))

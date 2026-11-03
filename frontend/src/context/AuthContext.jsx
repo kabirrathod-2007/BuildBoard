@@ -38,8 +38,9 @@ async function syncUserWithApi(firebaseUser, extraData = {}) {
         ...extraData,
       }),
     })
-  } catch {
-    throw new Error('Could not reach the BuildBoard API. Start the backend and check its MySQL connection.')
+  } catch (err) {
+    console.error(`[BuildBoard Auth] Failed to sync user at ${apiBaseUrl}/api/auth/me:`, err)
+    throw new Error('Could not reach the BuildBoard API. Start the backend and check its MySQL connection.', { cause: err })
   }
   const result = await response.json().catch(() => ({}))
 
