@@ -38,6 +38,7 @@ export default function BuilderDashboardPage() {
   const { user } = useAuth()
   const {
     getUserProducts,
+    loadServerProducts,
     getProductViewCount,
     getProductEnrollmentCount,
     getProductFeedback,
@@ -321,6 +322,13 @@ export default function BuilderDashboardPage() {
       return () => clearTimeout(timer)
     }
   }, [location, navigate])
+
+  // Synchronize freshest product ownership from API on mount / user change
+  useEffect(() => {
+    if (user) {
+      loadServerProducts?.()
+    }
+  }, [user, loadServerProducts])
 
   // Get products owned by the signed-in user (empty array if not signed in)
   const userProducts = useMemo(() => {

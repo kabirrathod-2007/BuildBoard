@@ -134,7 +134,7 @@ export const DemoDataProvider = ({ children }) => {
     return () => {
       active = false
     }
-  }, [])
+  }, [user?.uid, user?.email])
 
   // Custom products created on this device (in memory only; cloud MySQL is authoritative)
   const [customProducts, setCustomProducts] = useState([])
@@ -477,6 +477,8 @@ export const DemoDataProvider = ({ children }) => {
             galleryMediaIds: Array.isArray(formData.galleryMediaIds) ? formData.galleryMediaIds : [],
             videoMediaId: formData.videoMediaId || null,
             isServerSynced: true,
+            isOwner: true,
+            creatorEmail: creatorEmail || res.product?.creatorEmail,
           }
           setServerProducts((prev) => [serverProduct, ...prev.filter((p) => p.id !== serverProduct.id)])
           return serverProduct
@@ -771,7 +773,9 @@ export const DemoDataProvider = ({ children }) => {
     const product = products.find(
       (p) => String(p.id) === String(productId) || p.slug === productId
     )
-    if (!product || !product.creatorEmail) return false
+    if (!product) return false
+    if (product.isOwner) return true
+    if (!product.creatorEmail) return false
     return product.creatorEmail.toLowerCase().trim() === normalized
   }, [products])
 
@@ -981,6 +985,7 @@ export const DemoDataProvider = ({ children }) => {
     if (!userEmail) return []
     const normalized = userEmail.toLowerCase().trim()
     return products.filter((p) => {
+      if (p.isOwner) return true
       if (!p.creatorEmail) return false
       return p.creatorEmail.toLowerCase().trim() === normalized
     })

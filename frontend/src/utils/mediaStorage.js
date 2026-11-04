@@ -4,6 +4,24 @@ import { saveMediaFile } from './indexedDB.js'
 
 export const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10 MB
 export const MAX_VIDEO_SIZE = 50 * 1024 * 1024 // 50 MB
+export const CLOUD_STORAGE_TIMEOUT_MS = 5000 // 5 seconds max per upload attempt before fallback
+
+/**
+ * Race a promise against a timeout to prevent hanging when Cloud Storage or network is stalled.
+ */
+function withTimeout(promise, ms, message) {
+  let timerId
+  const timeoutPromise = new Promise((_, reject) => {
+    timerId = setTimeout(() => {
+      reject(new Error(message || `Operation timed out after ${ms}ms`))
+    }, ms)
+  })
+
+  return Promise.race([
+    promise.finally(() => clearTimeout(timerId)),
+    timeoutPromise,
+  ])
+}
 
 export const ALLOWED_IMAGE_TYPES = [
   'image/png',
@@ -94,11 +112,19 @@ export async function uploadProductMedia({ file, userId = 'anonymous', folder = 
       const storagePath = `products/${userId}/${folder}/${Date.now()}_${sanitizedName}`
       const storageRef = ref(firebaseStorage, storagePath)
 
-      const snapshot = await uploadBytes(storageRef, file, {
-        contentType: file.type || 'application/octet-stream',
-      })
+      const snapshot = await withTimeout(
+        uploadBytes(storageRef, file, {
+          contentType: file.type || 'application/octet-stream',
+        }),
+        CLOUD_STORAGE_TIMEOUT_MS,
+        'Cloud storage upload timed out'
+      )
 
-      const downloadUrl = await getDownloadURL(snapshot.ref)
+      const downloadUrl = await withTimeout(
+        getDownloadURL(snapshot.ref),
+        CLOUD_STORAGE_TIMEOUT_MS,
+        'Cloud storage download URL fetch timed out'
+      )
 
       return {
         url: downloadUrl,
@@ -109,17 +135,27 @@ export async function uploadProductMedia({ file, userId = 'anonymous', folder = 
         type: file.type,
       }
     } catch (err) {
-      console.warn('[BuildBoard] Cloud storage upload failed, falling back to local IndexedDB:', err.message)
+      console.warn('[BuildBoard] Cloud storage upload failed or timed out, falling back to local storage:', err.message)
     }
   }
 
   // 2. Fallback to local IndexedDB (development or unconfigured storage)
-  const saved = await saveMediaFile(file)
-  return {
-    mediaId: saved.id,
-    isCloud: false,
-    name: saved.name,
-    size: saved.size,
-    type: saved.type,
+  try {
+    const saved = await saveMediaFile(file)
+    return {
+      mediaId: saved.id,
+      isCloud: false,
+      name: saved.name,
+      size: saved.size,
+      type: saved.type,
+    }
+  } catch (idbErr) {
+    console.warn('[BuildBoard] IndexedDB fallback also failed:', idbErr.message)
+    return {
+      isCloud: false,
+      name: file.name || 'media',
+      size: file.size || 0,
+      type: file.type || '',
+    }
   }
 }

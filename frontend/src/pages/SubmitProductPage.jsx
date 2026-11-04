@@ -279,103 +279,120 @@ export default function SubmitProductPage() {
     }
 
     const normalizedEmail = (user.email || '').toLowerCase().trim()
+    const userId = user.uid || user.id || 'anonymous'
 
     setIsSavingMedia(true)
-
-    // Save media to Cloud Storage (with IndexedDB fallback)
-    const userId = user.id || user.uid || 'anonymous'
-
-    let coverUrl = imageUrl.trim()
-    let coverMediaId = null
-    if (coverFile) {
-      try {
-        const saved = await uploadProductMedia({
-          file: coverFile,
-          userId,
-          folder: 'covers',
-        })
-        if (saved.isCloud && saved.url) {
-          coverUrl = saved.url
-        } else if (saved.mediaId) {
-          coverMediaId = saved.mediaId
-        }
-      } catch (err) {
-        console.error('Failed to save cover file:', err)
-      }
-    }
-
-    const galleryUrls = []
-    const galleryMediaIds = []
-    for (const item of galleryFiles) {
-      try {
-        const saved = await uploadProductMedia({
-          file: item.file,
-          userId,
-          folder: 'gallery',
-        })
-        if (saved.isCloud && saved.url) {
-          galleryUrls.push(saved.url)
-        } else if (saved.mediaId) {
-          galleryMediaIds.push(saved.mediaId)
-        }
-      } catch (err) {
-        console.error('Failed to save gallery screenshot:', err)
-      }
-    }
-
-    let finalVideoUrl = videoUrl.trim()
-    let videoMediaId = null
-    if (videoFile) {
-      try {
-        const saved = await uploadProductMedia({
-          file: videoFile,
-          userId,
-          folder: 'videos',
-        })
-        if (saved.isCloud && saved.url) {
-          finalVideoUrl = saved.url
-        } else if (saved.mediaId) {
-          videoMediaId = saved.mediaId
-        }
-      } catch (err) {
-        console.error('Failed to save demo video file:', err)
-      }
-    }
-
-    setIsSavingMedia(false)
     setErrors({})
 
-    let finalCoverMediaId = coverMediaId
-    if (!coverUrl && !finalCoverMediaId && galleryMediaIds.length > 0) {
-      finalCoverMediaId = galleryMediaIds[0]
+    try {
+      // 1. Upload media files concurrently (Cloud Storage with fast timeout & IndexedDB fallback)
+      const [coverSaved, galleryResults, videoSaved] = await Promise.all([
+        coverFile
+          ? uploadProductMedia({
+              file: coverFile,
+              userId,
+              folder: 'covers',
+            }).catch((err) => {
+              console.error('Failed to save cover file:', err)
+              return null
+            })
+          : Promise.resolve(null),
+        Promise.all(
+          galleryFiles.map((item) =>
+            uploadProductMedia({
+              file: item.file,
+              userId,
+              folder: 'gallery',
+            }).catch((err) => {
+              console.error('Failed to save gallery screenshot:', err)
+              return null
+            })
+          )
+        ),
+        videoFile
+          ? uploadProductMedia({
+              file: videoFile,
+              userId,
+              folder: 'videos',
+            }).catch((err) => {
+              console.error('Failed to save demo video file:', err)
+              return null
+            })
+          : Promise.resolve(null),
+      ])
+
+      let coverUrl = imageUrl.trim()
+      let coverMediaId = null
+      if (coverSaved) {
+        if (coverSaved.isCloud && coverSaved.url) {
+          coverUrl = coverSaved.url
+        } else if (coverSaved.mediaId) {
+          coverMediaId = coverSaved.mediaId
+        }
+      }
+
+      const galleryUrls = []
+      const galleryMediaIds = []
+      if (Array.isArray(galleryResults)) {
+        for (const saved of galleryResults) {
+          if (!saved) continue
+          if (saved.isCloud && saved.url) {
+            galleryUrls.push(saved.url)
+          } else if (saved.mediaId) {
+            galleryMediaIds.push(saved.mediaId)
+          }
+        }
+      }
+
+      let finalVideoUrl = videoUrl.trim()
+      let videoMediaId = null
+      if (videoSaved) {
+        if (videoSaved.isCloud && videoSaved.url) {
+          finalVideoUrl = videoSaved.url
+        } else if (videoSaved.mediaId) {
+          videoMediaId = videoSaved.mediaId
+        }
+      }
+
+      let finalCoverMediaId = coverMediaId
+      if (!coverUrl && !finalCoverMediaId && galleryMediaIds.length > 0) {
+        finalCoverMediaId = galleryMediaIds[0]
+      }
+
+      const finalImage = coverUrl || (galleryUrls.length > 0 ? galleryUrls[0] : '')
+      const finalGallery = galleryUrls.length > 0 ? galleryUrls : (finalImage ? [finalImage] : [])
+
+      const newProduct = await addProduct({
+        name: formData.name.trim(),
+        tagline: formData.tagline.trim(),
+        prototypeUrl: formData.prototypeUrl.trim(),
+        githubUrl: formData.githubUrl.trim(),
+        categories: formData.categories,
+        audience: formData.audience.trim(),
+        targetRoles: formData.targetRoles,
+        targetIndustries: formData.targetIndustries,
+        targetTechnologies: formData.targetTechnologies,
+        feedbackRequest: formData.feedbackRequest.trim(),
+        enrollmentLimit: formData.enrollmentLimit ? Number(formData.enrollmentLimit) : null,
+        maker: (normalizedEmail ? getProfile(normalizedEmail)?.displayName?.trim() : null) || (normalizedEmail ? normalizedEmail.split('@')[0] : 'Builder'),
+        creatorEmail: normalizedEmail,
+        image: finalImage,
+        mediaId: finalCoverMediaId,
+        gallery: finalGallery,
+        galleryMediaIds,
+        videoUrl: finalVideoUrl,
+        videoMediaId,
+      })
+
+      if (newProduct) {
+        navigate(`/products/${newProduct.slug || newProduct.id}`)
+      }
+    } catch (err) {
+      console.error('Failed to submit product:', err)
+      setErrors({ submit: err.message || 'Failed to submit prototype. Please try again.' })
+    } finally {
+      setIsSavingMedia(false)
     }
-
-    const finalImage = coverUrl || (galleryUrls.length > 0 ? galleryUrls[0] : '')
-    const finalGallery = galleryUrls.length > 0 ? galleryUrls : (finalImage ? [finalImage] : [])
-
-    const newProduct = await addProduct({
-      name: formData.name.trim(),
-      tagline: formData.tagline.trim(),
-      prototypeUrl: formData.prototypeUrl.trim(),
-      githubUrl: formData.githubUrl.trim(),
-      categories: formData.categories,
-      audience: formData.audience.trim(),
-      targetRoles: formData.targetRoles,
-      targetIndustries: formData.targetIndustries,
-      targetTechnologies: formData.targetTechnologies,
-      feedbackRequest: formData.feedbackRequest.trim(),
-      enrollmentLimit: formData.enrollmentLimit ? Number(formData.enrollmentLimit) : null,
-      maker: (normalizedEmail ? getProfile(normalizedEmail)?.displayName?.trim() : null) || (normalizedEmail ? normalizedEmail.split('@')[0] : 'Builder'),
-      creatorEmail: normalizedEmail,
-      image: finalImage,
-      mediaId: finalCoverMediaId,
-      gallery: finalGallery,
-      galleryMediaIds,
-      videoUrl: finalVideoUrl,
-      videoMediaId,
-    })
-
-    navigate(`/products/${newProduct.slug || newProduct.id}`)
   }
 
   const handleReset = () => {
@@ -1291,6 +1308,11 @@ export default function SubmitProductPage() {
 
                 {/* Submit & Demo Notice */}
                 <div className="border-t border-[var(--border-main)] pt-6">
+                  {errors.submit && (
+                    <div className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm font-medium text-rose-500">
+                      {errors.submit}
+                    </div>
+                  )}
                   <button
                     type="submit"
                     disabled={isSavingMedia}

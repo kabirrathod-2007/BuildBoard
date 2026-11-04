@@ -179,7 +179,16 @@ export default function ProductDetailsPage() {
     }
   }, [user?.email, loadMyEnrollments])
 
-  const product = serverDetail || contextProduct
+  const product = useMemo(() => {
+    if (!serverDetail) return contextProduct || null
+    return {
+      ...(contextProduct || {}),
+      ...serverDetail,
+      mediaId: serverDetail.mediaId || contextProduct?.mediaId || null,
+      galleryMediaIds: (serverDetail.galleryMediaIds?.length ? serverDetail.galleryMediaIds : contextProduct?.galleryMediaIds) || [],
+      videoMediaId: serverDetail.videoMediaId || contextProduct?.videoMediaId || null,
+    }
+  }, [serverDetail, contextProduct])
   const makerProfile = product?.creatorEmail ? getProfile(product.creatorEmail) : null
   const makerName =
     makerProfile?.displayName?.trim() ||

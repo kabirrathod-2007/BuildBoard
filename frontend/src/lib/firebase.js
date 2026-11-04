@@ -40,4 +40,12 @@ export const firebaseApp = isFirebaseConfigured
 
 export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null
 export const firebaseStorage = (firebaseApp && firebaseConfig.storageBucket) ? getStorage(firebaseApp) : null
+if (firebaseStorage) {
+  try {
+    firebaseStorage.maxUploadRetryTime = 5000
+    firebaseStorage.maxOperationRetryTime = 5000
+  } catch {
+    // no-op if properties not directly settable
+  }
+}
 export const isStorageConfigured = Boolean(isFirebaseConfigured && firebaseStorage)
